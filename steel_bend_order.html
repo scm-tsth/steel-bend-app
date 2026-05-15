@@ -382,7 +382,20 @@ async function doSubmit(){
   const remark=gv('remark');
   const promises=items.map(id=>{
     const mat=gv('mat-'+id);
-    const payload={date:gv('oDate'),plant:gv('plant-'+id),item_description:mat,customer_group:grp,tons:parseFloat(gv('ton-'+id)),pcs:parseFloat(gv('pcs-'+id))||0,sales_order_no:gv('so-'+id),customer_name:gv('cust-val-'+id),sales_person:gv('sales-val-'+id)||grp,remark:gv('term-'+id)||'EXW',unit_weight:UW[mat]||0,submitter_email:email,receive_date:gv('rdate-'+id),order_remark:remark};
+   const payload = {
+  date: gv('oDate'),
+  plant: gv('plant-'+id),
+  item_description: mat,
+  customer_group: grp,
+  tons: parseFloat(gv('ton-'+id)),
+  pcs: parseFloat(gv('pcs-'+id)) || 0,
+  sales_order_no: so || '',
+  customer_name: cust || '',
+  sales_person: sp || '',
+  remark: gv('remark'),
+  unit_weight: parseFloat(uw) || 0,
+  submitter_email: email
+};
     return fetch(FLOW_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
   });
   try{
