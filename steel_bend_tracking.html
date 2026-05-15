@@ -54,6 +54,8 @@ tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t
 .badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500;white-space:nowrap}
 .badge.done{background:var(--gl);color:#15803d}
 .badge.pending{background:var(--al);color:#92400e}
+.badge.error{background:var(--rl);color:var(--rd)}
+.badge.cancelled{background:var(--sl);color:var(--t2)}
 .empty{text-align:center;padding:2.5rem 1rem;color:var(--t3);font-size:13px}
 .loading-box{text-align:center;padding:2rem 1rem;color:var(--t2);font-size:13px}
 .spin{display:inline-block;width:18px;height:18px;border:2px solid var(--br);border-top-color:var(--bm);border-radius:50%;animation:spin .7s linear infinite;vertical-align:-4px;margin-right:6px}
@@ -153,7 +155,7 @@ tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t
           <th>ลูกค้า</th>
           <th>Sales</th>
           <th>Incoterms</th>
-          <th>วันที่รับสินค้า</th>
+          <th class="receive-col">วันที่รับสินค้า</th>
           <th>Email ผู้สั่ง</th>
           <th>สถานะ</th>
         </tr>
@@ -211,8 +213,56 @@ function isTrue(val){
   return statusVal === 'true' || statusVal === 'yes' || statusVal === '1';
 }
 
-function isDoneStatus(r){
-  return isTrue(r['Status'] ?? r['status'] ?? '');
+function normalizeStatus(value){
+  if(value===true) return 'Sent';
+  if(value===false) return 'Pending';
+  const statusVal = String(value ?? '').trim();
+  const lower = statusVal.toLowerCase();
+
+  if(!lower || lower==='false' || lower==='0' || lower==='no' || lower==='pending' || lower==='รอดำเนินการ') return 'Pending';
+  if(lower==='true' || lower==='1' || lower==='yes' || lower==='sent' || lower==='done' || lower==='completed' || lower==='complete' || lower==='เสร็จแล้ว' || lower==='ดำเนินการแล้ว') return 'Sent';
+  if(lower==='error' || lower==='failed' || lower==='fail' || lower==='ผิดพลาด') return 'Error';
+  if(lower==='cancelled' || lower==='canceled' || lower==='cancel' || lower==='ยกเลิก') return 'Cancelled';
+
+  return statusVal;
+}
+
+function getStatusText(row){
+  const statusText = row['Status_Text'] ?? row['status_text'] ?? row['Status Text'] ?? row['statusText'];
+  if(String(statusText ?? '').trim()) return normalizeStatus(statusText);
+  return normalizeStatus(row['Status'] ?? row['status'] ?? '');
+}
+
+function isPending(row){
+  return getStatusText(row)==='Pending';
+}
+
+function isDoneStatus(row){
+  return getStatusText(row)==='Sent';
+}
+
+function receiveDateValue(row){
+  return row['Receive Date'] ?? row['receive_date'] ?? row['Request Date'] ?? row['request_date'] ?? '';
+}
+
+function hasReceiveDate(row){
+  return String(receiveDateValue(row) ?? '').trim() !== '';
+}
+
+function statusBadge(row){
+  const statusText=getStatusText(row);
+  if(statusText==='Pending') return '<span class="badge pending">⏳ รอดำเนินการ</span>';
+  if(statusText==='Error') return '<span class="badge error">⚠️ Error</span>';
+  if(statusText==='Cancelled') return '<span class="badge cancelled">ยกเลิก</span>';
+  return '<span class="badge done">✅ ส่งแล้ว</span>';
+}
+
+function statusSortOrder(row){
+  const statusText=getStatusText(row);
+  if(statusText==='Pending') return 0;
+  if(statusText==='Error') return 1;
+  if(statusText==='Cancelled') return 2;
+  return 3;
 }
 
 async function fetchData(){
@@ -254,7 +304,7 @@ function applyFilter(){
   const fItem=document.getElementById('fItem').value.toLowerCase().trim();
   const fStatus=document.getElementById('fStatus').value;
 
-  let rows=allRows;
+  let rows=[...allRows];
 
   if(currentEmail){
     rows=rows.filter(r=>{
@@ -276,7 +326,7 @@ if(fItem){
 
 if(fStatus==='done') rows=rows.filter(r=>isDoneStatus(r));
 
-if(fStatus==='pending') rows=rows.filter(r=>!isDoneStatus(r));
+if(fStatus==='pending') rows=rows.filter(r=>isPending(r));
 
   renderTable(rows);
 }
@@ -284,8 +334,8 @@ if(fStatus==='pending') rows=rows.filter(r=>!isDoneStatus(r));
 function renderTable(rows){
 
   rows.sort((a,b)=>{
-    const aDone=isDoneStatus(a)?1:0;
-    const bDone=isDoneStatus(b)?1:0;
+    const aDone=statusSortOrder(a);
+    const bDone=statusSortOrder(b);
 
     if(aDone!==bDone){
       return aDone-bDone;
@@ -293,14 +343,16 @@ function renderTable(rows){
 
     return 0;
   });
-  const done=rows.filter(r=>isTrue(r['Status']||r['status'])).length;
-  const pending=rows.length-done;
+  const done=rows.filter(r=>isDoneStatus(r)).length;
+  const pending=rows.filter(r=>isPending(r)).length;
+  const showReceiveDate=allRows.some(r=>hasReceiveDate(r));
 
   document.getElementById('statTotal').textContent=rows.length;
   document.getElementById('statDone').textContent=done;
   document.getElementById('statPending').textContent=pending;
   document.getElementById('statsRow').style.display='grid';
   document.getElementById('countLabel').textContent=`แสดง ${rows.length} รายการ`;
+  document.querySelectorAll('.receive-col').forEach(el=>{el.style.display=showReceiveDate?'':'none';});
 
   if(rows.length===0){
     document.getElementById('tableCard').style.display='none';
@@ -312,7 +364,6 @@ function renderTable(rows){
 
   const tbody=document.getElementById('tableBody');
   tbody.innerHTML=rows.map(r=>{
-    const status=isDoneStatus(r);
     const email=(r['Submitter_email']||r['submitter_email']||'-');
     const emailShort=email.includes('@')?email.split('@')[0]:email;
     return `<tr>
@@ -325,11 +376,9 @@ function renderTable(rows){
       <td style="font-size:11px">${r['Customer Name']||r['customer_name']||'-'}</td>
       <td style="font-size:11px">${r['Sales Person']||r['sales_person']||'-'}</td>
       <td>${r['Incoterms']||r['incoterms']||'-'}</td>
-<td class="mono">
-  ${excelDateToStr(r['Receive Date']||r['receive_date'])}
-</td>
+      ${showReceiveDate?`<td class="mono receive-col">${excelDateToStr(receiveDateValue(r))}</td>`:''}
       <td class="mono" style="font-size:11px">${emailShort}</td>
-      <td>${status?'<span class="badge done">✅ เสร็จแล้ว</span>':'<span class="badge pending">⏳ รอดำเนินการ</span>'}</td>
+      <td>${statusBadge(r)}</td>
     </tr>`;
   }).join('');
 }
