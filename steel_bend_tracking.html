@@ -269,7 +269,12 @@ function renderTable(rows){
 
   const tbody=document.getElementById('tableBody');
   tbody.innerHTML=rows.map(r=>{
-    const status=isTrue(r['Status']||r['status']);
+    const statusVal = String(r['Status'] || r['status'] || '').toLowerCase();
+
+const status =
+  statusVal === 'true' ||
+  statusVal === 'yes' ||
+  statusVal === '1';
     const email=(r['Submitter_email']||r['submitter_email']||'-');
     const emailShort=email.includes('@')?email.split('@')[0]:email;
     return `<tr>
@@ -281,7 +286,7 @@ function renderTable(rows){
       <td class="mono">${r['Pcs']||r['pcs']||'-'}</td>
       <td style="font-size:11px">${r['Customer Name']||r['customer_name']||'-'}</td>
       <td style="font-size:11px">${r['Sales Person']||r['sales_person']||'-'}</td>
-      <td>${r['Remark']||r['remark']||'-'}</td>
+      <td>${r['Incoterms']||r['incoterms']||r['Remark']||r['remark']||'-'}</td>
       <td class="mono" style="font-size:11px">${emailShort}</td>
       <td>${status?'<span class="badge done">✅ เสร็จแล้ว</span>':'<span class="badge pending">⏳ รอดำเนินการ</span>'}</td>
     </tr>`;
