@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ระบบสั่งพับเหล็ก</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--bd:#0f2a4a;--bm:#1a3d6b;--ba:#2563b0;--bl:#dbeafe;--sl:#f1f5f9;--gr:#16a34a;--gl:#dcfce7;--rd:#dc2626;--rl:#fee2e2;--al:#fef3c7;--wh:#fff;--tx:#0f172a;--t2:#475569;--t3:#94a3b8;--br:#e2e8f0;--ra:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--tx);min-height:100vh;padding:1.25rem 1rem 3rem}
+.page{max-width:660px;margin:0 auto}
+.hdr{background:var(--bd);border-radius:12px;padding:.9rem 1.25rem;margin-bottom:1.1rem;display:flex;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(15,42,74,.15)}
+.hdr-icon{width:34px;height:34px;background:rgba(255,255,255,.13);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.hdr-icon svg{width:26px;height:26px}
+.hdr h1{color:#fff;font-size:15px;font-weight:600}
+.card{background:#fff;border:1px solid var(--br);border-radius:var(--ra);padding:1.1rem 1.2rem;margin-bottom:.9rem;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.ctitle{display:flex;align-items:center;gap:7px;margin-bottom:.85rem}
+.sdot{width:22px;height:22px;border-radius:50%;background:var(--bm);color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ctitle h2{font-size:13px;font-weight:600;color:var(--tx)}
+.field{margin-bottom:.8rem}
+.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:11px;font-weight:500;color:var(--t2);text-transform:uppercase;letter-spacing:.45px;margin-bottom:3px}
+.req{color:var(--rd)}
+.field input,.field select{width:100%;height:35px;padding:0 9px;font-size:13px;font-family:'IBM Plex Sans Thai',sans-serif;border:1px solid var(--br);border-radius:8px;background:#fff;color:var(--tx);outline:none;transition:border .15s,box-shadow .15s}
+.field input:focus,.field select:focus{border-color:var(--ba);box-shadow:0 0 0 3px rgba(37,99,176,.1)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.pill-wrap{display:flex;gap:6px;flex-wrap:wrap}
+.pill{padding:5px 14px;border-radius:20px;border:1px solid var(--br);background:#fff;color:var(--t2);font-size:12px;font-family:'IBM Plex Sans Thai',sans-serif;cursor:pointer;transition:all .15s;font-weight:500}
+.pill.on{background:var(--bm);border-color:var(--bm);color:#fff}
+.email-wrap{display:flex;align-items:center;border:1px solid var(--br);border-radius:8px;overflow:hidden;transition:border .15s,box-shadow .15s}
+.email-wrap:focus-within{border-color:var(--ba);box-shadow:0 0 0 3px rgba(37,99,176,.1)}
+.email-wrap input{border:none;border-radius:0;flex:1;height:35px;padding:0 9px;font-size:13px;font-family:'IBM Plex Sans Thai',sans-serif;outline:none;background:#fff;color:var(--tx)}
+.email-domain{background:var(--sl);padding:0 9px;height:35px;display:flex;align-items:center;font-size:12px;color:var(--t2);border-left:1px solid var(--br);white-space:nowrap;font-family:'IBM Plex Mono',monospace}
+.item-card{background:var(--sl);border:1px solid var(--br);border-radius:var(--ra);padding:.85rem .95rem;margin-bottom:.7rem}
+.item-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:.7rem}
+.item-tag{font-size:11px;font-weight:600;color:var(--ba);background:var(--bl);padding:2px 8px;border-radius:10px}
+.rm-btn{background:none;border:none;cursor:pointer;color:var(--t3);padding:3px 5px;border-radius:5px;font-size:13px;line-height:1;transition:all .15s}
+.rm-btn:hover{color:var(--rd);background:var(--rl)}
+.ac-wrap{position:relative}
+.ac-list{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--ba);border-top:none;border-radius:0 0 8px 8px;max-height:180px;overflow-y:auto;z-index:100;display:none;box-shadow:0 4px 12px rgba(0,0,0,.1)}
+.ac-list.open{display:block}
+.ac-item{padding:7px 10px;font-size:13px;cursor:pointer;color:var(--tx);transition:background .1s}
+.ac-item:hover,.ac-item.active{background:var(--bl);color:var(--bm)}
+.sales-display{font-size:12px;color:var(--gr);font-weight:500;padding:6px 9px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:7px;margin-top:3px}
+.add-btn{display:flex;align-items:center;justify-content:center;gap:5px;width:100%;padding:7px;border:1.5px dashed var(--br);border-radius:var(--ra);background:none;color:var(--t3);font-size:12px;font-family:'IBM Plex Sans Thai',sans-serif;cursor:pointer;transition:all .15s;margin-top:2px}
+.add-btn:hover{border-color:var(--ba);color:var(--ba);background:var(--bl)}
+.submit-btn{width:100%;padding:12px;background:var(--bm);color:#fff;border:none;border-radius:var(--ra);font-size:14px;font-weight:600;font-family:'IBM Plex Sans Thai',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .2s;margin-top:.75rem}
+.submit-btn:hover{background:var(--bd);transform:translateY(-1px)}
+.confirm-screen{display:none}
+.confirm-screen.show{display:block}
+.confirm-hdr{background:var(--al);border:1px solid #fde68a;border-radius:var(--ra);padding:.7rem 1rem;margin-bottom:.85rem;font-size:13px;color:#92400e;font-weight:500}
+.ctable{width:100%;border-collapse:collapse;font-size:12px;margin:.4rem 0}
+.ctable td{padding:.32rem .55rem;border:.5px solid var(--br);vertical-align:top;line-height:1.5}
+.ctable td:first-child{font-weight:500;color:var(--t2);width:110px;white-space:nowrap;background:var(--sl)}
+.iblock{background:#fff;border:1px solid var(--br);border-radius:8px;padding:.65rem .8rem;margin-bottom:.55rem}
+.ititle{font-size:11px;font-weight:600;color:var(--ba);background:var(--bl);padding:2px 8px;border-radius:8px;display:inline-block;margin-bottom:.45rem}
+.btn-row{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:.8rem}
+.btn-edit{padding:11px;background:#fff;color:var(--bm);border:1.5px solid var(--bm);border-radius:var(--ra);font-size:13px;font-weight:600;font-family:'IBM Plex Sans Thai',sans-serif;cursor:pointer;transition:all .15s}
+.btn-edit:hover{background:var(--bl)}
+.btn-ok{padding:11px;background:var(--gr);color:#fff;border:none;border-radius:var(--ra);font-size:13px;font-weight:600;font-family:'IBM Plex Sans Thai',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s}
+.btn-ok:hover{background:#15803d}
+.btn-ok:disabled{background:var(--t3);cursor:not-allowed}
+.spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none}
+.btn-ok.loading .btn-text{display:none}
+.btn-ok.loading .spinner{display:block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.success-screen{display:none;text-align:center;padding:2rem 1rem}
+.success-screen.show{display:block}
+.s-icon{width:60px;height:60px;background:var(--gl);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:26px}
+.success-screen h2{font-size:17px;font-weight:600;margin-bottom:.4rem}
+.success-screen p{font-size:13px;color:var(--t2);line-height:1.7}
+.new-btn{display:inline-flex;align-items:center;gap:5px;margin-top:1rem;padding:9px 18px;background:var(--bm);color:#fff;border:none;border-radius:var(--ra);font-size:13px;font-family:'IBM Plex Sans Thai',sans-serif;font-weight:500;cursor:pointer}
+.toast{position:fixed;top:18px;left:50%;transform:translateX(-50%) translateY(-8px);background:var(--bd);color:#fff;padding:10px 18px;border-radius:var(--ra);font-size:13px;z-index:999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.error{background:var(--rd)}
+.toast.success{background:var(--gr)}
+</style>
+</head>
+<body>
+<div class="page">
+<div class="hdr">
+  <div class="hdr-icon">
+    <svg viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- เหล็กเส้นซ้าย -->
+      <rect x="1" y="11" width="24" height="2.2" rx="1.1" fill="rgba(255,255,255,0.9)"/>
+      <!-- ปล้อง ribs บนเหล็กเส้นซ้าย -->
+      <rect x="5"  y="9.5"  width="1.4" height="5.2" rx="0.7" fill="rgba(255,255,255,0.75)"/>
+      <rect x="9"  y="9.5"  width="1.4" height="5.2" rx="0.7" fill="rgba(255,255,255,0.75)"/>
+      <rect x="13" y="9.5"  width="1.4" height="5.2" rx="0.7" fill="rgba(255,255,255,0.75)"/>
+      <rect x="17" y="9.5"  width="1.4" height="5.2" rx="0.7" fill="rgba(255,255,255,0.75)"/>
+      <!-- เหล็กเส้นบน (เล็กกว่า เฉียงนิด) -->
+      <rect x="1" y="5.5" width="24" height="1.6" rx="0.8" fill="rgba(255,255,255,0.55)"/>
+      <rect x="6"  y="4.5"  width="1.1" height="3.6" rx="0.55" fill="rgba(255,255,255,0.45)"/>
+      <rect x="11" y="4.5"  width="1.1" height="3.6" rx="0.55" fill="rgba(255,255,255,0.45)"/>
+      <rect x="16" y="4.5"  width="1.1" height="3.6" rx="0.55" fill="rgba(255,255,255,0.45)"/>
+      <!-- เหล็กเส้นล่าง -->
+      <rect x="1" y="18.9" width="24" height="1.6" rx="0.8" fill="rgba(255,255,255,0.55)"/>
+      <rect x="6"  y="17.9" width="1.1" height="3.6" rx="0.55" fill="rgba(255,255,255,0.45)"/>
+      <rect x="11" y="17.9" width="1.1" height="3.6" rx="0.55" fill="rgba(255,255,255,0.45)"/>
+      <rect x="16" y="17.9" width="1.1" height="3.6" rx="0.55" fill="rgba(255,255,255,0.45)"/>
+    </svg>
+  </div>
+  <h1>ระบบสั่งพับเหล็ก</h1>
+</div>
+
+<!-- FORM -->
+<div id="formView">
+<div class="card">
+  <div class="ctitle"><span class="sdot">1</span><h2>ข้อมูลเบื้องต้น</h2></div>
+  <div class="field" style="margin-bottom:.8rem">
+    <label>วันที่สั่ง <span class="req">*</span></label>
+    <input type="date" id="oDate"/>
+  </div>
+  <div class="field" style="margin-bottom:.8rem">
+    <label>แผนก <span class="req">*</span></label>
+    <div class="pill-wrap">
+      <button class="pill on" onclick="setPill(this,'Project')">Project</button>
+      <button class="pill" onclick="setPill(this,'Retail')">Retail</button>
+      <button class="pill" onclick="setPill(this,'Direct')">Direct</button>
+      <button class="pill" onclick="setPill(this,'Export')">Export</button>
+    </div>
+  </div>
+  <div class="field">
+    <label>Email ผู้สั่งพับ <span class="req">*</span></label>
+    <div class="email-wrap">
+      <input type="text" id="uEmailUser" placeholder="ชื่ออีเมล"/>
+      <span class="email-domain">@tatasteelthailand.com</span>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ctitle"><span class="sdot">2</span><h2>รายการสินค้าที่สั่งพับ</h2></div>
+  <div id="itemList"></div>
+  <button class="add-btn" id="addBtn" onclick="addItem()">+ เพิ่มรายการ (สูงสุด 5 รายการ)</button>
+</div>
+
+<div class="card">
+  <div class="ctitle"><span class="sdot">3</span><h2>หมายเหตุ</h2></div>
+  <div class="field">
+    <label>หมายเหตุ</label>
+    <input type="text" id="remark" placeholder="เช่น เหล็กอยู่ใน 2400"/>
+  </div>
+</div>
+
+<button class="submit-btn" onclick="showConfirm()">ยืนยันการสั่งพับเหล็ก →</button>
+</div>
+
+<!-- CONFIRM -->
+<div class="confirm-screen" id="confirmView">
+  <div class="confirm-hdr">⚠️ กรุณาตรวจสอบรายการให้ครบถ้วนก่อนยืนยัน</div>
+  <div id="confirmContent"></div>
+  <div class="btn-row">
+    <button class="btn-edit" onclick="backToForm()">✏️ แก้ไข</button>
+    <button class="btn-ok" id="confirmBtn" onclick="doSubmit()">
+      <span class="btn-text">✅ ยืนยันและส่งข้อมูล</span>
+      <div class="spinner"></div>
+    </button>
+  </div>
+</div>
+
+<!-- SUCCESS -->
+<div class="success-screen" id="successView">
+  <div class="s-icon">✅</div>
+  <h2>ส่งรายการสำเร็จแล้วครับ!</h2>
+  <p>ระบบได้รับรายการของคุณแล้ว<br/>กรุณาตรวจสอบอีเมลยืนยันที่ <strong id="confirmEmail"></strong><br/>รายการจะถูกดำเนินการในรอบถัดไป (ตัดยอด 10:00 น.)</p>
+  <button class="new-btn" onclick="resetAll()">+ สั่งรายการใหม่</button>
+</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const FLOW_URL='https://defaultc49eedf2bcd84a848b29b3e5f61a3d.03.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/83ff0c72763c4b62a8f115ebfaedbfce/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=r05zycvBQ4quuY8relxktq9MI5ZzMHDjEQPLxu98oMI';
+
+const SALES_MAP={"บจก. ที.เค.เอ็ม.เม็ททัล":"คุณภาณุพัฒน์ (เอฟ)","บจก. ตั้งฮ่งกี่ เทรดดิ้ง":"คุณยุทธนา (เจ็ง)","บจก. ต.วรคุณ":"คุณยุทธนา (เจ็ง)","บมจ. พี.โอเวอร์ซีส์ สตีล":"คุณยุทธนา (เจ็ง)","บจก. สหวิบูลย์ค้าวัสดุก่อสร้าง":"คุณยุทธนา (เจ็ง)","บจก. เกียรติทยากร เมททัล":"คุณฉลองลาภ (พีค)","บจก. ยูไนเต็ด คอนบิลด์":"คุณฉลองลาภ (พีค)","บจก. โกลด์เมทอลเซ็นเตอร์":"คุณฉลองลาภ (พีค)","บจก. ธนาสาร เซ็นทรัล สตีล":"คุณฉลองลาภ (พีค)","บจก. รามคำแหงโฮมมาร์ท":"คุณฉลองลาภ (พีค)","บจก. โดราสตีล":"คุณฉลองลาภ (พีค)","บจก. สุวรรณภูมิสตีลเซ็นเตอร์":"คุณฉลองลาภ (พีค)","หจก. เอ็น.เอส.เค.เทรดดิ้ง":"คุณฉลองลาภ (พีค)","บจก. วิบูลย์ทรัพย์สตีล":"คุณฉลองลาภ (พีค)","บจก. ชัยเจริญใช่หลีสตีล":"คุณฉลองลาภ (พีค)","บจก. ไพศาลสตีล":"คุณธวัชชัย (ฮ้ง)","บจก. โลหะไพศาลวานิช":"คุณธวัชชัย (ฮ้ง)","ไทวัสดุ + เมกาโฮม (โฮม โปรดักส์)":"คุณฐาปนี (ปิ๊ก)","ดูโฮม + สยามโกลบอลเฮ้าส์":"คุณทวิช (อ๊อส)","ลำปาง ล.โลหะภัณฑ์":"คุณกิตติณัฏฐ์ (บีม)","เชียงใหม่วิทยาพาณิชย์(1997)":"คุณกิตติณัฏฐ์ (บีม)","วีระพานิชเชียงใหม่":"คุณกิตติณัฏฐ์ (บีม)","นพดลพานิช":"คุณกิตติณัฏฐ์ (บีม)","ฒิลา ค้าวัสดุก่อสร้าง":"คุณกิตติณัฏฐ์ (บีม)","องอาจค้าวัสดุ":"คุณกิตติณัฏฐ์ (บีม)","ลีเจริญโลหะกิจ":"คุณกิตติณัฏฐ์ (บีม)","บี.บี. วัสดุก่อสร้าง":"คุณกิตติณัฏฐ์ (บีม)","ชุมพรไถ่เชียง":"คุณภิรญา (มอส)","เอสทีสตีล (2001)":"คุณภิรญา (มอส)","เจี้ยบเซ้งโฮมแมคโคร":"คุณภิรญา (มอส)","สุนทรภัณฑ์การก่อสร้าง":"คุณภิรญา (มอส)","โชคพูลผลคอนกรีต":"คุณสมเกียรติ (หมู)","อังครงค์รักษ์พาณิชย์":"คุณสมเกียรติ (หมู)","ศิริมหาชัย มุกดาหาร":"คุณสมเกียรติ (หมู)","โฮมฮับ":"คุณสมเกียรติ (หมู)","เบสท์ สตีล":"คุณรัตชฎาพร (ยาหยี)","39 แมททีเรียล":"คุณพรรณสุภา (อ้อม)","นันทวัน":"คุณพรรณสุภา (อ้อม)","พีซีไอ คอนกรีตอุตสาหกรรม":"คุณพรรณสุภา (อ้อม)","บางปะอินคอนกรีต":"คุณพรรณสุภา (อ้อม)","เอสซีจี":"คุณพรรณสุภา (อ้อม)","สยามเทคนิคอนกรีต":"คุณพรรณสุภา (อ้อม)","ไพลอน":"คุณพรรณสุภา (อ้อม)","อิตัล-ไทย":"คุณพรรณสุภา (อ้อม)","ซีวิล เอ็นจิเนียริ่ง":"คุณพรรณสุภา (อ้อม)","ช.การช่าง":"คุณธิติรัตน์ (นัตตี้)","CSC COMPLEX CENTER SOLE CO.,LTD":"คุณวรรณนิภา (แนน)","MAHAXAY ATP SOLE CO.,LTD.":"คุณวรรณนิภา (แนน)","NARINE THACHAREUNE INDIVIDUAL ENTERPRISE":"คุณวรรณนิภา (แนน)","NANA STEEL":"คุณวรรณนิภา (แนน)","Lao Development Service import export":"คุณวรรณนิภา (แนน)","TANG CHAREON (TCR) GROUP":"คุณวรรณนิภา (แนน)","MAC STEEL":"คุณวรรณนิภา เลิศแสง (แนน)","SCG INTERNATIONAL CORPORATION":"คุณวรรณนิภา เลิศแสง (แนน)","TATA STEEL LIMITED (INDIA)":"คุณอรสา (บี)","CHIPMONG":"คุณอรสา (บี)"};
+
+const CUSTOMERS={Retail:["โฮมฮับ","เชียงใหม่วิทยาพาณิชย์(1997)","วีระพานิชเชียงใหม่","นพดลพานิช","ฒิลา ค้าวัสดุก่อสร้าง","เอสทีสตีล (2001)","เจี้ยบเซ้งโฮมแมคโคร","โชคพูลผลคอนกรีต","อังครงค์รักษ์พาณิชย์","ศิริมหาชัย มุกดาหาร","เบสท์ สตีล","สุนทรภัณฑ์การก่อสร้าง","ลีเจริญโลหะกิจ","องอาจค้าวัสดุ","ชุมพรไถ่เชียง","บี.บี. วัสดุก่อสร้าง","ลำปาง ล.โลหะภัณฑ์","ไทวัสดุ + เมกาโฮม (โฮม โปรดักส์)","ดูโฮม + สยามโกลบอลเฮ้าส์"],Project:["บจก. ที.เค.เอ็ม.เม็ททัล","บจก. ตั้งฮ่งกี่ เทรดดิ้ง","บจก. ต.วรคุณ","บมจ. พี.โอเวอร์ซีส์ สตีล","บจก. รามคำแหงโฮมมาร์ท","บจก. ยูไนเต็ด คอนบิลด์","บจก. โกลด์เมทอลเซ็นเตอร์","หจก. เอ็น.เอส.เค.เทรดดิ้ง","บจก. สหวิบูลย์ค้าวัสดุก่อสร้าง","บจก. ไพศาลสตีล"],Direct:["39 แมททีเรียล","นันทวัน","พีซีไอ คอนกรีตอุตสาหกรรม","บางปะอินคอนกรีต","เอสซีจี","สยามเทคนิคอนกรีต","ช.การช่าง","ไพลอน","อิตัล-ไทย","ซีวิล เอ็นจิเนียริ่ง"],Export:["SCG INTERNATIONAL CORPORATION","MAHAXAY ATP SOLE CO.,LTD.","NARINE THACHAREUNE INDIVIDUAL ENTERPRISE","TANG CHAREON (TCR) GROUP","CSC COMPLEX CENTER SOLE CO.,LTD","NANA STEEL","Lao Development Service import export","CHIPMONG","MAC STEEL","TATA STEEL LIMITED (INDIA)"]};
+
+const MAT_SCSC=["SR24 RB9/10 TATA TISCON","SR24 RB12/10 TATA TISCON","SR24 RB15/10 TATA TISCON","SD40 DB10/10 TATA TISCON","SD40 DB10/12 TATA TISCON","SD40 DB12/10 TATA TISCON","SD40 DB12/12 TATA TISCON","SD40 DB16/10 TATA TISCON","SD40 DB16/12 TATA TISCON","SD40 DB20/10 TATA TISCON","SD40 DB20/12 TATA TISCON","SD40 DB25/10 TATA TISCON","SD40 DB25/12 TATA TISCON","SD40 DB28/10 TATA TISCON","SD40 DB28/12 TATA TISCON","SD40 DB32/10 TATA TISCON","SD40 DB32/12 TATA TISCON","DB B400B-R 14 mm. 10 m. TATA TISCON","DB B400B-R 14 mm. 12 m. TATA TISCON","SD40 DB12/10 TATA TISCON (NON-T)","SD40 DB12/12 TATA TISCON (NON-T)","SD40 DB16/10 TATA TISCON(NON-T)","SD40 DB16/12 TATA TISCON (NON-T)","SD40 DB20/10 TATA TISCON(NON-T)","SD40 DB25/10 TATA TISCON(NON-T)","SD50 DB12/10 TATA TISCON","SD50 DB16/10 TATA TISCON","SD40S DB12/10 TATA TISCON","SD40S DB12/12 TATA TISCON","SD40S DB16/10 TATA TISCON","SD40S DB16/12 TATA TISCON","SD40S DB20/10 TATA TISCON","SD40S DB20/12 TATA TISCON","SD40S DB25/10 TATA TISCON","SD40S DB25/12 TATA TISCON"];
+const MAT_NTS=["SR24 RB19/10 TATA TISCON","SR24 RB25/10 TATA TISCON","SD40 DB16/10 TATA TISCON","SD40 DB16/12 TATA TISCON","SD40 DB20/10 TATA TISCON","SD40 DB20/12 TATA TISCON","SD40 DB25/10 TATA TISCON","SD40 DB25/12 TATA TISCON","SD40 DB28/10 TATA TISCON","SD40 DB28/12 TATA TISCON","SD40 DB32/10 TATA TISCON","SD40 DB32/12 TATA TISCON","SD40 DB20/10 TATA TISCON (NON-T)","SD40 DB20/12 TATA TISCON (NON-T)","SD40 DB25/10 TATA TISCON (NON-T)","SD40 DB25/12 TATA TISCON (NON-T)","SD50 DB20/10 TATA TISCON","SD50 DB25/10 TATA TISCON","SD40S DB20/10 TATA TISCON","SD40S DB20/12 TATA TISCON","SD40S DB25/10 TATA TISCON","SD40S DB25/12 TATA TISCON"];
+const UW={"SR24 RB9/10 TATA TISCON":4.990,"SR24 RB12/10 TATA TISCON":8.880,"SR24 RB15/10 TATA TISCON":13.870,"SR24 RB19/10 TATA TISCON":22.260,"SR24 RB25/10 TATA TISCON":38.530,"SD40 DB10/10 TATA TISCON":6.160,"SD40 DB10/12 TATA TISCON":7.392,"SD40 DB12/10 TATA TISCON":8.880,"SD40 DB12/12 TATA TISCON":10.656,"SD40 DB16/10 TATA TISCON":15.780,"SD40 DB16/12 TATA TISCON":18.936,"SD40 DB20/10 TATA TISCON":24.660,"SD40 DB20/12 TATA TISCON":29.592,"SD40 DB25/10 TATA TISCON":38.530,"SD40 DB25/12 TATA TISCON":46.236,"SD40 DB28/10 TATA TISCON":48.340,"SD40 DB28/12 TATA TISCON":58.008,"SD40 DB32/10 TATA TISCON":63.130,"SD40 DB32/12 TATA TISCON":75.756,"DB B400B-R 14 mm. 10 m. TATA TISCON":12.080,"DB B400B-R 14 mm. 12 m. TATA TISCON":14.496,"SD40 DB12/10 TATA TISCON (NON-T)":8.880,"SD40 DB12/12 TATA TISCON (NON-T)":10.656,"SD40 DB16/10 TATA TISCON(NON-T)":15.780,"SD40 DB16/12 TATA TISCON (NON-T)":18.936,"SD40 DB20/10 TATA TISCON(NON-T)":24.660,"SD40 DB25/10 TATA TISCON(NON-T)":38.530,"SD40 DB20/10 TATA TISCON (NON-T)":24.660,"SD40 DB20/12 TATA TISCON (NON-T)":29.592,"SD40 DB25/10 TATA TISCON (NON-T)":38.530,"SD40 DB25/12 TATA TISCON (NON-T)":46.236,"SD50 DB12/10 TATA TISCON":8.880,"SD50 DB16/10 TATA TISCON":15.780,"SD50 DB20/10 TATA TISCON":24.660,"SD50 DB25/10 TATA TISCON":38.530,"SD40S DB12/10 TATA TISCON":8.880,"SD40S DB12/12 TATA TISCON":10.656,"SD40S DB16/10 TATA TISCON":15.780,"SD40S DB16/12 TATA TISCON":18.936,"SD40S DB20/10 TATA TISCON":24.660,"SD40S DB20/12 TATA TISCON":29.592,"SD40S DB25/10 TATA TISCON":38.530,"SD40S DB25/12 TATA TISCON":46.236};
+
+let grp='Project',items=[],iid=0;
+
+function setPill(btn,val){grp=val;document.querySelectorAll('.pill').forEach(b=>b.classList.remove('on'));btn.classList.add('on');items.forEach(id=>refreshCust(id));}
+function today(){return new Date().toISOString().split('T')[0];}
+document.getElementById('oDate').value=today();
+function custOpts(){return '<option value="">-- ระบุถ้ามี --</option>'+(CUSTOMERS[grp]||[]).map(c=>`<option>${c}</option>`).join('');}
+function matOpts(p){const l=p==='SCSC'?MAT_SCSC:p==='NTS'?MAT_NTS:[];return '<option value="">-- เลือกสินค้า --</option>'+l.map(m=>`<option>${m}</option>`).join('');}
+
+function getSales(cust){return cust&&SALES_MAP[cust]?SALES_MAP[cust]:grp;}
+
+function refreshCust(id){
+  // just re-update sales display when grp changes
+  const cust=document.getElementById('cust-val-'+id)?.value||'';
+  updateSalesFromVal(id,cust);
+}
+function updateSales(id){
+  const cust=document.getElementById('cust-'+id)?.value||'';
+  updateSalesFromVal(id,cust);
+}
+function updateSalesFromVal(id,cust){
+  const s=getSales(cust);
+  const el=document.getElementById('sales-disp-'+id);
+  const hid=document.getElementById('sales-val-'+id);
+  if(el) el.textContent='👤 '+s;
+  if(hid) hid.value=s;
+}
+
+// Autocomplete
+function acFilter(id){
+  const q=document.getElementById('cust-'+id).value.toLowerCase().trim();
+  const list=CUSTOMERS[grp]||[];
+  const matches=q?list.filter(c=>c.toLowerCase().includes(q)):list;
+  renderAcList(id,matches);
+  document.getElementById('ac-list-'+id).classList.add('open');
+  document.getElementById('cust-val-'+id).value='';
+  updateSalesFromVal(id,'');
+}
+function acOpen(id){
+  const list=CUSTOMERS[grp]||[];
+  const q=document.getElementById('cust-'+id).value.toLowerCase().trim();
+  const matches=q?list.filter(c=>c.toLowerCase().includes(q)):list;
+  renderAcList(id,matches);
+  document.getElementById('ac-list-'+id).classList.add('open');
+}
+function acClose(id){document.getElementById('ac-list-'+id)?.classList.remove('open');}
+function renderAcList(id,items){
+  const el=document.getElementById('ac-list-'+id);
+  el.innerHTML=items.map((c,i)=>`<div class="ac-item" onmousedown="acSelect(${id},'${c.replace(/'/g,"\\'")}')"> ${c}</div>`).join('');
+}
+function acSelect(id,val){
+  document.getElementById('cust-'+id).value=val;
+  document.getElementById('cust-val-'+id).value=val;
+  document.getElementById('ac-list-'+id).classList.remove('open');
+  updateSalesFromVal(id,val);
+}
+function acKey(e,id){
+  const list=document.getElementById('ac-list-'+id);
+  const items=list.querySelectorAll('.ac-item');
+  const active=list.querySelector('.ac-item.active');
+  let idx=Array.from(items).indexOf(active);
+  if(e.key==='ArrowDown'){e.preventDefault();if(active)active.classList.remove('active');items[Math.min(idx+1,items.length-1)]?.classList.add('active');}
+  else if(e.key==='ArrowUp'){e.preventDefault();if(active)active.classList.remove('active');items[Math.max(idx-1,0)]?.classList.add('active');}
+  else if(e.key==='Enter'&&active){e.preventDefault();acSelect(id,active.textContent.trim());}
+  else if(e.key==='Escape'){acClose(id);}
+}
+function makeItem(id,idx){
+  return `<div class="item-card" id="item-${id}">
+    <div class="item-hdr"><span class="item-tag" id="itag-${id}">รายการที่ ${idx}</span><button class="rm-btn" onclick="removeItem(${id})">✕</button></div>
+    <div class="field" style="margin-bottom:.7rem"><label>PLANT <span class="req">*</span></label>
+      <select id="plant-${id}" onchange="onPlant(${id})"><option value="">-- เลือก --</option><option>SCSC</option><option>NTS</option></select></div>
+    <div class="field" style="margin-bottom:.7rem"><label>สินค้า <span class="req">*</span></label>
+      <select id="mat-${id}" onchange="calcPcs(${id})"><option value="">-- เลือกสินค้า --</option></select></div>
+    <div class="row2" style="margin-bottom:.7rem">
+      <div class="field"><label>จำนวน (Tons) <span class="req">*</span></label>
+        <input type="number" id="ton-${id}" placeholder="0.000" step="0.001" min="0" oninput="calcPcs(${id})"/></div>
+      <div class="field"><label>PCS (เส้น)</label>
+        <input type="number" id="pcs-${id}" placeholder="อัตโนมัติ" min="0"/></div>
+    </div>
+    <div class="field" style="margin-bottom:.7rem"><label>เลขที่ SO</label>
+      <input type="text" id="so-${id}" placeholder="ระบุถ้ามี"/></div>
+    <div class="row2" style="margin-bottom:.7rem">
+      <div class="field"><label>ลูกค้า</label>
+        <div class="ac-wrap">
+          <input type="text" id="cust-${id}" placeholder="พิมพ์เพื่อค้นหา..." autocomplete="off"
+            oninput="acFilter(${id})" onfocus="acOpen(${id})" onblur="setTimeout(()=>acClose(${id}),200)"
+            onkeydown="acKey(event,${id})"/>
+          <input type="hidden" id="cust-val-${id}"/>
+          <div class="ac-list" id="ac-list-${id}"></div>
+        </div>
+      </div>
+      <div class="field"><label>Salesperson</label>
+        <div class="sales-display" id="sales-disp-${id}">👤 ${grp}</div>
+        <input type="hidden" id="sales-val-${id}" value="${grp}"/></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Incoterms <span class="req">*</span></label>
+        <select id="term-${id}">
+          <option value="">-- เลือก --</option>
+          <option value="EXW">EXW</option>
+          <option value="CFR">CFR</option>
+          <option value="CFR/EXW">CFR/EXW</option>
+        </select>
+      </div>
+      <div class="field"><label>วันที่รับสินค้า</label><input type="date" id="rdate-${id}"/></div>
+    </div>
+  </div>`;
+}
+function addItem(){
+  if(items.length>=5){toast('เพิ่มได้สูงสุด 5 รายการ','error');return;}
+  const id=++iid;items.push(id);
+  const d=document.createElement('div');d.innerHTML=makeItem(id,items.length);
+  document.getElementById('itemList').appendChild(d.firstChild);
+  if(items.length>=5)document.getElementById('addBtn').style.display='none';
+}
+function removeItem(id){
+  items=items.filter(i=>i!==id);
+  document.getElementById('item-'+id)?.remove();
+  items.forEach((i,x)=>{const t=document.getElementById('itag-'+i);if(t)t.textContent=`รายการที่ ${x+1}`;});
+  document.getElementById('addBtn').style.display='flex';
+}
+function onPlant(id){
+  const p=document.getElementById('plant-'+id).value;
+  document.getElementById('mat-'+id).innerHTML=p?matOpts(p):'<option value="">-- เลือกสินค้า --</option>';
+  document.getElementById('pcs-'+id).value='';
+}
+function calcPcs(id){
+  const mat=document.getElementById('mat-'+id)?.value;
+  const ton=document.getElementById('ton-'+id)?.value;
+  const tonVal=parseFloat(ton);
+  const pcsEl=document.getElementById('pcs-'+id);
+  if(!ton||!tonVal){pcsEl.value='';return;}
+  const uw=UW[mat]||0;
+  if(!uw){pcsEl.value='';return;}
+  const exact=tonVal*1000/uw;
+  const floored=Math.floor(exact);
+  const diff=exact-floored;
+  // ถ้าเกินจำนวนเต็ม (เช่น 160.01x) ให้ปัดขึ้นเป็นจำนวนเต็ม
+  // ถ้าขาด (เช่น 159.9xx) ให้แสดงทศนิยม 3 ตำแหน่ง
+  if(diff<0.001){pcsEl.value=floored;}         // แทบลงตัว → จำนวนเต็ม
+  else if(diff>0.999){pcsEl.value=floored+1;}   // เกินนิดเดียว → ปัดขึ้น
+  else{pcsEl.value=parseFloat(exact.toFixed(3));} // ขาด → แสดงทศนิยม 3 ตำแหน่ง
+}
+function gv(id){const el=document.getElementById(id);return el?el.value.trim():'';}
+function toast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast '+(type||'');
+  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3200);
+}
+
+function showConfirm(){
+  const eu=gv('uEmailUser');
+  if(!eu){toast('กรุณากรอกชื่ออีเมลผู้สั่งพับ','error');return;}
+  if(!gv('oDate')){toast('กรุณาระบุวันที่สั่ง','error');return;}
+  if(items.length===0){toast('กรุณาเพิ่มรายการสินค้า','error');return;}
+  for(let i=0;i<items.length;i++){
+    const id=items[i];
+    if(!gv('plant-'+id)){toast(`รายการที่ ${i+1}: กรุณาเลือก Plant`,'error');return;}
+    if(!gv('mat-'+id)){toast(`รายการที่ ${i+1}: กรุณาเลือกสินค้า`,'error');return;}
+    if(!gv('ton-'+id)||parseFloat(gv('ton-'+id))<=0){toast(`รายการที่ ${i+1}: กรุณากรอกจำนวน Tons`,'error');return;}
+  }
+  const email=eu+'@tatasteelthailand.com';
+  let html=`<div class="card"><table class="ctable">
+    <tr><td>วันที่สั่ง</td><td>${gv('oDate')}</td></tr>
+    <tr><td>แผนก</td><td>${grp}</td></tr>
+    <tr><td>อีเมลผู้สั่งพับ</td><td>${email}</td></tr>
+    <tr><td>หมายเหตุ</td><td>${gv('remark')||'-'}</td></tr>
+  </table></div>`;
+  items.forEach((id,idx)=>{
+    html+=`<div class="iblock"><div class="ititle">รายการที่ ${idx+1}</div>
+    <table class="ctable">
+      <tr><td>Plant</td><td>${gv('plant-'+id)}</td></tr>
+      <tr><td>สินค้า</td><td>${gv('mat-'+id)}</td></tr>
+      <tr><td>จำนวน</td><td>${gv('ton-'+id)} ตัน &nbsp;|&nbsp; ${gv('pcs-'+id)||'—'} เส้น</td></tr>
+      <tr><td>เลขที่ SO</td><td>${gv('so-'+id)||'-'}</td></tr>
+      <tr><td>ลูกค้า</td><td>${gv('cust-val-'+id)||'-'}</td></tr>
+      <tr><td>Salesperson</td><td>${gv('sales-val-'+id)||grp}</td></tr>
+      <tr><td>Incoterms</td><td>${gv('term-'+id)||'EXW'}</td></tr>
+      <tr><td>วันที่รับสินค้า</td><td>${gv('rdate-'+id)||'-'}</td></tr>
+    </table></div>`;
+  });
+  document.getElementById('confirmContent').innerHTML=html;
+  document.getElementById('formView').style.display='none';
+  document.getElementById('confirmView').classList.add('show');
+  window.scrollTo(0,0);
+}
+function backToForm(){
+  document.getElementById('confirmView').classList.remove('show');
+  document.getElementById('formView').style.display='block';
+}
+async function doSubmit(){
+  const eu=gv('uEmailUser');
+  const email=eu+'@tatasteelthailand.com';
+  const btn=document.getElementById('confirmBtn');
+  btn.classList.add('loading');btn.disabled=true;
+  const remark=gv('remark');
+  const promises=items.map(id=>{
+    const mat=gv('mat-'+id);
+    const payload={date:gv('oDate'),plant:gv('plant-'+id),item_description:mat,customer_group:grp,tons:parseFloat(gv('ton-'+id)),pcs:parseFloat(gv('pcs-'+id))||0,sales_order_no:gv('so-'+id),customer_name:gv('cust-val-'+id),sales_person:gv('sales-val-'+id)||grp,remark:gv('term-'+id)||'EXW',unit_weight:UW[mat]||0,submitter_email:email,receive_date:gv('rdate-'+id),order_remark:remark};
+    return fetch(FLOW_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  });
+  try{
+    await Promise.all(promises);
+    btn.classList.remove('loading');btn.disabled=false;
+    document.getElementById('confirmView').classList.remove('show');
+    document.getElementById('confirmEmail').textContent=email;
+    document.getElementById('successView').classList.add('show');
+    window.scrollTo(0,0);
+  }catch(e){
+    btn.classList.remove('loading');btn.disabled=false;
+    toast('เกิดข้อผิดพลาด กรุณาลองใหม่','error');
+  }
+}
+function resetAll(){
+  items=[];iid=0;
+  document.getElementById('itemList').innerHTML='';
+  document.getElementById('addBtn').style.display='flex';
+  document.getElementById('oDate').value=today();
+  document.getElementById('uEmailUser').value='';
+  document.getElementById('remark').value='';
+  document.querySelectorAll('.pill').forEach((b,i)=>b.classList.toggle('on',i===0));
+  grp='Project';
+  document.getElementById('successView').classList.remove('show');
+  document.getElementById('confirmView').classList.remove('show');
+  document.getElementById('formView').style.display='block';
+  addItem();window.scrollTo(0,0);
+}
+addItem();
+</script>
+</body>
+</html>

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Tracking — ระบบสั่งพับเหล็ก</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--bd:#0f2a4a;--bm:#1a3d6b;--ba:#2563b0;--bl:#dbeafe;--sl:#f1f5f9;--gr:#16a34a;--gl:#dcfce7;--rd:#dc2626;--rl:#fee2e2;--am:#d97706;--al:#fef3c7;--tx:#0f172a;--t2:#475569;--t3:#94a3b8;--br:#e2e8f0;--ra:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--tx);min-height:100vh;padding:1.25rem 1rem 3rem}
+.page{max-width:900px;margin:0 auto}
+.hdr{background:var(--bd);border-radius:12px;padding:.9rem 1.25rem;margin-bottom:1.1rem;display:flex;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(15,42,74,.15)}
+.hdr-icon{width:34px;height:34px;background:rgba(255,255,255,.13);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.hdr-icon svg{width:26px;height:26px}
+.hdr-text h1{color:#fff;font-size:15px;font-weight:600}
+.hdr-text p{color:rgba(255,255,255,.5);font-size:11px;margin-top:1px}
+.card{background:#fff;border:1px solid var(--br);border-radius:var(--ra);padding:1.1rem 1.2rem;margin-bottom:.9rem;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.field label{display:block;font-size:11px;font-weight:500;color:var(--t2);text-transform:uppercase;letter-spacing:.45px;margin-bottom:4px}
+.search-wrap{display:flex;gap:8px;align-items:center}
+.email-wrap{display:flex;align-items:center;border:1px solid var(--br);border-radius:8px;overflow:hidden;flex:1;transition:border .15s,box-shadow .15s}
+.email-wrap:focus-within{border-color:var(--ba);box-shadow:0 0 0 3px rgba(37,99,176,.1)}
+.email-wrap input{border:none;flex:1;height:36px;padding:0 10px;font-size:13px;font-family:'IBM Plex Sans Thai',sans-serif;outline:none;background:#fff;color:var(--tx)}
+.email-domain{background:var(--sl);padding:0 9px;height:36px;display:flex;align-items:center;font-size:12px;color:var(--t2);border-left:1px solid var(--br);white-space:nowrap;font-family:'IBM Plex Mono',monospace}
+.load-btn{height:36px;padding:0 16px;background:var(--bm);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:500;font-family:'IBM Plex Sans Thai',sans-serif;cursor:pointer;white-space:nowrap;transition:background .15s;display:flex;align-items:center;gap:6px}
+.load-btn:hover{background:var(--bd)}
+.load-btn:disabled{background:var(--t3);cursor:not-allowed}
+.all-btn{height:36px;padding:0 14px;background:#fff;color:var(--bm);border:1.5px solid var(--bm);border-radius:8px;font-size:13px;font-weight:500;font-family:'IBM Plex Sans Thai',sans-serif;cursor:pointer;white-space:nowrap;transition:all .15s}
+.all-btn:hover{background:var(--bl)}
+.filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:.75rem}
+.filter-select{height:32px;padding:0 8px;font-size:12px;font-family:'IBM Plex Sans Thai',sans-serif;border:1px solid var(--br);border-radius:7px;background:#fff;color:var(--tx);outline:none}
+.filter-select:focus{border-color:var(--ba)}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:.9rem}
+.stat-box{background:#fff;border:1px solid var(--br);border-radius:var(--ra);padding:.75rem 1rem;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.stat-num{font-size:22px;font-weight:600;color:var(--bm)}
+.stat-num.green{color:var(--gr)}
+.stat-num.amber{color:var(--am)}
+.stat-label{font-size:11px;color:var(--t2);margin-top:2px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:720px}
+thead th{background:var(--bd);color:#fff;padding:.5rem .65rem;text-align:left;font-weight:500;font-size:11px;letter-spacing:.3px;white-space:nowrap}
+thead th:first-child{border-radius:8px 0 0 0}
+thead th:last-child{border-radius:0 8px 0 0}
+tbody tr{border-bottom:.5px solid var(--br);transition:background .1s}
+tbody tr:hover{background:#f8fafc}
+tbody td{padding:.5rem .65rem;vertical-align:middle;color:var(--tx);line-height:1.4}
+tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t2)}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500;white-space:nowrap}
+.badge.done{background:var(--gl);color:#15803d}
+.badge.pending{background:var(--al);color:#92400e}
+.empty{text-align:center;padding:2.5rem 1rem;color:var(--t3);font-size:13px}
+.loading-box{text-align:center;padding:2rem 1rem;color:var(--t2);font-size:13px}
+.spin{display:inline-block;width:18px;height:18px;border:2px solid var(--br);border-top-color:var(--bm);border-radius:50%;animation:spin .7s linear infinite;vertical-align:-4px;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.err-box{background:var(--rl);border:1px solid #fca5a5;border-radius:var(--ra);padding:.75rem 1rem;font-size:13px;color:var(--rd);margin-bottom:.9rem}
+.count-label{font-size:12px;color:var(--t2);margin-bottom:.5rem}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="hdr">
+  <div class="hdr-icon">
+    <svg viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="1" y="11" width="24" height="2.2" rx="1.1" fill="rgba(255,255,255,0.9)"/>
+      <rect x="5" y="9.5" width="1.4" height="5.2" rx="0.7" fill="rgba(255,255,255,0.75)"/>
+      <rect x="9" y="9.5" width="1.4" height="5.2" rx="0.7" fill="rgba(255,255,255,0.75)"/>
+      <rect x="13" y="9.5" width="1.4" height="5.2" rx="0.7" fill="rgba(255,255,255,0.75)"/>
+      <rect x="17" y="9.5" width="1.4" height="5.2" rx="0.7" fill="rgba(255,255,255,0.75)"/>
+      <rect x="1" y="5.5" width="24" height="1.6" rx="0.8" fill="rgba(255,255,255,0.55)"/>
+      <rect x="6" y="4.5" width="1.1" height="3.6" rx="0.55" fill="rgba(255,255,255,0.45)"/>
+      <rect x="11" y="4.5" width="1.1" height="3.6" rx="0.55" fill="rgba(255,255,255,0.45)"/>
+      <rect x="16" y="4.5" width="1.1" height="3.6" rx="0.55" fill="rgba(255,255,255,0.45)"/>
+      <rect x="1" y="18.9" width="24" height="1.6" rx="0.8" fill="rgba(255,255,255,0.55)"/>
+      <rect x="6" y="17.9" width="1.1" height="3.6" rx="0.55" fill="rgba(255,255,255,0.45)"/>
+      <rect x="11" y="17.9" width="1.1" height="3.6" rx="0.55" fill="rgba(255,255,255,0.45)"/>
+      <rect x="16" y="17.9" width="1.1" height="3.6" rx="0.55" fill="rgba(255,255,255,0.45)"/>
+    </svg>
+  </div>
+  <div class="hdr-text">
+    <h1>Tracking — ระบบสั่งพับเหล็ก</h1>
+    <p>ติดตามสถานะรายการสั่งพับเหล็ก</p>
+  </div>
+</div>
+
+<!-- SEARCH -->
+<div class="card">
+  <div class="field" style="margin-bottom:.75rem">
+    <label>ค้นหาตาม Email ผู้สั่งพับ</label>
+    <div class="search-wrap">
+      <div class="email-wrap">
+        <input type="text" id="emailInput" placeholder="ชื่ออีเมล" onkeydown="if(event.key==='Enter')loadByEmail()"/>
+        <span class="email-domain">@tatasteelthailand.com</span>
+      </div>
+      <button class="load-btn" id="searchBtn" onclick="loadByEmail()">🔍 ค้นหา</button>
+      <button class="all-btn" onclick="loadAll()">ทั้งหมด</button>
+    </div>
+  </div>
+  <div class="filter-row">
+    <select class="filter-select" id="fGrp" onchange="applyFilter()">
+      <option value="">ทุกแผนก</option>
+      <option>Project</option><option>Retail</option><option>Direct</option><option>Export</option>
+    </select>
+    <select class="filter-select" id="fPlant" onchange="applyFilter()">
+      <option value="">ทุก Plant</option>
+      <option>SCSC</option><option>NTS</option>
+    </select>
+    <select class="filter-select" id="fStatus" onchange="applyFilter()">
+      <option value="">ทุกสถานะ</option>
+      <option value="done">✅ ดำเนินการแล้ว</option>
+      <option value="pending">⏳ รอดำเนินการ</option>
+    </select>
+  </div>
+</div>
+
+<div id="errBox" style="display:none" class="err-box"></div>
+
+<!-- STATS -->
+<div class="stats-row" id="statsRow" style="display:none">
+  <div class="stat-box"><div class="stat-num" id="statTotal">0</div><div class="stat-label">รายการทั้งหมด</div></div>
+  <div class="stat-box"><div class="stat-num done green" id="statDone">0</div><div class="stat-label">ดำเนินการแล้ว</div></div>
+  <div class="stat-box"><div class="stat-num amber" id="statPending">0</div><div class="stat-label">รอดำเนินการ</div></div>
+</div>
+
+<!-- TABLE -->
+<div class="card" id="tableCard" style="display:none">
+  <div class="count-label" id="countLabel"></div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>วันที่สั่ง</th>
+          <th>แผนก</th>
+          <th>Plant</th>
+          <th>สินค้า</th>
+          <th>Tons</th>
+          <th>PCS</th>
+          <th>ลูกค้า</th>
+          <th>Sales</th>
+          <th>Incoterms</th>
+          <th>Email ผู้สั่ง</th>
+          <th>สถานะ</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div id="loadingBox" class="loading-box" style="display:none">
+  <span class="spin"></span>กำลังโหลดข้อมูล...
+</div>
+
+<div id="emptyBox" class="card empty" style="display:none">
+  ไม่พบรายการที่ตรงกัน
+</div>
+
+</div>
+
+<script>
+const FLOW_URL='https://defaultc49eedf2bcd84a848b29b3e5f61a3d.03.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/dd06128deabc40d8ba6a54df6e6327bd/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=J_ZPZCb4OzwlGSQ3GXc27pDL8NKs_VmWYqzVdg-pe0w';
+
+let allRows=[];
+let currentEmail='';
+
+function excelDateToStr(val){
+  if(!val) return '-';
+  if(typeof val==='string'&&val.includes('-')) return val.split('T')[0];
+  if(typeof val==='number'){
+    const d=new Date((val-25569)*86400*1000);
+    const y=d.getUTCFullYear();
+    const m=String(d.getUTCMonth()+1).padStart(2,'0');
+    const day=String(d.getUTCDate()).padStart(2,'0');
+    return `${day}/${m}/${y}`;
+  }
+  return String(val).split('T')[0]||'-';
+}
+
+function isTrue(val){
+  if(val===true||val==='true'||val==='TRUE'||val===1||val==='1') return true;
+  return false;
+}
+
+async function fetchData(){
+  document.getElementById('loadingBox').style.display='block';
+  document.getElementById('tableCard').style.display='none';
+  document.getElementById('statsRow').style.display='none';
+  document.getElementById('emptyBox').style.display='none';
+  document.getElementById('errBox').style.display='none';
+  document.getElementById('searchBtn').disabled=true;
+
+  try{
+    const res=await fetch(FLOW_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    allRows=Array.isArray(data)?data:(data.value||[]);
+    applyFilter();
+  }catch(e){
+    document.getElementById('errBox').textContent='เกิดข้อผิดพลาดในการโหลดข้อมูล: '+e.message;
+    document.getElementById('errBox').style.display='block';
+  }finally{
+    document.getElementById('loadingBox').style.display='none';
+    document.getElementById('searchBtn').disabled=false;
+  }
+}
+
+function loadByEmail(){
+  currentEmail=document.getElementById('emailInput').value.trim().toLowerCase();
+  fetchData();
+}
+function loadAll(){
+  currentEmail='';
+  document.getElementById('emailInput').value='';
+  fetchData();
+}
+
+function applyFilter(){
+  const fGrp=document.getElementById('fGrp').value;
+  const fPlant=document.getElementById('fPlant').value;
+  const fStatus=document.getElementById('fStatus').value;
+
+  let rows=allRows;
+
+  if(currentEmail){
+    rows=rows.filter(r=>{
+      const em=(r['Submitter_email']||r['submitter_email']||'').toLowerCase();
+      return em.includes(currentEmail)||em.startsWith(currentEmail);
+    });
+  }
+  if(fGrp) rows=rows.filter(r=>(r['Customer Group']||r['customer_group']||'')==fGrp);
+  if(fPlant) rows=rows.filter(r=>(r['Plant']||r['plant']||'')==fPlant);
+  if(fStatus==='done') rows=rows.filter(r=>isTrue(r['Status']||r['status']));
+  if(fStatus==='pending') rows=rows.filter(r=>!isTrue(r['Status']||r['status']));
+
+  renderTable(rows);
+}
+
+function renderTable(rows){
+  const done=rows.filter(r=>isTrue(r['Status']||r['status'])).length;
+  const pending=rows.length-done;
+
+  document.getElementById('statTotal').textContent=rows.length;
+  document.getElementById('statDone').textContent=done;
+  document.getElementById('statPending').textContent=pending;
+  document.getElementById('statsRow').style.display='grid';
+  document.getElementById('countLabel').textContent=`แสดง ${rows.length} รายการ`;
+
+  if(rows.length===0){
+    document.getElementById('tableCard').style.display='none';
+    document.getElementById('emptyBox').style.display='block';
+    return;
+  }
+  document.getElementById('emptyBox').style.display='none';
+  document.getElementById('tableCard').style.display='block';
+
+  const tbody=document.getElementById('tableBody');
+  tbody.innerHTML=rows.map(r=>{
+    const status=isTrue(r['Status']||r['status']);
+    const email=(r['Submitter_email']||r['submitter_email']||'-');
+    const emailShort=email.includes('@')?email.split('@')[0]:email;
+    return `<tr>
+      <td class="mono">${excelDateToStr(r['Date']||r['date'])}</td>
+      <td>${r['Customer Group']||r['customer_group']||'-'}</td>
+      <td><strong>${r['Plant']||r['plant']||'-'}</strong></td>
+      <td style="max-width:160px;font-size:11px">${r['Item Description']||r['item_description']||'-'}</td>
+      <td class="mono">${r['Tons']||r['tons']||'-'}</td>
+      <td class="mono">${r['Pcs']||r['pcs']||'-'}</td>
+      <td style="font-size:11px">${r['Customer Name']||r['customer_name']||'-'}</td>
+      <td style="font-size:11px">${r['Sales Person']||r['sales_person']||'-'}</td>
+      <td>${r['Remark']||r['remark']||'-'}</td>
+      <td class="mono" style="font-size:11px">${emailShort}</td>
+      <td>${status?'<span class="badge done">✅ เสร็จแล้ว</span>':'<span class="badge pending">⏳ รอดำเนินการ</span>'}</td>
+    </tr>`;
+  }).join('');
+}
+</script>
+</body>
+</html>
