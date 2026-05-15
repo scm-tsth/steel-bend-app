@@ -102,14 +102,22 @@ tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t
       <option>Project</option><option>Retail</option><option>Direct</option><option>Export</option>
     </select>
     <select class="filter-select" id="fPlant" onchange="applyFilter()">
-      <option value="">ทุก Plant</option>
-      <option>SCSC</option><option>NTS</option>
-    </select>
-    <select class="filter-select" id="fStatus" onchange="applyFilter()">
-      <option value="">ทุกสถานะ</option>
-      <option value="done">✅ ดำเนินการแล้ว</option>
-      <option value="pending">⏳ รอดำเนินการ</option>
-    </select>
+  <option value="">ทุก Plant</option>
+  <option>SCSC</option>
+  <option>NTS</option>
+</select>
+
+<input class="filter-select"
+       id="fItem"
+       placeholder="ค้นหาสินค้า เช่น DB25, SD40"
+       oninput="applyFilter()"
+       style="width:220px"/>
+
+<select class="filter-select" id="fStatus" onchange="applyFilter()">
+  <option value="">ทุกสถานะ</option>
+  <option value="done">✅ ดำเนินการแล้ว</option>
+  <option value="pending">⏳ รอดำเนินการ</option>
+</select>
   </div>
 </div>
 
@@ -235,6 +243,7 @@ function loadAll(){
 function applyFilter(){
   const fGrp=document.getElementById('fGrp').value;
   const fPlant=document.getElementById('fPlant').value;
+  const fItem=document.getElementById('fItem').value.toLowerCase().trim();
   const fStatus=document.getElementById('fStatus').value;
 
   let rows=allRows;
@@ -245,10 +254,21 @@ function applyFilter(){
       return em.includes(currentEmail)||em.startsWith(currentEmail);
     });
   }
-  if(fGrp) rows=rows.filter(r=>(r['Customer Group']||r['customer_group']||'')==fGrp);
-  if(fPlant) rows=rows.filter(r=>(r['Plant']||r['plant']||'')==fPlant);
-  if(fStatus==='done') rows=rows.filter(r=>isDoneStatus(r));
-  if(fStatus==='pending') rows=rows.filter(r=>!isDoneStatus(r));
+ if(fGrp) rows=rows.filter(r=>(r['Customer Group']||r['customer_group']||'')==fGrp);
+
+if(fPlant) rows=rows.filter(r=>(r['Plant']||r['plant']||'')==fPlant);
+
+if(fItem){
+  rows=rows.filter(r=>
+    String(r['Item Description']||r['item_description']||'')
+      .toLowerCase()
+      .includes(fItem)
+  );
+}
+
+if(fStatus==='done') rows=rows.filter(r=>isDoneStatus(r));
+
+if(fStatus==='pending') rows=rows.filter(r=>!isDoneStatus(r));
 
   renderTable(rows);
 }
