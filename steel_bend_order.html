@@ -115,10 +115,10 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
   <div class="field">
     <label>แผนก <span class="req">*</span></label>
     <div class="pill-wrap">
-      <button class="pill on" onclick="setPill(this,'Project')">Project</button>
-      <button class="pill" onclick="setPill(this,'Retail')">Retail</button>
-      <button class="pill" onclick="setPill(this,'Direct')">Direct</button>
-      <button class="pill" onclick="setPill(this,'Export')">Export</button>
+      <button class="pill on" data-grp="Project">Project</button>
+      <button class="pill" data-grp="Retail">Retail</button>
+      <button class="pill" data-grp="Direct">Direct</button>
+      <button class="pill" data-grp="Export">Export</button>
     </div>
   </div>
 </div>
@@ -411,6 +411,10 @@ function resetAll(){
   document.getElementById('formView').style.display='block';
   addItem();window.scrollTo(0,0);
 }
+// Pill click handler
+document.querySelectorAll('.pill[data-grp]').forEach(btn=>{
+  btn.addEventListener('click',function(){setPill(this,this.dataset.grp);});
+});
 addItem();
 const savedUser=localStorage.getItem('steel_user');
 if(!savedUser){
