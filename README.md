@@ -22,6 +22,8 @@ Current order submission works by sending one HTTP POST payload per item to Powe
 
 | Payload field | Source in frontend | Excel column / usage |
 | --- | --- | --- |
+| `OrderID` | generated per item | `OrderID` |
+| `order_id` | generated per item | compatibility key for `OrderID` |
 | `date` | `#oDate` | `Date` |
 | `plant` | `#plant-${id}` | `Plant` |
 | `item_description` | `#mat-${id}` | `Item Description` |
@@ -70,6 +72,7 @@ Required mapping for current fields:
 | `Unit Weight` | `triggerBody()?['unit_weight']` |
 | `Status` | `false` |
 | `submitter_email` | `triggerBody()?['submitter_email']` |
+| `OrderID` | `coalesce(triggerBody()?['OrderID'], triggerBody()?['order_id'])` |
 | `Status_Text` | `coalesce(triggerBody()?['Status_Text'], triggerBody()?['status_text'], 'Pending')` |
 
 After updating the flow, submit one test order and confirm the new Excel row has:
@@ -192,8 +195,246 @@ and(
 
 Recommended update-row key:
 
-- Use `ItemInternalId` from the listed row as the row id/key if the Excel connector exposes it.
-- If Excel connector requires a key column, use `OrderID` after adding a unique value during order submission.
+- Use `OrderID` as the update key after the order submit flow maps it into the `OrderID` Excel column.
+- Keep `OrderID` unique per item row. The frontend sends one generated `OrderID` for each item payload.
+
+## Power Automate Flow 5 Detailed Runbook
+
+Build the first version for SCSC only. After it works, duplicate the plant/template branch for NTS.
+
+### 1. Create Scheduled Cloud Flow
+
+Create a new Scheduled cloud flow:
+
+- Flow name: `Steel_Bend_05_DailyCutoffPDF`
+- Starting: next working test date/time
+- Repeat every: `1` day
+
+Open the Recurrence trigger and set:
+
+- Interval: `1`
+- Frequency: `Day`
+- Time zone: `SE Asia Standard Time`
+- At these hours: `10`
+- At these minutes: `0`
+
+For testing, temporarily set the recurrence to a near future time or use manual Test after saving.
+
+### 2. Initialize Variables
+
+Add these variables immediately after Recurrence:
+
+| Action | Name | Type | Value |
+| --- | --- | --- | --- |
+| Initialize variable | `PlantCode` | String | `SCSC` |
+| Initialize variable | `RunDateText` | String | `formatDateTime(convertTimeZone(utcNow(),'UTC','SE Asia Standard Time'),'yyyyMMdd')` |
+| Initialize variable | `CutoffDate` | String | `formatDateTime(convertTimeZone(utcNow(),'UTC','SE Asia Standard Time'),'yyyy-MM-dd')` |
+| Initialize variable | `SentAt` | String | `formatDateTime(convertTimeZone(utcNow(),'UTC','SE Asia Standard Time'),'yyyy-MM-dd HH:mm:ss')` |
+| Initialize variable | `BatchID` | String | `concat(variables('PlantCode'),'-',variables('RunDateText'),'-1000')` |
+| Initialize variable | `PdfFileName` | String | `concat(variables('BatchID'),'.pdf')` |
+
+### 3. List Pending Rows
+
+Add action: Excel Online (Business) - List rows present in a table
+
+- Location: SharePoint site used by `Input_DB.xlsx`
+- Document Library: the library that contains the workbook
+- File: `Input_DB.xlsx`
+- Table: `InputDB`
+
+Turn on pagination if available. This keeps the flow ready if rows exceed the default connector page size.
+
+### 4. Filter Pending SCSC Rows
+
+Add action: Data Operations - Filter array
+
+From:
+
+```text
+value from List rows present in a table
+```
+
+Advanced mode expression:
+
+```text
+@and(
+  equals(toLower(trim(coalesce(item()?['Status_Text'], ''))), 'pending'),
+  equals(item()?['Plant'], variables('PlantCode'))
+)
+```
+
+Name this action: `Filter_Pending_SCSC`.
+
+### 5. Stop If No Pending Rows
+
+Add Condition:
+
+```text
+length(body('Filter_Pending_SCSC'))
+```
+
+is greater than
+
+```text
+0
+```
+
+If No:
+
+- Add Terminate
+- Status: Succeeded
+- Message: `No pending SCSC orders for cutoff`
+
+If Yes: continue.
+
+### 6. Prepare Batch Input
+
+Recommended structure:
+
+- Create or use a separate Excel table named `SCSC_Batch_Input`.
+- Clear old rows before writing the new batch if this table feeds the PDF template.
+- Add each filtered row into `SCSC_Batch_Input`.
+
+Inside Apply to each over `body('Filter_Pending_SCSC')`, map at minimum:
+
+| SCSC batch field | Value |
+| --- | --- |
+| `Batch_ID` | `variables('BatchID')` |
+| `OrderID` | `items('Apply_to_each')?['OrderID']` |
+| `Date` | `items('Apply_to_each')?['Date']` |
+| `Plant` | `items('Apply_to_each')?['Plant']` |
+| `Item Description` | `items('Apply_to_each')?['Item Description']` |
+| `Customer Group` | `items('Apply_to_each')?['Customer Group']` |
+| `Tons` | `items('Apply_to_each')?['Tons']` |
+| `Pcs` | `items('Apply_to_each')?['Pcs']` |
+| `Customer Name` | `items('Apply_to_each')?['Customer Name']` |
+| `Sales Person` | `items('Apply_to_each')?['Sales Person']` |
+| `Incoterms` | `items('Apply_to_each')?['Incoterms']` |
+| `Order Remark` | `items('Apply_to_each')?['Order Remark']` |
+| `Unit Weight` | `items('Apply_to_each')?['Unit Weight']` |
+
+If clearing `SCSC_Batch_Input` is awkward with the Excel connector, use an Office Script later. For the first version, writing a new batch table or appending with `Batch_ID` is acceptable.
+
+### 7. Generate PDF
+
+Choose one implementation path:
+
+Option A - Excel template to PDF:
+
+1. Store the SCSC form template in SharePoint.
+2. Fill `SCSC_Batch_Input`.
+3. Use the Excel/OneDrive/SharePoint conversion action available in your tenant to create PDF from the template/workbook.
+4. Save the generated PDF into a SharePoint folder.
+
+Option B - Word template to PDF:
+
+1. Create a Word template with repeating table rows if your license supports Word template population.
+2. Populate the template with filtered rows.
+3. Convert Word document to PDF.
+4. Save the PDF to SharePoint.
+
+Recommended SharePoint folder:
+
+```text
+SCM Demand/SCM Demand/เหล็กพับ/CutoffPDF/SCSC/
+```
+
+Recommended file name:
+
+```text
+SCSC-YYYYMMDD-1000.pdf
+```
+
+### 8. Send Email To Factory
+
+Add action: Send an email (V2)
+
+Suggested fields:
+
+- To: SCSC factory email group
+- Subject: `Steel Bending Cutoff - SCSC - @{variables('CutoffDate')} 10:00`
+- Attachment: generated PDF
+- Body should include:
+  - Batch ID
+  - Cutoff date/time
+  - Number of rows
+  - PDF link
+
+Row count expression:
+
+```text
+length(body('Filter_Pending_SCSC'))
+```
+
+### 9. Update InputDB Rows After Email Success
+
+Use Apply to each over `body('Filter_Pending_SCSC')`.
+
+Action: Excel Online (Business) - Update a row
+
+- File: `Input_DB.xlsx`
+- Table: `InputDB`
+- Key Column: `OrderID`
+- Key Value: `items('Apply_to_each')?['OrderID']`
+
+Set these fields:
+
+| Excel column | Value |
+| --- | --- |
+| `Status` | `true` |
+| `Status_Text` | `Sent` |
+| `Cutoff_Batch_ID` | `variables('BatchID')` |
+| `Cutoff_Date` | `variables('CutoffDate')` |
+| `Sent_To_Plant_At` | `variables('SentAt')` |
+| `PDF_File_Name` | `variables('PdfFileName')` |
+| `PDF_File_URL` | link/path returned by create file action |
+| `Error_Message` | blank |
+
+Keep all existing fields mapped to their current values if the Update row action requires them. Do not overwrite order data with blank values.
+
+### 10. Error Handling Scope
+
+Recommended structure:
+
+- Scope: `Try_Cutoff`
+  - List rows
+  - Filter rows
+  - Generate PDF
+  - Send email
+  - Update rows as Sent
+- Scope: `Catch_Error`
+  - Configure run after `Try_Cutoff` has failed, timed out, or skipped
+  - Apply to each filtered pending row if available
+  - Update:
+    - `Status_Text` = `Error`
+    - `Error_Message` = error summary
+
+Useful error message expression:
+
+```text
+string(outputs('Try_Cutoff'))
+```
+
+If `Filter_Pending_SCSC` did not run, send an admin email instead of updating rows.
+
+### 11. Test Plan
+
+Test with 1-2 rows only:
+
+1. Submit one SCSC test order from the web app.
+2. Confirm Excel row has:
+   - `OrderID` not blank
+   - `Status` unchecked / false
+   - `Status_Text` = `Pending`
+3. Run Flow 5 manually.
+4. Confirm PDF file is created.
+5. Confirm email is sent.
+6. Confirm the same InputDB row changed to:
+   - `Status` checked / true
+   - `Status_Text` = `Sent`
+   - `Cutoff_Batch_ID` = `SCSC-YYYYMMDD-1000`
+   - `PDF_File_Name` and `PDF_File_URL` filled
+7. Open tracking page and confirm row no longer appears as Pending.
 
 Future extension:
 

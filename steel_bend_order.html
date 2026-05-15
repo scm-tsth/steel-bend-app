@@ -382,9 +382,13 @@ async function doSubmit(){
   const remark=gv('remark');
   const promises=items.map(id=>{
     const mat=gv('mat-'+id);
+    const plant=gv('plant-'+id);
+    const orderId='SB-'+plant+'-'+gv('oDate').replaceAll('-','')+'-'+Date.now()+'-'+id;
 const payload = {
+  OrderID: orderId,
+  order_id: orderId,
   date: gv('oDate'),
-  plant: gv('plant-'+id),
+  plant: plant,
   item_description: mat,
   customer_group: grp,
   tons: parseFloat(gv('ton-'+id)) || 0,
