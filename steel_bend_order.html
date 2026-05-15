@@ -417,10 +417,6 @@ document.querySelectorAll('.pill[data-grp]').forEach(btn=>{
 });
 addItem();
 const savedUser=localStorage.getItem('steel_user');
-if(!savedUser){
-  window.location.href='index.html';
-} else {
-  document.getElementById('uEmailUser').value=savedUser;
-}
+if(savedUser) document.getElementById('uEmailUser').value=savedUser;
 </body>
 </html>
