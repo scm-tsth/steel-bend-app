@@ -392,7 +392,7 @@ async function doSubmit(){
   sales_order_no: gv('so-'+id) || '',
   customer_name: gv('cust-'+id) || '',
   sales_person: gv('sales-'+id) || grp,
-  remark: gv('incoterms-'+id) || gv('incoterm-'+id) || gv('inco-'+id) || '',
+  remark: gv('term-'+id) || 'EXW',
   unit_weight: parseFloat(gv('pcs-'+id)) ? (parseFloat(gv('ton-'+id)) * 1000 / parseFloat(gv('pcs-'+id))) : 1,
   submitter_email: email
 };
