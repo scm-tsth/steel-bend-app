@@ -389,14 +389,14 @@ async function doSubmit(){
   customer_group: grp,
   tons: parseFloat(gv('ton-'+id)),
   pcs: parseFloat(gv('pcs-'+id)) || 0,
-  sales_order_no: so || '',
-  customer_name: cust || '',
-  sales_person: sp || '',
-  remark: gv('remark'),
-  unit_weight: parseFloat(uw) || 0,
+  sales_order_no: gv('so-'+id) || '',
+  customer_name: gv('cust-'+id) || '',
+  sales_person: gv('sales-'+id) || grp,
+  remark: gv('remark') || '',
+  unit_weight: parseFloat(gv('uw-'+id)) || 0,
   submitter_email: email
 };
-   console.log(payload);
+   console.log("Sending payload:", payload);
     return fetch(FLOW_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
   });
   try{
