@@ -397,7 +397,8 @@ const payload = {
 
   sales_person: gv('sales-val-'+id) || grp,
 
-  remark: gv('term-'+id) || 'EXW',
+  incoterms: gv('term-'+id) || 'EXW',
+  order_remark: gv('remark') || '',
 
   request_date: gv('rdate-'+id) || '',
 
