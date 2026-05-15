@@ -36,8 +36,14 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
 .stat-num.green{color:var(--gr)}
 .stat-num.amber{color:var(--am)}
 .stat-label{font-size:11px;color:var(--t2);margin-top:2px}
-.table-wrap{overflow-x:auto}
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
 table{width:100%;border-collapse:collapse;font-size:12px;min-width:1050px}
+@media (max-width:768px){
+  .page{max-width:100%}
+  body{padding:.75rem .5rem 2rem}
+  table{min-width:1050px}
+  .card{padding:.85rem}
+}
 thead th{background:var(--bd);color:#fff;padding:.5rem .65rem;text-align:left;font-weight:500;font-size:11px;letter-spacing:.3px;white-space:nowrap}
 thead th:first-child{border-radius:8px 0 0 0}
 thead th:last-child{border-radius:0 8px 0 0}
