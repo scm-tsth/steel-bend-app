@@ -112,20 +112,13 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
     <label>วันที่สั่ง <span class="req">*</span></label>
     <input type="date" id="oDate"/>
   </div>
-  <div class="field" style="margin-bottom:.8rem">
+  <div class="field">
     <label>แผนก <span class="req">*</span></label>
     <div class="pill-wrap">
       <button class="pill on" onclick="setPill(this,'Project')">Project</button>
       <button class="pill" onclick="setPill(this,'Retail')">Retail</button>
       <button class="pill" onclick="setPill(this,'Direct')">Direct</button>
       <button class="pill" onclick="setPill(this,'Export')">Export</button>
-    </div>
-  </div>
-  <div class="field">
-    <label>Email ผู้สั่งพับ <span class="req">*</span></label>
-    <div class="email-wrap">
-      <input type="text" id="uEmailUser" placeholder="ชื่ออีเมล"/>
-      <span class="email-domain">@tatasteelthailand.com</span>
     </div>
   </div>
 </div>
@@ -141,6 +134,17 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
   <div class="field">
     <label>หมายเหตุ</label>
     <input type="text" id="remark" placeholder="เช่น เหล็กอยู่ใน 2400"/>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ctitle"><span class="sdot">4</span><h2>ลงชื่อผู้สั่งพับ</h2></div>
+  <div class="field">
+    <label>Email ผู้สั่งพับ <span class="req">*</span></label>
+    <div class="email-wrap">
+      <input type="text" id="uEmailUser" placeholder="ชื่ออีเมล"/>
+      <span class="email-domain">@tatasteelthailand.com</span>
+    </div>
   </div>
 </div>
 
@@ -408,6 +412,7 @@ function resetAll(){
   addItem();window.scrollTo(0,0);
 }
 addItem();
-</script>
+const savedUser=sessionStorage.getItem('steel_user');
+if(savedUser) document.getElementById('uEmailUser').value=savedUser;
 </body>
 </html>
