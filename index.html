@@ -149,7 +149,7 @@ async function doLogin(){
     const res=await fetch(AUTH_URL,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({email:email})
+      body:JSON.stringify({email:email+'@tatasteelthailand.com'})
     });
     const data=await res.json();
     if(data.authorized===true){
