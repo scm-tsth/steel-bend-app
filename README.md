@@ -8,6 +8,7 @@
 - Hosting: GitHub Pages / static hosting
 - Backend: Power Automate HTTP trigger flows
 - Database: Excel file on SharePoint (`Input_DB.xlsx`)
+- Main Excel table: `InputDB`
 - Main pages:
   - `index.html` - login / entry page
   - `steel_bend_order.html` - order submission form
@@ -35,15 +36,53 @@ Current order submission works by sending one HTTP POST payload per item to Powe
 | `unit_weight` | `UW[mat]` fallback `0` | `Unit Weight` |
 | `submitter_email` | email input + domain | `submitter_email` |
 | `status_text` | constant `Pending` | future `Status_Text` |
+| `Status_Text` | constant `Pending` | future `Status_Text` compatibility key |
 
 Backward-compatible aliases currently kept in the payload:
 
 - `remark` mirrors `incoterms` for older flows that previously used `remark` as Incoterms.
 - `receive_date` and `request_date` mirror the receive date input if a future Excel/flow mapping supports it.
 
+## Power Automate Order Submit Flow Update
+
+Existing order submission flow should continue using the same HTTP trigger and the same `Input_DB.xlsx` file.
+
+In the Excel action that adds a row:
+
+- File: `Input_DB.xlsx`
+- Table: `InputDB`
+
+Required mapping for current fields:
+
+| Excel column | Recommended Power Automate value |
+| --- | --- |
+| `Date` | `triggerBody()?['date']` |
+| `Plant` | `triggerBody()?['plant']` |
+| `Item Description` | `triggerBody()?['item_description']` |
+| `Customer Group` | `triggerBody()?['customer_group']` |
+| `Tons` | `triggerBody()?['tons']` |
+| `Pcs` | `triggerBody()?['pcs']` |
+| `Sales Order No.` | `triggerBody()?['sales_order_no']` |
+| `Customer Name` | `triggerBody()?['customer_name']` |
+| `Sales Person` | `triggerBody()?['sales_person']` |
+| `Incoterms` | `triggerBody()?['incoterms']` |
+| `Order Remark` | `triggerBody()?['order_remark']` |
+| `Unit Weight` | `triggerBody()?['unit_weight']` |
+| `Status` | `false` |
+| `submitter_email` | `triggerBody()?['submitter_email']` |
+| `Status_Text` | `coalesce(triggerBody()?['Status_Text'], triggerBody()?['status_text'], 'Pending')` |
+
+After updating the flow, submit one test order and confirm the new Excel row has:
+
+- `Status` = `FALSE`
+- `Status_Text` = `Pending`
+- `Incoterms` from the selected incoterm dropdown
+- `Order Remark` from the remark input
+- `Unit Weight` from frontend material lookup
+
 ## Excel Column Mapping
 
-Current `Input_DB.xlsx` input table columns:
+Current `Input_DB.xlsx` input table `InputDB` columns:
 
 1. `Date`
 2. `Plant`
@@ -106,7 +145,7 @@ Trigger:
 
 Recommended logic:
 
-1. List rows from `Input_DB.xlsx`.
+1. List rows from `Input_DB.xlsx`, table `InputDB`.
 2. Filter rows where:
    - `Status_Text` = `Pending`
    - `Plant` = `SCSC`
@@ -115,7 +154,7 @@ Recommended logic:
 5. Generate PDF from the SCSC form template.
 6. Save the PDF to SharePoint.
 7. Send email to the SCSC factory with the PDF/link.
-8. If email succeeds, update selected `Input_DB.xlsx` rows:
+8. If email succeeds, update selected `Input_DB.xlsx` rows in table `InputDB`:
    - `Status` = `TRUE`
    - `Status_Text` = `Sent`
    - `Cutoff_Batch_ID` = `Batch_ID`
@@ -126,6 +165,35 @@ Recommended logic:
 9. If any step fails, update selected rows:
    - `Status_Text` = `Error`
    - `Error_Message` = error detail
+
+Implementation notes for filtering:
+
+- Prefer filtering in Power Automate after `List rows` with a Filter array action first.
+- Use normalized comparison if older rows may have blank `Status_Text`:
+
+```text
+equals(toLower(trim(item()?['Status_Text'])), 'pending')
+```
+
+- For plant:
+
+```text
+equals(item()?['Plant'], 'SCSC')
+```
+
+- For a combined advanced mode filter expression:
+
+```text
+and(
+  equals(toLower(trim(item()?['Status_Text'])), 'pending'),
+  equals(item()?['Plant'], 'SCSC')
+)
+```
+
+Recommended update-row key:
+
+- Use `ItemInternalId` from the listed row as the row id/key if the Excel connector exposes it.
+- If Excel connector requires a key column, use `OrderID` after adding a unique value during order submission.
 
 Future extension:
 
