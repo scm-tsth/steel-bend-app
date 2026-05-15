@@ -413,6 +413,10 @@ function resetAll(){
 }
 addItem();
 const savedUser=sessionStorage.getItem('steel_user');
-if(savedUser) document.getElementById('uEmailUser').value=savedUser;
+if(!savedUser){
+  window.location.href='index.html';
+} else {
+  document.getElementById('uEmailUser').value=savedUser;
+}
 </body>
 </html>

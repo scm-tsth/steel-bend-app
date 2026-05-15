@@ -160,6 +160,11 @@ tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t
 <script>
 const FLOW_URL='https://defaultc49eedf2bcd84a848b29b3e5f61a3d.03.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/dd06128deabc40d8ba6a54df6e6327bd/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=J_ZPZCb4OzwlGSQ3GXc27pDL8NKs_VmWYqzVdg-pe0w';
 
+// เช็ค session — ถ้าไม่มีให้กลับ index
+if(!sessionStorage.getItem('steel_user')){
+  window.location.href='index.html';
+}
+
 let allRows=[];
 let currentEmail='';
 
