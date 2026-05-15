@@ -382,18 +382,33 @@ async function doSubmit(){
   const remark=gv('remark');
   const promises=items.map(id=>{
     const mat=gv('mat-'+id);
-   const payload = {
+const payload = {
   date: gv('oDate'),
   plant: gv('plant-'+id),
   item_description: mat,
   customer_group: grp,
-  tons: parseFloat(gv('ton-'+id)),
+
+  tons: parseFloat(gv('ton-'+id)) || 0,
   pcs: parseFloat(gv('pcs-'+id)) || 0,
+
   sales_order_no: gv('so-'+id) || '',
-  customer_name: gv('cust-'+id) || '',
-  sales_person: gv('sales-'+id) || grp,
-  remark: gv('term-'+id) || 'EXW',
-  unit_weight: parseFloat(gv('pcs-'+id)) ? (parseFloat(gv('ton-'+id)) * 1000 / parseFloat(gv('pcs-'+id))) : 1,
+
+  customer_name: gv('cust-val-'+id) || '',
+
+  sales_person: gv('sales-val-'+id) || grp,
+
+  incoterms: gv('term-'+id) || 'EXW',
+
+  remark: gv('remark') || '',
+
+  request_date: gv('rdate-'+id) || '',
+
+  unit_weight: UW[mat] || (
+    parseFloat(gv('pcs-'+id))
+      ? (parseFloat(gv('ton-'+id)) * 1000 / parseFloat(gv('pcs-'+id)))
+      : 0
+  ),
+
   submitter_email: email
 };
    console.log("Sending payload:", payload);
