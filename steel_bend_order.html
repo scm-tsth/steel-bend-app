@@ -396,6 +396,7 @@ async function doSubmit(){
   unit_weight: parseFloat(uw) || 0,
   submitter_email: email
 };
+   console.log(payload);
     return fetch(FLOW_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
   });
   try{
