@@ -94,6 +94,7 @@ tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t
       </div>
       <button class="load-btn" id="searchBtn" onclick="loadByEmail()">🔍 ค้นหา</button>
       <button class="all-btn" onclick="loadAll()">ทั้งหมด</button>
+      <button class="all-btn" onclick="fetchData()">🔄 Refresh</button>
     </div>
   </div>
   <div class="filter-row">
@@ -146,6 +147,7 @@ tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t
           <th>ลูกค้า</th>
           <th>Sales</th>
           <th>Incoterms</th>
+          <th>วันที่รับสินค้า</th>
           <th>Email ผู้สั่ง</th>
           <th>สถานะ</th>
         </tr>
@@ -274,6 +276,17 @@ if(fStatus==='pending') rows=rows.filter(r=>!isDoneStatus(r));
 }
 
 function renderTable(rows){
+
+  rows.sort((a,b)=>{
+    const aDone=isDoneStatus(a)?1:0;
+    const bDone=isDoneStatus(b)?1:0;
+
+    if(aDone!==bDone){
+      return aDone-bDone;
+    }
+
+    return 0;
+  });
   const done=rows.filter(r=>isTrue(r['Status']||r['status'])).length;
   const pending=rows.length-done;
 
@@ -305,7 +318,10 @@ function renderTable(rows){
       <td class="mono">${r['Pcs']||r['pcs']||'-'}</td>
       <td style="font-size:11px">${r['Customer Name']||r['customer_name']||'-'}</td>
       <td style="font-size:11px">${r['Sales Person']||r['sales_person']||'-'}</td>
-      <td>${r['Incoterms']||r['incoterms']||r['Remark']||r['remark']||'-'}</td>
+      <td>${r['Incoterms']||r['incoterms']||'-'}</td>
+<td class="mono">
+  ${excelDateToStr(r['Receive Date']||r['receive_date'])}
+</td>
       <td class="mono" style="font-size:11px">${emailShort}</td>
       <td>${status?'<span class="badge done">✅ เสร็จแล้ว</span>':'<span class="badge pending">⏳ รอดำเนินการ</span>'}</td>
     </tr>`;
