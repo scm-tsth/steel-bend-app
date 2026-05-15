@@ -191,8 +191,12 @@ function excelDateToStr(val){
 }
 
 function isTrue(val){
-  if(val===true||val==='true'||val==='TRUE'||val===1||val==='1') return true;
-  return false;
+  const statusVal = String(val ?? '').toLowerCase().trim();
+  return statusVal === 'true' || statusVal === 'yes' || statusVal === '1';
+}
+
+function isDoneStatus(r){
+  return isTrue(r['Status'] ?? r['status'] ?? '');
 }
 
 async function fetchData(){
@@ -243,8 +247,8 @@ function applyFilter(){
   }
   if(fGrp) rows=rows.filter(r=>(r['Customer Group']||r['customer_group']||'')==fGrp);
   if(fPlant) rows=rows.filter(r=>(r['Plant']||r['plant']||'')==fPlant);
-  if(fStatus==='done') rows=rows.filter(r=>isTrue(r['Status']||r['status']));
-  if(fStatus==='pending') rows=rows.filter(r=>!isTrue(r['Status']||r['status']));
+  if(fStatus==='done') rows=rows.filter(r=>isDoneStatus(r));
+  if(fStatus==='pending') rows=rows.filter(r=>!isDoneStatus(r));
 
   renderTable(rows);
 }
@@ -269,12 +273,7 @@ function renderTable(rows){
 
   const tbody=document.getElementById('tableBody');
   tbody.innerHTML=rows.map(r=>{
-    const statusVal = String(r['Status'] || r['status'] || '').toLowerCase();
-
-const status =
-  statusVal === 'true' ||
-  statusVal === 'yes' ||
-  statusVal === '1';
+    const status=isDoneStatus(r);
     const email=(r['Submitter_email']||r['submitter_email']||'-');
     const emailShort=email.includes('@')?email.split('@')[0]:email;
     return `<tr>
