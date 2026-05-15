@@ -125,7 +125,7 @@ const AUTH_URL='https://defaultc49eedf2bcd84a848b29b3e5f61a3d.03.environment.api
 
 // เช็ค session
 window.onload=function(){
-  const saved=sessionStorage.getItem('steel_user');
+  const saved=localStorage.getItem('steel_user');
   if(saved){
     showMenu(saved);
   }
@@ -159,7 +159,7 @@ async function doLogin(){
     let data={};
     try{data=JSON.parse(text);}catch(e){}
     if(data.authorized===true){
-      sessionStorage.setItem('steel_user',email);
+      localStorage.setItem('steel_user',email);
       showMenu(email);
     } else {
       err.classList.add('show');
@@ -181,7 +181,7 @@ function showMenu(email){
 }
 
 function signOut(){
-  sessionStorage.removeItem('steel_user');
+  localStorage.removeItem('steel_user');
   document.getElementById('loginCard').classList.remove('hide');
   document.getElementById('menuView').classList.remove('show');
   document.getElementById('emailInput').value='';

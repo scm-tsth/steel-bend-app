@@ -412,7 +412,7 @@ function resetAll(){
   addItem();window.scrollTo(0,0);
 }
 addItem();
-const savedUser=sessionStorage.getItem('steel_user');
+const savedUser=localStorage.getItem('steel_user');
 if(!savedUser){
   window.location.href='index.html';
 } else {
