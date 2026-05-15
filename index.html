@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ระบบสั่งพับเหล็ก — Tata Steel Thailand</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{--bd:#0f2a4a;--bm:#1a3d6b;--ba:#2563b0;--bl:#dbeafe;--gr:#16a34a;--gl:#dcfce7;--br:#e2e8f0;--tx:#0f172a;--t2:#475569;--t3:#94a3b8;--ra:14px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--tx);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem 1rem}
+.wrap{max-width:480px;width:100%}
+.hdr{text-align:center;margin-bottom:2rem}
+.logo{width:64px;height:64px;background:var(--bd);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;box-shadow:0 4px 20px rgba(15,42,74,.2)}
+.logo svg{width:38px;height:38px}
+.hdr h1{font-size:20px;font-weight:600;color:var(--bd);margin-bottom:.35rem}
+.hdr p{font-size:13px;color:var(--t2)}
+.cards{display:flex;flex-direction:column;gap:14px}
+.menu-card{background:#fff;border:1.5px solid var(--br);border-radius:var(--ra);padding:1.4rem 1.5rem;cursor:pointer;transition:all .2s;text-decoration:none;display:flex;align-items:center;gap:1rem;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.menu-card:hover{border-color:var(--ba);box-shadow:0 4px 20px rgba(37,99,176,.12);transform:translateY(-2px)}
+.menu-card.order:hover{border-color:var(--bm)}
+.menu-card.track:hover{border-color:var(--gr)}
+.card-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px}
+.order .card-icon{background:var(--bl)}
+.track .card-icon{background:var(--gl)}
+.card-text h2{font-size:15px;font-weight:600;color:var(--tx);margin-bottom:3px}
+.card-text p{font-size:12px;color:var(--t2);line-height:1.5}
+.arrow{margin-left:auto;color:var(--t3);font-size:18px;flex-shrink:0;transition:transform .2s}
+.menu-card:hover .arrow{transform:translateX(4px);color:var(--ba)}
+.footer{text-align:center;margin-top:1.75rem;font-size:11px;color:var(--t3)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hdr">
+    <div class="logo">
+      <svg viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="11" width="24" height="2.2" rx="1.1" fill="rgba(255,255,255,0.9)"/>
+        <rect x="5" y="9.5" width="1.4" height="5.2" rx="0.7" fill="rgba(255,255,255,0.75)"/>
+        <rect x="9" y="9.5" width="1.4" height="5.2" rx="0.7" fill="rgba(255,255,255,0.75)"/>
+        <rect x="13" y="9.5" width="1.4" height="5.2" rx="0.7" fill="rgba(255,255,255,0.75)"/>
+        <rect x="17" y="9.5" width="1.4" height="5.2" rx="0.7" fill="rgba(255,255,255,0.75)"/>
+        <rect x="1" y="5.5" width="24" height="1.6" rx="0.8" fill="rgba(255,255,255,0.55)"/>
+        <rect x="6" y="4.5" width="1.1" height="3.6" rx="0.55" fill="rgba(255,255,255,0.45)"/>
+        <rect x="11" y="4.5" width="1.1" height="3.6" rx="0.55" fill="rgba(255,255,255,0.45)"/>
+        <rect x="16" y="4.5" width="1.1" height="3.6" rx="0.55" fill="rgba(255,255,255,0.45)"/>
+        <rect x="1" y="18.9" width="24" height="1.6" rx="0.8" fill="rgba(255,255,255,0.55)"/>
+        <rect x="6" y="17.9" width="1.1" height="3.6" rx="0.55" fill="rgba(255,255,255,0.45)"/>
+        <rect x="11" y="17.9" width="1.1" height="3.6" rx="0.55" fill="rgba(255,255,255,0.45)"/>
+        <rect x="16" y="17.9" width="1.1" height="3.6" rx="0.55" fill="rgba(255,255,255,0.45)"/>
+      </svg>
+    </div>
+    <h1>ระบบสั่งพับเหล็ก</h1>
+    <p>Tata Steel Thailand — SCM Demand</p>
+  </div>
+
+  <div class="cards">
+    <a class="menu-card order" href="steel_bend_order.html">
+      <div class="card-icon">🔩</div>
+      <div class="card-text">
+        <h2>สั่งพับเหล็ก</h2>
+        <p>กรอกรายการสินค้าที่ต้องการสั่งพับ<br/>ส่งคำสั่งซื้อเข้าระบบได้ทันที</p>
+      </div>
+      <div class="arrow">›</div>
+    </a>
+
+    <a class="menu-card track" href="steel_bend_tracking.html">
+      <div class="card-icon">📋</div>
+      <div class="card-text">
+        <h2>ติดตามสถานะ</h2>
+        <p>ตรวจสอบรายการที่สั่งไว้<br/>ดูสถานะว่าดำเนินการแล้วหรือยัง</p>
+      </div>
+      <div class="arrow">›</div>
+    </a>
+  </div>
+
+  <div class="footer">ตัดยอดทุกวัน 10:00 น. — รายการที่ส่งหลัง 10:00 น. จะเข้ารอบวันถัดไป</div>
+</div>
+</body>
+</html>
