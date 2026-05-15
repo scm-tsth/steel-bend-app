@@ -397,7 +397,22 @@ async function doSubmit(){
   submitter_email: email
 };
    console.log("Sending payload:", payload);
-    return fetch(FLOW_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+   return fetch(FLOW_URL,{
+  method:'POST',
+  headers:{'Content-Type':'application/json'},
+  body:JSON.stringify(payload)
+})
+.then(async res => {
+  const txt = await res.text();
+
+  console.log("STATUS:", res.status);
+  console.log("RESPONSE:", txt);
+
+  if (!res.ok) {
+    throw new Error("Flow error " + res.status + ": " + txt);
+  }
+
+  return res;
   });
   try{
     await Promise.all(promises);
