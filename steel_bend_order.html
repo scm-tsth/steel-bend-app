@@ -393,7 +393,7 @@ async function doSubmit(){
   customer_name: gv('cust-'+id) || '',
   sales_person: gv('sales-'+id) || grp,
   remark: gv('remark') || '',
-  unit_weight: parseFloat(gv('uw-'+id)) || parseFloat(gv('unit_weight-'+id)) || parseFloat(gv('unitWeight-'+id)) || 1,
+  unit_weight: parseFloat(gv('pcs-'+id)) ? (parseFloat(gv('ton-'+id)) * 1000 / parseFloat(gv('pcs-'+id))) : 1,
   submitter_email: email
 };
    console.log("Sending payload:", payload);
