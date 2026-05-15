@@ -4,30 +4,54 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>ระบบสั่งพับเหล็ก — Tata Steel Thailand</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
-:root{--bd:#0f2a4a;--bm:#1a3d6b;--ba:#2563b0;--bl:#dbeafe;--gr:#16a34a;--gl:#dcfce7;--br:#e2e8f0;--tx:#0f172a;--t2:#475569;--t3:#94a3b8;--ra:14px}
+:root{--bd:#0f2a4a;--bm:#1a3d6b;--ba:#2563b0;--bl:#dbeafe;--gr:#16a34a;--gl:#dcfce7;--rd:#dc2626;--rl:#fee2e2;--br:#e2e8f0;--tx:#0f172a;--t2:#475569;--t3:#94a3b8;--ra:14px}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--tx);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem 1rem}
-.wrap{max-width:480px;width:100%}
+.wrap{max-width:420px;width:100%}
 .hdr{text-align:center;margin-bottom:2rem}
 .logo{width:64px;height:64px;background:var(--bd);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;box-shadow:0 4px 20px rgba(15,42,74,.2)}
 .logo svg{width:38px;height:38px}
 .hdr h1{font-size:20px;font-weight:600;color:var(--bd);margin-bottom:.35rem}
 .hdr p{font-size:13px;color:var(--t2)}
-.cards{display:flex;flex-direction:column;gap:14px}
-.menu-card{background:#fff;border:1.5px solid var(--br);border-radius:var(--ra);padding:1.4rem 1.5rem;cursor:pointer;transition:all .2s;text-decoration:none;display:flex;align-items:center;gap:1rem;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+
+/* LOGIN */
+.login-card{background:#fff;border:1px solid var(--br);border-radius:var(--ra);padding:1.75rem 1.5rem;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.login-card h2{font-size:14px;font-weight:600;color:var(--tx);margin-bottom:.35rem}
+.login-card p{font-size:12px;color:var(--t2);margin-bottom:1.1rem;line-height:1.6}
+.email-wrap{display:flex;align-items:center;border:1px solid var(--br);border-radius:8px;overflow:hidden;transition:border .15s,box-shadow .15s;margin-bottom:.75rem}
+.email-wrap:focus-within{border-color:var(--ba);box-shadow:0 0 0 3px rgba(37,99,176,.1)}
+.email-wrap input{border:none;flex:1;height:38px;padding:0 10px;font-size:13px;font-family:'IBM Plex Sans Thai',sans-serif;outline:none;background:#fff;color:var(--tx)}
+.email-domain{background:var(--sl, #f1f5f9);padding:0 9px;height:38px;display:flex;align-items:center;font-size:12px;color:var(--t2);border-left:1px solid var(--br);white-space:nowrap;font-family:'IBM Plex Mono',monospace}
+.login-btn{width:100%;height:38px;background:var(--bm);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:500;font-family:'IBM Plex Sans Thai',sans-serif;cursor:pointer;transition:background .15s;display:flex;align-items:center;justify-content:center;gap:6px}
+.login-btn:hover{background:var(--bd)}
+.login-btn:disabled{background:var(--t3);cursor:not-allowed}
+.err-msg{background:var(--rl);border:1px solid #fca5a5;border-radius:8px;padding:.6rem .85rem;font-size:12px;color:var(--rd);margin-top:.65rem;display:none}
+.err-msg.show{display:block}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* MENU */
+.menu-view{display:none}
+.menu-view.show{display:block}
+.login-card.hide{display:none}
+.greeting{text-align:center;font-size:13px;color:var(--t2);margin-bottom:1.1rem}
+.greeting strong{color:var(--bm)}
+.cards{display:flex;flex-direction:column;gap:12px}
+.menu-card{background:#fff;border:1.5px solid var(--br);border-radius:var(--ra);padding:1.3rem 1.4rem;cursor:pointer;transition:all .2s;text-decoration:none;display:flex;align-items:center;gap:1rem;box-shadow:0 1px 4px rgba(0,0,0,.06)}
 .menu-card:hover{border-color:var(--ba);box-shadow:0 4px 20px rgba(37,99,176,.12);transform:translateY(-2px)}
-.menu-card.order:hover{border-color:var(--bm)}
 .menu-card.track:hover{border-color:var(--gr)}
-.card-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px}
+.card-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px}
 .order .card-icon{background:var(--bl)}
 .track .card-icon{background:var(--gl)}
-.card-text h2{font-size:15px;font-weight:600;color:var(--tx);margin-bottom:3px}
+.card-text h2{font-size:14px;font-weight:600;color:var(--tx);margin-bottom:3px}
 .card-text p{font-size:12px;color:var(--t2);line-height:1.5}
 .arrow{margin-left:auto;color:var(--t3);font-size:18px;flex-shrink:0;transition:transform .2s}
 .menu-card:hover .arrow{transform:translateX(4px);color:var(--ba)}
-.footer{text-align:center;margin-top:1.75rem;font-size:11px;color:var(--t3)}
+.signout{text-align:center;margin-top:1rem;font-size:12px;color:var(--t3);cursor:pointer;text-decoration:underline}
+.signout:hover{color:var(--rd)}
+.footer{text-align:center;margin-top:1.5rem;font-size:11px;color:var(--t3)}
 </style>
 </head>
 <body>
@@ -54,27 +78,109 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
     <p>Tata Steel Thailand — SCM Demand</p>
   </div>
 
-  <div class="cards">
-    <a class="menu-card order" href="steel_bend_order.html">
-      <div class="card-icon">🔩</div>
-      <div class="card-text">
-        <h2>สั่งพับเหล็ก</h2>
-        <p>กรอกรายการสินค้าที่ต้องการสั่งพับ<br/>ส่งคำสั่งซื้อเข้าระบบได้ทันที</p>
-      </div>
-      <div class="arrow">›</div>
-    </a>
+  <!-- LOGIN -->
+  <div class="login-card" id="loginCard">
+    <h2>เข้าสู่ระบบ</h2>
+    <p>กรุณาระบุ Email เพื่อยืนยันสิทธิ์การใช้งาน</p>
+    <div class="email-wrap">
+      <input type="text" id="emailInput" placeholder="ชื่ออีเมล" onkeydown="if(event.key==='Enter')doLogin()"/>
+      <span class="email-domain">@tatasteelthailand.com</span>
+    </div>
+    <button class="login-btn" id="loginBtn" onclick="doLogin()">
+      <span id="loginText">ยืนยัน →</span>
+      <span class="spin" id="loginSpin" style="display:none"></span>
+    </button>
+    <div class="err-msg" id="errMsg">⛔ คุณไม่มีสิทธิ์ใช้งานระบบนี้ กรุณาติดต่อผู้ดูแลระบบ</div>
+  </div>
 
-    <a class="menu-card track" href="steel_bend_tracking.html">
-      <div class="card-icon">📋</div>
-      <div class="card-text">
-        <h2>ติดตามสถานะ</h2>
-        <p>ตรวจสอบรายการที่สั่งไว้<br/>ดูสถานะว่าดำเนินการแล้วหรือยัง</p>
-      </div>
-      <div class="arrow">›</div>
-    </a>
+  <!-- MENU -->
+  <div class="menu-view" id="menuView">
+    <div class="greeting">สวัสดีครับ <strong id="greetName"></strong></div>
+    <div class="cards">
+      <a class="menu-card order" href="steel_bend_order.html">
+        <div class="card-icon">🔩</div>
+        <div class="card-text">
+          <h2>สั่งพับเหล็ก</h2>
+          <p>กรอกรายการสินค้าที่ต้องการสั่งพับ<br/>ส่งคำสั่งซื้อเข้าระบบได้ทันที</p>
+        </div>
+        <div class="arrow">›</div>
+      </a>
+      <a class="menu-card track" href="steel_bend_tracking.html">
+        <div class="card-icon">📋</div>
+        <div class="card-text">
+          <h2>ติดตามสถานะ</h2>
+          <p>ตรวจสอบรายการที่สั่งไว้<br/>ดูสถานะว่าดำเนินการแล้วหรือยัง</p>
+        </div>
+        <div class="arrow">›</div>
+      </a>
+    </div>
+    <div class="signout" onclick="signOut()">ออกจากระบบ</div>
   </div>
 
   <div class="footer">ตัดยอดทุกวัน 10:00 น. — รายการที่ส่งหลัง 10:00 น. จะเข้ารอบวันถัดไป</div>
 </div>
+
+<script>
+const AUTH_URL='https://defaultc49eedf2bcd84a848b29b3e5f61a3d.03.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/89ec33c02cda46e6b5a53c86ad0cdae4/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=KAOAU4tru--J9rAwcQgUj6kywEszKoEDkEr4LP3tuYQ';
+
+// เช็ค session
+window.onload=function(){
+  const saved=sessionStorage.getItem('steel_user');
+  if(saved){
+    showMenu(saved);
+  }
+};
+
+async function doLogin(){
+  const email=document.getElementById('emailInput').value.trim().toLowerCase();
+  if(!email){document.getElementById('emailInput').focus();return;}
+
+  const btn=document.getElementById('loginBtn');
+  const txt=document.getElementById('loginText');
+  const spin=document.getElementById('loginSpin');
+  const err=document.getElementById('errMsg');
+
+  btn.disabled=true;
+  txt.style.display='none';
+  spin.style.display='inline-block';
+  err.classList.remove('show');
+
+  try{
+    const res=await fetch(AUTH_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email:email})
+    });
+    const data=await res.json();
+    if(data.authorized===true){
+      sessionStorage.setItem('steel_user',email);
+      showMenu(email);
+    } else {
+      err.classList.add('show');
+    }
+  }catch(e){
+    err.textContent='⚠️ เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง';
+    err.classList.add('show');
+  }finally{
+    btn.disabled=false;
+    txt.style.display='inline';
+    spin.style.display='none';
+  }
+}
+
+function showMenu(email){
+  document.getElementById('loginCard').classList.add('hide');
+  document.getElementById('menuView').classList.add('show');
+  document.getElementById('greetName').textContent=email+'@tatasteelthailand.com';
+}
+
+function signOut(){
+  sessionStorage.removeItem('steel_user');
+  document.getElementById('loginCard').classList.remove('hide');
+  document.getElementById('menuView').classList.remove('show');
+  document.getElementById('emailInput').value='';
+  document.getElementById('errMsg').classList.remove('show');
+}
+</script>
 </body>
 </html>
