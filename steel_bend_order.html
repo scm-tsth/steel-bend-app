@@ -411,7 +411,6 @@ async function doSubmit(){
   if (!res.ok) {
     throw new Error("Flow error " + res.status + ": " + txt);
   }
-
   return res;
   });
   try{
