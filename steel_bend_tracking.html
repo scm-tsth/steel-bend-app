@@ -170,15 +170,24 @@ let currentEmail='';
 
 function excelDateToStr(val){
   if(!val) return '-';
-  if(typeof val==='string'&&val.includes('-')) return val.split('T')[0];
-  if(typeof val==='number'){
-    const d=new Date((val-25569)*86400*1000);
-    const y=d.getUTCFullYear();
-    const m=String(d.getUTCMonth()+1).padStart(2,'0');
-    const day=String(d.getUTCDate()).padStart(2,'0');
+
+  if(typeof val === 'string' && /^\d+(\.\d+)?$/.test(val)){
+    val = Number(val);
+  }
+
+  if(typeof val === 'string' && val.includes('-')) {
+    return val.split('T')[0];
+  }
+
+  if(typeof val === 'number'){
+    const d = new Date((val - 25569) * 86400 * 1000);
+    const y = d.getUTCFullYear();
+    const m = String(d.getUTCMonth() + 1).padStart(2,'0');
+    const day = String(d.getUTCDate()).padStart(2,'0');
     return `${day}/${m}/${y}`;
   }
-  return String(val).split('T')[0]||'-';
+
+  return String(val).split('T')[0] || '-';
 }
 
 function isTrue(val){
