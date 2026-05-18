@@ -103,7 +103,7 @@ tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t
 <!-- SEARCH -->
 <div class="card">
   <div class="field" style="margin-bottom:.75rem">
-    <label>ค้นหาตาม Email ผู้สั่งพับ</label>
+    <label>ค้นหาตาม ชื่อ ผู้สั่งพับ</label>
     <div class="search-wrap">
       <div class="email-wrap">
         <input type="text" id="emailInput" placeholder="ชื่ออีเมล" onkeydown="if(event.key==='Enter')loadByEmail()"/>
@@ -133,8 +133,10 @@ tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t
 
 <select class="filter-select" id="fStatus" onchange="applyFilter()">
   <option value="">ทุกสถานะ</option>
-  <option value="done">✅ ดำเนินการแล้ว</option>
   <option value="pending">⏳ รอดำเนินการ</option>
+  <option value="done">✅ ส่งแล้ว</option>
+  <option value="cancelled">ยกเลิกแล้ว</option>
+  <option value="error">⚠️ Error</option>
 </select>
   </div>
 </div>
@@ -165,7 +167,7 @@ tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t
           <th>Sales</th>
           <th>Incoterms</th>
           <th class="receive-col">วันที่รับสินค้า</th>
-          <th>Email ผู้สั่ง</th>
+          <th>ผู้สั่ง</th>
           <th>สถานะ</th>
           <th>จัดการ</th>
         </tr>
@@ -414,6 +416,10 @@ if(fItem){
 if(fStatus==='done') rows=rows.filter(r=>isDoneStatus(r));
 
 if(fStatus==='pending') rows=rows.filter(r=>isPending(r));
+
+if(fStatus==='cancelled') rows=rows.filter(r=>getStatusText(r)==='Cancelled');
+
+if(fStatus==='error') rows=rows.filter(r=>getStatusText(r)==='Error');
 
   renderTable(rows);
 }
