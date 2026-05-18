@@ -13,8 +13,11 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
 .hdr{background:var(--bd);border-radius:12px;padding:.9rem 1.25rem;margin-bottom:1.1rem;display:flex;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(15,42,74,.15)}
 .hdr-icon{width:34px;height:34px;background:rgba(255,255,255,.13);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .hdr-icon svg{width:26px;height:26px}
+.hdr-text{flex:1}
 .hdr-text h1{color:#fff;font-size:15px;font-weight:600}
 .hdr-text p{color:rgba(255,255,255,.5);font-size:11px;margin-top:1px}
+.home-btn{height:34px;padding:0 12px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.1);color:#fff;border-radius:8px;font-size:12px;font-weight:500;font-family:'IBM Plex Sans Thai',sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.home-btn:hover{background:rgba(255,255,255,.18)}
 .card{background:#fff;border:1px solid var(--br);border-radius:var(--ra);padding:1.1rem 1.2rem;margin-bottom:.9rem;box-shadow:0 1px 3px rgba(0,0,0,.06)}
 .field label{display:block;font-size:11px;font-weight:500;color:var(--t2);text-transform:uppercase;letter-spacing:.45px;margin-bottom:4px}
 .search-wrap{display:flex;gap:8px;align-items:center}
@@ -41,6 +44,8 @@ table{width:100%;border-collapse:collapse;font-size:12px;min-width:1140px}
 @media (max-width:768px){
   .page{max-width:100%}
   body{padding:.75rem .5rem 2rem}
+  .hdr{align-items:flex-start;flex-wrap:wrap}
+  .home-btn{width:100%;justify-content:center}
   table{min-width:1140px}
   .card{padding:.85rem}
 }
@@ -92,12 +97,13 @@ tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t
     <h1>Tracking — ระบบสั่งพับเหล็ก</h1>
     <p>ติดตามสถานะรายการสั่งพับเหล็ก</p>
   </div>
+  <a class="home-btn" href="index.html">← กลับหน้าหลัก</a>
 </div>
 
 <!-- SEARCH -->
 <div class="card">
   <div class="field" style="margin-bottom:.75rem">
-    <label>ค้นหาตาม ชื่อ ผู้สั่งพับ</label>
+    <label>ค้นหาตาม Email ผู้สั่งพับ</label>
     <div class="search-wrap">
       <div class="email-wrap">
         <input type="text" id="emailInput" placeholder="ชื่ออีเมล" onkeydown="if(event.key==='Enter')loadByEmail()"/>
@@ -159,7 +165,7 @@ tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t
           <th>Sales</th>
           <th>Incoterms</th>
           <th class="receive-col">วันที่รับสินค้า</th>
-          <th>ผู้สั่งพับ</th>
+          <th>Email ผู้สั่ง</th>
           <th>สถานะ</th>
           <th>จัดการ</th>
         </tr>
@@ -181,7 +187,7 @@ tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t
 
 <script>
 const FLOW_URL='https://defaultc49eedf2bcd84a848b29b3e5f61a3d.03.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/dd06128deabc40d8ba6a54df6e6327bd/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=J_ZPZCb4OzwlGSQ3GXc27pDL8NKs_VmWYqzVdg-pe0w';
-const CANCEL_FLOW_URL='https://defaultc49eedf2bcd84a848b29b3e5f61a3d.03.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/91ebe8f1d82d4e5e99b2bd31e2880dda/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=hViZKhjcNR77ENfkLlwNDFYcPRm4wlhnkCDC4As0wlc';
+const CANCEL_FLOW_URL='PASTE_STEEL_BEND_02_CANCELORDER_HTTP_POST_URL_HERE';
 
 // เช็ค session — ถ้าไม่มีให้กลับ index
 //if(!localStorage.getItem('steel_user')){
