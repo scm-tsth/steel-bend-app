@@ -37,11 +37,11 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
 .stat-num.amber{color:var(--am)}
 .stat-label{font-size:11px;color:var(--t2);margin-top:2px}
 .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-table{width:100%;border-collapse:collapse;font-size:12px;min-width:1050px}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:1140px}
 @media (max-width:768px){
   .page{max-width:100%}
   body{padding:.75rem .5rem 2rem}
-  table{min-width:1050px}
+  table{min-width:1140px}
   .card{padding:.85rem}
 }
 thead th{background:var(--bd);color:#fff;padding:.5rem .65rem;text-align:left;font-weight:500;font-size:11px;letter-spacing:.3px;white-space:nowrap}
@@ -56,6 +56,9 @@ tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t
 .badge.pending{background:var(--al);color:#92400e}
 .badge.error{background:var(--rl);color:var(--rd)}
 .badge.cancelled{background:var(--sl);color:var(--t2)}
+.cancel-btn{height:28px;padding:0 10px;border:1px solid #fca5a5;background:#fff;color:var(--rd);border-radius:7px;font-size:11px;font-family:'IBM Plex Sans Thai',sans-serif;cursor:pointer;white-space:nowrap}
+.cancel-btn:hover{background:var(--rl)}
+.cancel-btn:disabled{border-color:var(--br);color:var(--t3);background:var(--sl);cursor:not-allowed}
 .empty{text-align:center;padding:2.5rem 1rem;color:var(--t3);font-size:13px}
 .loading-box{text-align:center;padding:2rem 1rem;color:var(--t2);font-size:13px}
 .spin{display:inline-block;width:18px;height:18px;border:2px solid var(--br);border-top-color:var(--bm);border-radius:50%;animation:spin .7s linear infinite;vertical-align:-4px;margin-right:6px}
@@ -94,7 +97,7 @@ tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t
 <!-- SEARCH -->
 <div class="card">
   <div class="field" style="margin-bottom:.75rem">
-    <label>ค้นหาตาม รายชื่อ ผู้สั่งพับ</label>
+    <label>ค้นหาตาม ชื่อ ผู้สั่งพับ</label>
     <div class="search-wrap">
       <div class="email-wrap">
         <input type="text" id="emailInput" placeholder="ชื่ออีเมล" onkeydown="if(event.key==='Enter')loadByEmail()"/>
@@ -156,8 +159,9 @@ tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t
           <th>Sales</th>
           <th>Incoterms</th>
           <th class="receive-col">วันที่รับสินค้า</th>
-          <th>ผู้สั่ง</th>
+          <th>ผู้สั่งพับ</th>
           <th>สถานะ</th>
+          <th>จัดการ</th>
         </tr>
       </thead>
       <tbody id="tableBody"></tbody>
@@ -177,6 +181,7 @@ tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t
 
 <script>
 const FLOW_URL='https://defaultc49eedf2bcd84a848b29b3e5f61a3d.03.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/dd06128deabc40d8ba6a54df6e6327bd/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=J_ZPZCb4OzwlGSQ3GXc27pDL8NKs_VmWYqzVdg-pe0w';
+const CANCEL_FLOW_URL='https://defaultc49eedf2bcd84a848b29b3e5f61a3d.03.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/91ebe8f1d82d4e5e99b2bd31e2880dda/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=hViZKhjcNR77ENfkLlwNDFYcPRm4wlhnkCDC4As0wlc';
 
 // เช็ค session — ถ้าไม่มีให้กลับ index
 //if(!localStorage.getItem('steel_user')){
@@ -241,6 +246,44 @@ function isDoneStatus(row){
   return getStatusText(row)==='Sent';
 }
 
+function fullEmail(value){
+  const v=String(value||'').trim().toLowerCase();
+  if(!v) return '';
+  return v.includes('@')?v:v+'@tatasteelthailand.com';
+}
+
+function rowEmail(row){
+  return fullEmail(row['Submitter_email']||row['submitter_email']||'');
+}
+
+function currentUserEmail(){
+  return fullEmail(localStorage.getItem('steel_user')||currentEmail||document.getElementById('emailInput').value);
+}
+
+function rowOrderId(row){
+  return row['OrderID']||row['order_id']||'';
+}
+
+function cancelDeadlineValue(row){
+  return row['Cancel_Deadline_At']||row['cancel_deadline_at']||'';
+}
+
+function parseDateTime(value){
+  if(!value) return null;
+  if(typeof value==='number') return new Date((value-25569)*86400*1000);
+  const text=String(value).trim();
+  if(/^\d+(\.\d+)?$/.test(text)) return new Date((Number(text)-25569)*86400*1000);
+  const thai=text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/);
+  if(thai) return new Date(Number(thai[3]),Number(thai[2])-1,Number(thai[1]),Number(thai[4]||0),Number(thai[5]||0));
+  const iso=new Date(text.replace(' ','T'));
+  return isNaN(iso.getTime())?null:iso;
+}
+
+function canCancel(row){
+  const deadline=parseDateTime(cancelDeadlineValue(row));
+  return isPending(row) && rowOrderId(row) && rowEmail(row)===currentUserEmail() && deadline && Date.now()<deadline.getTime();
+}
+
 function receiveDateValue(row){
   return row['Receive Date'] ?? row['receive_date'] ?? row['Request Date'] ?? row['request_date'] ?? '';
 }
@@ -263,6 +306,44 @@ function statusSortOrder(row){
   if(statusText==='Error') return 1;
   if(statusText==='Cancelled') return 2;
   return 3;
+}
+
+function cancelAction(row,idx){
+  if(!canCancel(row)) return '-';
+  return `<button class="cancel-btn" onclick="cancelOrder(${idx})">ยกเลิก</button>`;
+}
+
+async function cancelOrder(idx){
+  const row=allRows[idx];
+  if(!row||!canCancel(row)){alert('ไม่สามารถยกเลิกรายการนี้ได้');return;}
+  if(!CANCEL_FLOW_URL||CANCEL_FLOW_URL.includes('PASTE_')){
+    alert('ยังไม่ได้ตั้งค่า URL ของ Steel_Bend_02_CancelOrder ในไฟล์ tracking');
+    return;
+  }
+  const reason=prompt('ระบุเหตุผลการยกเลิก');
+  if(reason===null) return;
+  if(!reason.trim()){alert('กรุณาระบุเหตุผลการยกเลิก');return;}
+  if(!confirm('ยืนยันยกเลิกรายการนี้?')) return;
+
+  try{
+    const res=await fetch(CANCEL_FLOW_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        order_id:rowOrderId(row),
+        submitter_email:currentUserEmail(),
+        cancel_reason:reason.trim()
+      })
+    });
+    const text=await res.text();
+    let data={};
+    try{data=JSON.parse(text);}catch(e){}
+    if(!res.ok||data.success===false) throw new Error(data.message||text||('HTTP '+res.status));
+    alert(data.message||'ยกเลิกรายการสำเร็จ');
+    fetchData();
+  }catch(e){
+    alert('ยกเลิกไม่สำเร็จ: '+e.message);
+  }
 }
 
 async function fetchData(){
@@ -364,6 +445,7 @@ function renderTable(rows){
 
   const tbody=document.getElementById('tableBody');
   tbody.innerHTML=rows.map(r=>{
+    const rowIndex=allRows.indexOf(r);
     const email=(r['Submitter_email']||r['submitter_email']||'-');
     const emailShort=email.includes('@')?email.split('@')[0]:email;
     return `<tr>
@@ -379,6 +461,7 @@ function renderTable(rows){
       ${showReceiveDate?`<td class="mono receive-col">${excelDateToStr(receiveDateValue(r))}</td>`:''}
       <td class="mono" style="font-size:11px">${emailShort}</td>
       <td>${statusBadge(r)}</td>
+      <td>${cancelAction(r,rowIndex)}</td>
     </tr>`;
   }).join('');
 }
