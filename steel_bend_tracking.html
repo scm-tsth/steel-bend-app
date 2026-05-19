@@ -103,7 +103,7 @@ tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t
 <!-- SEARCH -->
 <div class="card">
   <div class="field" style="margin-bottom:.75rem">
-    <label>ค้นหาตาม รายชื่อ ผู้สั่งพับ</label>
+    <label>ค้นหาตาม Email ผู้สั่งพับ</label>
     <div class="search-wrap">
       <div class="email-wrap">
         <input type="text" id="emailInput" placeholder="ชื่ออีเมล" onkeydown="if(event.key==='Enter')loadByEmail()"/>
@@ -134,7 +134,7 @@ tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t
 <select class="filter-select" id="fStatus" onchange="applyFilter()">
   <option value="">ทุกสถานะ</option>
   <option value="pending">⏳ รอดำเนินการ</option>
-  <option value="done">✅ สำเร็จ</option>
+  <option value="done">✅ ส่งแล้ว</option>
   <option value="cancelled">ยกเลิกแล้ว</option>
   <option value="error">⚠️ Error</option>
 </select>
@@ -167,7 +167,8 @@ tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t
           <th>Sales</th>
           <th>Incoterms</th>
           <th class="receive-col">วันที่รับสินค้า</th>
-          <th>ผู้สั่ง</th>
+          <th class="cutoff-col">รอบตัดยอด</th>
+          <th>Email ผู้สั่ง</th>
           <th>สถานะ</th>
           <th>จัดการ</th>
         </tr>
@@ -300,12 +301,31 @@ function hasReceiveDate(row){
   return String(receiveDateValue(row) ?? '').trim() !== '';
 }
 
+function cutoffDateValue(row){
+  return row['Cutoff_Date'] ?? row['cutoff_date'] ?? row['Cutoff Date'] ?? row['cutoffDate'] ?? '';
+}
+
+function cutoffAtValue(row){
+  return row['Cutoff_At_ISO'] ?? row['cutoff_at_iso'] ?? row['Cutoff_At'] ?? row['cutoff_at'] ?? row['Cutoff At'] ?? row['cutoffAt'] ?? '';
+}
+
+function cutoffDisplay(row){
+  const at=String(cutoffAtValue(row) ?? '').trim();
+  if(at) return at.replace('T',' ').replace('+07:00','');
+  const date=String(cutoffDateValue(row) ?? '').trim();
+  return date?`${excelDateToStr(date)} 10:00`:'';
+}
+
+function hasCutoff(row){
+  return cutoffDisplay(row) !== '';
+}
+
 function statusBadge(row){
   const statusText=getStatusText(row);
   if(statusText==='Pending') return '<span class="badge pending">⏳ รอดำเนินการ</span>';
   if(statusText==='Error') return '<span class="badge error">⚠️ Error</span>';
   if(statusText==='Cancelled') return '<span class="badge cancelled">ยกเลิก</span>';
-  return '<span class="badge done">✅ สำเร็จ</span>';
+  return '<span class="badge done">✅ ส่งแล้ว</span>';
 }
 
 function statusSortOrder(row){
@@ -439,6 +459,7 @@ function renderTable(rows){
   const done=rows.filter(r=>isDoneStatus(r)).length;
   const pending=rows.filter(r=>isPending(r)).length;
   const showReceiveDate=allRows.some(r=>hasReceiveDate(r));
+  const showCutoff=allRows.some(r=>hasCutoff(r));
 
   document.getElementById('statTotal').textContent=rows.length;
   document.getElementById('statDone').textContent=done;
@@ -446,6 +467,7 @@ function renderTable(rows){
   document.getElementById('statsRow').style.display='grid';
   document.getElementById('countLabel').textContent=`แสดง ${rows.length} รายการ`;
   document.querySelectorAll('.receive-col').forEach(el=>{el.style.display=showReceiveDate?'':'none';});
+  document.querySelectorAll('.cutoff-col').forEach(el=>{el.style.display=showCutoff?'':'none';});
 
   if(rows.length===0){
     document.getElementById('tableCard').style.display='none';
@@ -471,6 +493,7 @@ function renderTable(rows){
       <td style="font-size:11px">${r['Sales Person']||r['sales_person']||'-'}</td>
       <td>${r['Incoterms']||r['incoterms']||'-'}</td>
       ${showReceiveDate?`<td class="mono receive-col">${excelDateToStr(receiveDateValue(r))}</td>`:''}
+      ${showCutoff?`<td class="mono cutoff-col" style="font-size:11px">${cutoffDisplay(r)||'-'}</td>`:''}
       <td class="mono" style="font-size:11px">${emailShort}</td>
       <td>${statusBadge(r)}</td>
       <td>${cancelAction(r,rowIndex)}</td>
