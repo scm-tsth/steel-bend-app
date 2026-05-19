@@ -50,6 +50,10 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
 .confirm-screen{display:none}
 .confirm-screen.show{display:block}
 .confirm-hdr{background:var(--al);border:1px solid #fde68a;border-radius:var(--ra);padding:.7rem 1rem;margin-bottom:.85rem;font-size:13px;color:#92400e;font-weight:500}
+.cutoff-box{background:#f8fafc;border:1px solid var(--br);border-radius:var(--ra);padding:.65rem .75rem;margin-top:.55rem;font-size:12px;color:var(--t2);line-height:1.55}
+.cutoff-box strong{color:var(--bd);font-weight:600}
+.cutoff-note{font-size:11px;color:var(--t2);line-height:1.5;margin-top:2px}
+.cutoff-note.after{color:#92400e}
 .ctable{width:100%;border-collapse:collapse;font-size:12px;margin:.4rem 0}
 .ctable td{padding:.32rem .55rem;border:.5px solid var(--br);vertical-align:top;line-height:1.5}
 .ctable td:first-child{font-weight:500;color:var(--t2);width:110px;white-space:nowrap;background:var(--sl)}
@@ -111,6 +115,7 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
   <div class="field" style="margin-bottom:.8rem">
     <label>วันที่สั่ง <span class="req">*</span></label>
     <input type="date" id="oDate"/>
+    <div class="cutoff-box" id="cutoffInfo" aria-live="polite"></div>
   </div>
   <div class="field">
     <label>แผนก <span class="req">*</span></label>
@@ -168,7 +173,7 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
 <div class="success-screen" id="successView">
   <div class="s-icon">✅</div>
   <h2>ส่งรายการสำเร็จแล้วครับ!</h2>
-  <p>ระบบได้รับรายการของคุณแล้ว<br/>กรุณาตรวจสอบอีเมลยืนยันที่ <strong id="confirmEmail"></strong><br/>รายการจะถูกดำเนินการในรอบถัดไป (ตัดยอด 10:00 น.)</p>
+  <p>ระบบได้รับรายการของคุณแล้ว<br/>กรุณาตรวจสอบอีเมลยืนยันที่ <strong id="confirmEmail"></strong><br/>รายการจะถูกดำเนินการในรอบตัดยอด <strong id="confirmCutoff">10:00 น.</strong></p>
   <button class="new-btn" onclick="window.location.href='index.html'">← กลับหน้าหลัก</button>
 </div>
 </div>
@@ -231,9 +236,62 @@ const PROD_MAP={
 };
 
 let grp='Project',items=[],iid=0;
+const BKK_TIME_ZONE='Asia/Bangkok';
+const CUTOFF_HOUR=10;
+const CUTOFF_MINUTE=0;
+const CUTOFF_TIME='10:00';
+
+function pad2(v){return String(v).padStart(2,'0');}
+function bkkParts(date=new Date()){
+  const parts=new Intl.DateTimeFormat('en-CA',{
+    timeZone:BKK_TIME_ZONE,year:'numeric',month:'2-digit',day:'2-digit',
+    hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'
+  }).formatToParts(date).reduce((acc,p)=>{acc[p.type]=p.value;return acc;},{});
+  return {
+    year:Number(parts.year),month:Number(parts.month),day:Number(parts.day),
+    hour:Number(parts.hour),minute:Number(parts.minute),second:Number(parts.second)
+  };
+}
+function bkkDateText(parts=bkkParts()){return `${parts.year}-${pad2(parts.month)}-${pad2(parts.day)}`;}
+function addDays(dateText,days){
+  const [y,m,d]=dateText.split('-').map(Number);
+  const dt=new Date(Date.UTC(y,m-1,d+days));
+  return `${dt.getUTCFullYear()}-${pad2(dt.getUTCMonth()+1)}-${pad2(dt.getUTCDate())}`;
+}
+function formatThaiDate(dateText){
+  const [y,m,d]=dateText.split('-');
+  return `${d}/${m}/${y}`;
+}
+function getCutoffWindow(now=new Date()){
+  const parts=bkkParts(now);
+  const submitDate=bkkDateText(parts);
+  const currentMinutes=(parts.hour*60)+parts.minute+(parts.second/60);
+  const cutoffMinutes=(CUTOFF_HOUR*60)+CUTOFF_MINUTE;
+  const afterCutoff=currentMinutes>=cutoffMinutes;
+  const cutoffDate=afterCutoff?addDays(submitDate,1):submitDate;
+  const label=`${formatThaiDate(cutoffDate)} ${CUTOFF_TIME} น.`;
+  return {
+    date:cutoffDate,
+    dateCompact:cutoffDate.replaceAll('-',''),
+    time:CUTOFF_TIME,
+    at:`${cutoffDate} ${CUTOFF_TIME}:00`,
+    atIso:`${cutoffDate}T${CUTOFF_TIME}:00+07:00`,
+    submittedAt:`${submitDate} ${pad2(parts.hour)}:${pad2(parts.minute)}:${pad2(parts.second)}`,
+    afterCutoff,
+    label,
+    note:afterCutoff?'เลยเวลา 10:00 แล้ว รายการที่ส่งตอนนี้จะเข้ารอบวันถัดไป':'รายการที่ส่งตอนนี้จะเข้ารอบตัดยอดวันนี้'
+  };
+}
+function cutoffBatchId(plant,cutoff){return `${plant}-${cutoff.dateCompact}-1000`;}
+function updateCutoffInfo(){
+  const el=document.getElementById('cutoffInfo');
+  if(!el)return;
+  const cutoff=getCutoffWindow();
+  el.innerHTML=`<strong>รอบตัดยอดถัดไป: ${cutoff.label}</strong><div class="cutoff-note${cutoff.afterCutoff?' after':''}">${cutoff.note}</div>`;
+}
 
 function setPill(btn,val){grp=val;document.querySelectorAll('.pill').forEach(b=>b.classList.remove('on'));btn.classList.add('on');items.forEach(id=>refreshCust(id));}
-function today(){return new Date().toISOString().split('T')[0];}
+function today(){return bkkDateText();}
 document.getElementById('oDate').value=today();
 function custOpts(){return '<option value="">-- ระบุถ้ามี --</option>'+(CUSTOMERS[grp]||[]).map(c=>`<option>${c}</option>`).join('');}
 function matOpts(p){const l=p==='SCSC'?MAT_SCSC:p==='NTS'?MAT_NTS:[];return '<option value="">-- เลือกสินค้า --</option>'+l.map(m=>`<option>${m}</option>`).join('');}
@@ -391,8 +449,10 @@ function showConfirm(){
     if(!gv('ton-'+id)||parseFloat(gv('ton-'+id))<=0){toast(`รายการที่ ${i+1}: กรุณากรอกจำนวน Tons`,'error');return;}
   }
   const email=eu+'@tatasteelthailand.com';
+  const cutoff=getCutoffWindow();
   let html=`<div class="card"><table class="ctable">
     <tr><td>วันที่สั่ง</td><td>${gv('oDate')}</td></tr>
+    <tr><td>รอบตัดยอด</td><td>${cutoff.label}<div class="cutoff-note${cutoff.afterCutoff?' after':''}">${cutoff.note}</div></td></tr>
     <tr><td>แผนก</td><td>${grp}</td></tr>
     <tr><td>อีเมลผู้สั่งพับ</td><td>${email}</td></tr>
     <tr><td>หมายเหตุ</td><td>${gv('remark')||'-'}</td></tr>
@@ -425,10 +485,12 @@ async function doSubmit(){
   const btn=document.getElementById('confirmBtn');
   btn.classList.add('loading');btn.disabled=true;
   const remark=gv('remark');
+  const cutoff=getCutoffWindow();
   const promises=items.map(id=>{
     const mat=gv('mat-'+id);
     const plant=gv('plant-'+id);
     const prod=PROD_MAP[mat]||{};
+    const batchId=cutoffBatchId(plant,cutoff);
     const orderId='SB-'+plant+'-'+gv('oDate').replaceAll('-','')+'-'+Date.now()+'-'+id;
 const payload = {
   OrderID: orderId,
@@ -450,6 +512,20 @@ const payload = {
   PROD_ID_SP: prod.sp || '',
   PROD_ID_FP: prod.fp || '',
   submitter_email: email,
+  submitted_at: cutoff.submittedAt,
+  Submitted_At: cutoff.submittedAt,
+  cutoff_date: cutoff.date,
+  Cutoff_Date: cutoff.date,
+  cutoff_time: cutoff.time,
+  Cutoff_Time: cutoff.time,
+  cutoff_at: cutoff.at,
+  Cutoff_At: cutoff.at,
+  cutoff_at_iso: cutoff.atIso,
+  Cutoff_At_ISO: cutoff.atIso,
+  cutoff_batch_id: batchId,
+  Cutoff_Batch_ID: batchId,
+  cancel_deadline_at: cutoff.atIso,
+  Cancel_Deadline_At: cutoff.atIso,
   status_text: 'Pending',
   Status_Text: 'Pending',
   remark: gv('term-'+id) || 'EXW',
@@ -468,6 +544,7 @@ return fetch(FLOW_URL,{
     btn.classList.remove('loading');btn.disabled=false;
     document.getElementById('confirmView').classList.remove('show');
     document.getElementById('confirmEmail').textContent=email;
+    document.getElementById('confirmCutoff').textContent=cutoff.label;
     document.getElementById('successView').classList.add('show');
     window.scrollTo(0,0);
   }catch(e){
@@ -482,6 +559,7 @@ function resetAll(){
   document.getElementById('oDate').value=today();
   document.getElementById('uEmailUser').value='';
   document.getElementById('remark').value='';
+  updateCutoffInfo();
   document.querySelectorAll('.pill').forEach((b,i)=>b.classList.toggle('on',i===0));
   grp='Project';
   document.getElementById('successView').classList.remove('show');
@@ -493,6 +571,8 @@ function resetAll(){
 document.querySelectorAll('.pill[data-grp]').forEach(btn=>{
   btn.addEventListener('click',function(){setPill(this,this.dataset.grp);});
 });
+updateCutoffInfo();
+setInterval(updateCutoffInfo,60000);
 addItem();
 const savedUser=localStorage.getItem('steel_user');
 if(savedUser) document.getElementById('uEmailUser').value=savedUser;
