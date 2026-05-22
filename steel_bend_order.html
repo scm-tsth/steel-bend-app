@@ -79,6 +79,8 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .toast.error{background:var(--rd)}
 .toast.success{background:var(--gr)}
+.home-btn{height:30px;padding:0 11px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.1);color:#fff;border-radius:8px;font-size:12px;font-weight:500;font-family:'IBM Plex Sans Thai',sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;flex-shrink:0}
+.home-btn:hover{background:rgba(255,255,255,.18)}
 </style>
 </head>
 <body>
@@ -86,26 +88,23 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
 <div class="hdr">
   <div class="hdr-icon">
     <svg viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- เหล็กเส้นซ้าย -->
       <rect x="1" y="11" width="24" height="2.2" rx="1.1" fill="rgba(255,255,255,0.9)"/>
-      <!-- ปล้อง ribs บนเหล็กเส้นซ้าย -->
       <rect x="5"  y="9.5"  width="1.4" height="5.2" rx="0.7" fill="rgba(255,255,255,0.75)"/>
       <rect x="9"  y="9.5"  width="1.4" height="5.2" rx="0.7" fill="rgba(255,255,255,0.75)"/>
       <rect x="13" y="9.5"  width="1.4" height="5.2" rx="0.7" fill="rgba(255,255,255,0.75)"/>
       <rect x="17" y="9.5"  width="1.4" height="5.2" rx="0.7" fill="rgba(255,255,255,0.75)"/>
-      <!-- เหล็กเส้นบน (เล็กกว่า เฉียงนิด) -->
       <rect x="1" y="5.5" width="24" height="1.6" rx="0.8" fill="rgba(255,255,255,0.55)"/>
       <rect x="6"  y="4.5"  width="1.1" height="3.6" rx="0.55" fill="rgba(255,255,255,0.45)"/>
       <rect x="11" y="4.5"  width="1.1" height="3.6" rx="0.55" fill="rgba(255,255,255,0.45)"/>
       <rect x="16" y="4.5"  width="1.1" height="3.6" rx="0.55" fill="rgba(255,255,255,0.45)"/>
-      <!-- เหล็กเส้นล่าง -->
       <rect x="1" y="18.9" width="24" height="1.6" rx="0.8" fill="rgba(255,255,255,0.55)"/>
       <rect x="6"  y="17.9" width="1.1" height="3.6" rx="0.55" fill="rgba(255,255,255,0.45)"/>
       <rect x="11" y="17.9" width="1.1" height="3.6" rx="0.55" fill="rgba(255,255,255,0.45)"/>
       <rect x="16" y="17.9" width="1.1" height="3.6" rx="0.55" fill="rgba(255,255,255,0.45)"/>
     </svg>
   </div>
-  <h1>ระบบสั่งพับเหล็ก</h1>
+  <h1 style="flex:1;color:#fff;font-size:15px;font-weight:600">สั่งพับเหล็ก</h1>
+  <a class="home-btn" href="index.html">← กลับหน้าหลัก</a>
 </div>
 
 <!-- FORM -->
@@ -505,7 +504,7 @@ const payload = {
   customer_name: gv('cust-val-'+id) || '',
   sales_person: gv('sales-val-'+id) || grp,
   incoterms: gv('term-'+id) || 'EXW',
-  order_remark: gv('remark') || '',
+  order_remark: remark,
   unit_weight: UW[mat] || 0,
   prod_id_sp: prod.sp || '',
   prod_id_fp: prod.fp || '',
@@ -528,7 +527,8 @@ const payload = {
   Cancel_Deadline_At: cutoff.atIso,
   status_text: 'Pending',
   Status_Text: 'Pending',
-  remark: gv('term-'+id) || 'EXW',
+  remark: remark,
+  Delivery_Date: gv('rdate-'+id) || '',
   receive_date: gv('rdate-'+id) || '',
   request_date: gv('rdate-'+id) || ''
 };
