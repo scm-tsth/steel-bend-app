@@ -227,24 +227,16 @@ function isTrue(val){
   return statusVal === 'true' || statusVal === 'yes' || statusVal === '1';
 }
 
-function normalizeStatus(value){
-  if(value===true) return 'Sent';
-  if(value===false) return 'Pending';
-  const statusVal = String(value ?? '').trim();
-  const lower = statusVal.toLowerCase();
-
-  if(!lower || lower==='false' || lower==='0' || lower==='no' || lower==='pending' || lower==='รอดำเนินการ') return 'Pending';
-  if(lower==='true' || lower==='1' || lower==='yes' || lower==='sent' || lower==='done' || lower==='completed' || lower==='complete' || lower==='เสร็จแล้ว' || lower==='ดำเนินการแล้ว') return 'Sent';
-  if(lower==='error' || lower==='failed' || lower==='fail' || lower==='ผิดพลาด') return 'Error';
-  if(lower==='cancelled' || lower==='canceled' || lower==='cancel' || lower==='ยกเลิก') return 'Cancelled';
-
-  return statusVal;
-}
-
 function getStatusText(row){
-  const statusText = row['Status_Text'] ?? row['status_text'] ?? row['Status Text'] ?? row['statusText'];
-  if(String(statusText ?? '').trim()) return normalizeStatus(statusText);
-  return normalizeStatus(row['Status'] ?? row['status'] ?? '');
+  // Status_Text = workflow เท่านั้น
+  // Status (True/False) = SAP — ไม่นำมาใช้
+  const st=String(row['Status_Text']??row['status_text']??'').trim();
+  const l=st.toLowerCase();
+  if(!l||l==='pending') return 'Pending';
+  if(l==='sent'||l==='done'||l==='completed') return 'Sent';
+  if(l==='cancelled'||l==='canceled'||l==='cancel') return 'Cancelled';
+  if(l==='error'||l==='failed') return 'Error';
+  return st||'Pending';
 }
 
 function isPending(row){
