@@ -294,7 +294,7 @@ function canCancel(row){
 }
 
 function receiveDateValue(row){
-  return row['Receive Date'] ?? row['receive_date'] ?? row['Request Date'] ?? row['request_date'] ?? '';
+  return row['Delivery_Date'] ?? row['Delivery Date'] ?? row['delivery_date'] ?? row['Receive Date'] ?? row['receive_date'] ?? row['Request Date'] ?? row['request_date'] ?? '';
 }
 
 function hasReceiveDate(row){
