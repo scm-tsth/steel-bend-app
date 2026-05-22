@@ -131,6 +131,13 @@ tbody td.cb-td input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent
     <span class="sep">|</span>
     <span class="filter-label">แสดง:</span>
     <div class="view-toggle">
+      <span class="sep">|</span>
+<span class="filter-label">SAP:</span>
+<div class="view-toggle">
+  <button class="active" id="sapAll"  onclick="setSap('')">ทั้งหมด</button>
+  <button id="sapDone"   onclick="setSap('done')">&#10003; Done</button>
+  <button id="sapWait"   onclick="setSap('pending')">— รอ</button>
+</div>
       <button class="active" id="viewPending" onclick="setView('pending')">⏳ Pending</button>
       <button id="viewAll" onclick="setView('all')">ทั้งหมด</button>
     </div>
@@ -235,6 +242,7 @@ let filteredRows = [];
 const selectedIds = new Set();
 let currentPlant = '';
 let currentView = 'pending';
+let currentSap = '';   // '' = ทั้งหมด, 'done' = SAP Done, 'pending' = SAP รอ
 
 // ── Utilities ─────────────────────────────────────────────────────────────────
 function excelDateToStr(val) {
@@ -473,12 +481,21 @@ function setView(view) {
   selectedIds.clear();
   applyFilter();
 }
-
+function setSap(val) {
+  currentSap = val;
+  document.getElementById('sapAll').classList.toggle('active', val === '');
+  document.getElementById('sapDone').classList.toggle('active', val === 'done');
+  document.getElementById('sapWait').classList.toggle('active', val === 'pending');
+  selectedIds.clear();
+  applyFilter();
+}
 function applyFilter() {
   let rows = [...allRows];
 
   if (currentView === 'pending') rows = rows.filter(r => getStatus(r) === 'Pending');
   if (currentPlant) rows = rows.filter(r => rowPlant(r) === currentPlant);
+  if (currentSap === 'done')    rows = rows.filter(r => getSapStatus(r) === true);
+if (currentSap === 'pending') rows = rows.filter(r => getSapStatus(r) === false);
 
   // Sort: SCSC before NTS, then oldest first
   rows.sort((a, b) => {
