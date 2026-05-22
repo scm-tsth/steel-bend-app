@@ -143,6 +143,12 @@ tbody td.cb-td input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent
       <button id="viewAll" onclick="setView('all')">ทั้งหมด</button>
     </div>
     <span class="sep">|</span>
+<span class="filter-label">SAP:</span>
+<div class="view-toggle">
+  <button class="active" id="sapAll" onclick="setSap('')">ทั้งหมด</button>
+  <button id="sapDone" onclick="setSap('done')">&#10003; Done</button>
+  <button id="sapWait" onclick="setSap('pending')">— รอ</button>
+</div>
     <button class="icon-btn" onclick="fetchData()">🔄 Refresh</button>
     <button class="icon-btn" onclick="printOrders()" style="border-color:#d97706;color:#d97706">🖨️ พิมพ์ใบสรุป</button>
   </div>
@@ -479,11 +485,11 @@ function setView(view) {
   selectedIds.clear();
   applyFilter();
 }
-function setSap(val) {
-  currentSap = val;
-  document.getElementById('sapAll').classList.toggle('active', val === '');
-  document.getElementById('sapDone').classList.toggle('active', val === 'done');
-  document.getElementById('sapWait').classList.toggle('active', val === 'pending');
+function setSap(val){
+  currentSap=val;
+  document.getElementById('sapAll').classList.toggle('active',val==='');
+  document.getElementById('sapDone').classList.toggle('active',val==='done');
+  document.getElementById('sapWait').classList.toggle('active',val==='pending');
   selectedIds.clear();
   applyFilter();
 }
