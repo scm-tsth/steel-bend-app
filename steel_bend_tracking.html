@@ -228,8 +228,6 @@ function isTrue(val){
 }
 
 function getStatusText(row){
-  // Status_Text = workflow เท่านั้น
-  // Status (True/False) = SAP — ไม่นำมาใช้
   const st=String(row['Status_Text']??row['status_text']??'').trim();
   const l=st.toLowerCase();
   if(!l||l==='pending') return 'Pending';
