@@ -130,29 +130,21 @@ tbody td.cb-td input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent
     <button class="pill scsc" id="pillSCSC" onclick="setPlant('SCSC')">SCSC</button>
     <button class="pill nts" id="pillNTS" onclick="setPlant('NTS')">NTS</button>
     <span class="sep">|</span>
-    <span class="filter-label">แสดง:</span>
+<span class="filter-label">แสดง:</span>
     <div class="view-toggle">
-      <span class="sep">|</span>
-<span class="filter-label">SAP:</span>
-<div class="view-toggle">
-  <button class="active" id="sapAll"  onclick="setSap('')">ทั้งหมด</button>
-  <button id="sapDone"   onclick="setSap('done')">&#10003; Done</button>
-  <button id="sapWait"   onclick="setSap('pending')">— รอ</button>
-</div>
       <button class="active" id="viewPending" onclick="setView('pending')">⏳ Pending</button>
       <button id="viewAll" onclick="setView('all')">ทั้งหมด</button>
     </div>
     <span class="sep">|</span>
-<span class="filter-label">SAP:</span>
-<div class="view-toggle">
-  <button class="active" id="sapAll" onclick="setSap('')">ทั้งหมด</button>
-  <button id="sapDone" onclick="setSap('done')">&#10003; Done</button>
-  <button id="sapWait" onclick="setSap('pending')">— รอ</button>
-</div>
+    <span class="filter-label">SAP:</span>
+    <div class="view-toggle">
+      <button class="active" id="sapAll" onclick="setSap('')">ทั้งหมด</button>
+      <button id="sapDone" onclick="setSap('done')">&#10003; Done</button>
+      <button id="sapWait" onclick="setSap('pending')">— รอ</button>
+    </div>
+    <span class="sep">|</span>
     <button class="icon-btn" onclick="fetchData()">🔄 Refresh</button>
     <button class="icon-btn" onclick="printOrders()" style="border-color:#d97706;color:#d97706">🖨️ พิมพ์ใบสรุป</button>
-  </div>
-</div>
 
 <!-- STATS -->
 <div class="stats-row" id="statsRow" style="display:none">
