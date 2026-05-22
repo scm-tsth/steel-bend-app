@@ -347,22 +347,18 @@ function printOrders() {
     const bg = i % 2 === 0 ? '#ffffff' : '#f8fafc';
     const id = rowId(r);
     const emailShort = String(r['Submitter_email'] || r['submitter_email'] || '-').split('@')[0];
-    rowsHtml += '<tr style="background:' + bg + '">' +
-      '<td style="padding:5px 6px;border:1px solid #cbd5e1;text-align:right;font-size:11px">' + (i+1) + '</td>' +
-      '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:10px;font-family:\'Courier New\',monospace">' + (id||'-') + '</td>' +
-      '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:11px;white-space:nowrap">' + excelDateToStr(r['Date']||r['date']) + '</td>' +
-      '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:11px">' + (r['Customer Group']||r['customer_group']||'-') + '</td>' +
-      '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:10px;font-family:\'Courier New\',monospace">' + (r['Sales Order No.']||r['sales_order_no']||r['SalesOrderNo']||'-') + '</td>' +
-      '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:11px">' + (r['Customer Name']||r['customer_name']||'-') + '</td>' +
-      '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:10px">' + (r['Item Description']||r['item_description']||'-') + '</td>' +
-      '<td style="padding:5px 6px;border:1px solid #cbd5e1;text-align:right;font-size:11px">' + (r['Tons']||r['tons']||'-') + '</td>' +
-      '<td style="padding:5px 6px;border:1px solid #cbd5e1;text-align:right;font-size:11px">' + (r['Pcs']||r['pcs']||'-') + '</td>' +
-      '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:11px">' + (r['Incoterms']||r['incoterms']||r['term']||'-') + '</td>' +
-      '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:11px;white-space:nowrap">' + excelDateToStr(deliveryDateVal(r)) + '</td>' +
-      '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:11px">' + (r['Sales Person']||r['sales_person']||'-') + '</td>' +
-      '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:11px">' + emailShort + '</td>' +
-      '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:11px">' + (r['Remark']||r['remark']||r['order_remark']||'-') + '</td>' +
-    '</tr>';
+  rowsHtml += '<tr style="background:' + bg + '">' +
+  '<td style="padding:5px 6px;border:1px solid #cbd5e1;text-align:right;font-size:11px">' + (i+1) + '</td>' +
+  '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:10px">' + (r['Item Description']||r['item_description']||'-') + '</td>' +
+  '<td style="padding:5px 6px;border:1px solid #cbd5e1;text-align:right;font-size:11px">' + (r['Tons']||r['tons']||'-') + '</td>' +
+  '<td style="padding:5px 6px;border:1px solid #cbd5e1;text-align:right;font-size:11px">' + (r['Pcs']||r['pcs']||'-') + '</td>' +
+  '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:10px;font-family:\'Courier New\',monospace">' + (r['Sales Order No.']||r['sales_order_no']||r['SalesOrderNo']||'-') + '</td>' +
+  '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:11px">' + (r['Customer Name']||r['customer_name']||'-') + '</td>' +
+  '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:11px">' + (r['Sales Person']||r['sales_person']||'-') + '</td>' +
+  '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:11px;white-space:nowrap">' + excelDateToStr(deliveryDateVal(r)) + '</td>' +
+  '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:11px">' + (r['Incoterms']||r['incoterms']||r['term']||'-') + '</td>' +
+  '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:11px">' + (r['Remark']||r['remark']||r['order_remark']||'-') + '</td>' +
+'</tr>';
   });
 
   const html = '<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"/>' +
@@ -405,19 +401,15 @@ function printOrders() {
       '</div>' +
       '<table><thead><tr>' +
         '<th style="width:22px">No.</th>' +
-        '<th>Order ID</th>' +
-        '<th>วันที่สั่ง</th>' +
-        '<th>แผนก</th>' +
-        '<th>Sales Order</th>' +
-        '<th>ลูกค้า</th>' +
-        '<th>สินค้า (Item Description)</th>' +
-        '<th style="text-align:right">Tons</th>' +
-        '<th style="text-align:right">PCS</th>' +
-        '<th>Incoterms</th>' +
-        '<th>วันรับสินค้า</th>' +
-        '<th>Sales</th>' +
-        '<th>ผู้ส่ง</th>' +
-        '<th>หมายเหตุ</th>' +
+      '<th>สินค้า (Item Description)</th>' +
+      '<th style="text-align:right">Tons</th>' +
+      '<th style="text-align:right">PCS</th>' +
+      '<th>Sales Order</th>' +
+      '<th>ลูกค้า</th>' +
+      '<th>Sales</th>' +
+      '<th>วันรับสินค้า</th>' +
+      '<th>Incoterms</th>' +
+      '<th>หมายเหตุ</th>' +
       '</tr></thead>' +
       '<tbody>' + rowsHtml + '</tbody>' +
     '</table>' +
