@@ -59,7 +59,7 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
 .mark-btn.loading .mark-label{display:none}
 
 .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-table{width:100%;border-collapse:collapse;font-size:12px;min-width:1280px}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:1300px}
 thead th{background:var(--bd);color:#fff;padding:.5rem .65rem;text-align:left;font-weight:500;font-size:11px;letter-spacing:.3px;white-space:nowrap}
 thead th:first-child{border-radius:8px 0 0 0}
 thead th:last-child{border-radius:0 8px 0 0}
@@ -92,7 +92,7 @@ tbody td.cb-td input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent
 @media(max-width:900px){
   body{padding:.75rem .5rem 2rem}
   .stats-row{grid-template-columns:repeat(2,1fr)}
-  table{min-width:1280px}
+  table{min-width:1300px}
   .hdr{flex-wrap:wrap}
 }
 </style>
@@ -198,7 +198,8 @@ tbody td.cb-td input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent
           <th>วันรับสินค้า</th>
           <th>รอบ Cutoff</th>
           <th>Submitter</th>
-          <th>สถานะ</th>
+          <th>Workflow</th>
+          <th>SAP</th>
         </tr>
       </thead>
       <tbody id="tableBody"></tbody>
@@ -248,17 +249,31 @@ function excelDateToStr(val) {
   return String(val).split('T')[0] || '-';
 }
 
+// Status_Text = workflow state (Pending/Sent/Cancelled/Error)
+// Status (bool) = SAP confirmation — completely separate
 function getStatus(row) {
-  // Status_Text = workflow เท่านั้น
-  // Status (True/False) = SAP — ไม่นำมาใช้
   const st = String(row['Status_Text'] ?? row['status_text'] ?? '').trim();
   const l = st.toLowerCase();
-  if (!l || l==='pending') return 'Pending';
-  if (l==='sent'||l==='done'||l==='completed') return 'Sent';
-  if (l==='cancelled'||l==='canceled'||l==='cancel') return 'Cancelled';
-  if (l==='error'||l==='failed') return 'Error';
+  if (!l || l === 'pending') return 'Pending';
+  if (l === 'sent' || l === 'done' || l === 'completed') return 'Sent';
+  if (l === 'cancelled' || l === 'canceled' || l === 'cancel') return 'Cancelled';
+  if (l === 'error' || l === 'failed') return 'Error';
   return st || 'Pending';
 }
+
+function getSapStatus(row) {
+  const v = row['Status'] ?? row['status'];
+  if (v === true || String(v ?? '').toLowerCase() === 'true') return true;
+  return false;
+}
+
+function sapBadge(row) {
+  const done = getSapStatus(row);
+  return done
+    ? '<span style="color:#16a34a;font-size:12px;font-weight:600">&#10003; Done</span>'
+    : '<span style="color:#94a3b8;font-size:12px">— รอ</span>';
+}
+
 function rowId(row) { return row['OrderID'] || row['order_id'] || ''; }
 function rowPlant(row) { return row['Plant'] || row['plant'] || ''; }
 function rowTons(row) { return parseFloat(row['Tons'] || row['tons'] || 0) || 0; }
@@ -276,16 +291,139 @@ function deliveryDateVal(row) {
 
 function statusBadge(row) {
   const s = getStatus(row);
-  if (s === 'Pending')   return '<span class="badge pending">⏳ รอ</span>';
-  if (s === 'Error')     return '<span class="badge error">⚠️ Error</span>';
+  if (s === 'Pending')   return '<span class="badge pending">&#8987; รอ</span>';
+  if (s === 'Error')     return '<span class="badge error">&#9888; Error</span>';
   if (s === 'Cancelled') return '<span class="badge cancelled">ยกเลิก</span>';
-  return '<span class="badge done">✅ Sent</span>';
+  return '<span class="badge done">&#10003; Sent</span>';
 }
 
 function plantBadge(plant) {
   if (plant === 'SCSC') return '<span class="badge scsc">SCSC</span>';
   if (plant === 'NTS')  return '<span class="badge nts">NTS</span>';
   return plant || '-';
+}
+
+// ── Print Orders ──────────────────────────────────────────────────────────────
+function printOrders() {
+  let targetPlant = currentPlant;
+  if (!targetPlant) {
+    const choice = confirm('พิมพ์ใบสรุปสำหรับโรงงานไหน?\n\nกด OK = SCSC\nกด Cancel = NTS');
+    targetPlant = choice ? 'SCSC' : 'NTS';
+  }
+
+  const plantCode = targetPlant === 'SCSC' ? '0435' : '0431';
+  const rows = allRows.filter(r => getStatus(r) === 'Pending' && rowPlant(r) === targetPlant);
+
+  if (rows.length === 0) {
+    alert('ไม่มีรายการ Pending สำหรับ ' + targetPlant);
+    return;
+  }
+
+  const now = new Date();
+  const pad2 = n => String(n).padStart(2,'0');
+  const todayStr = pad2(now.getDate()) + '/' + pad2(now.getMonth()+1) + '/' + now.getFullYear();
+  const timeStr  = pad2(now.getHours()) + ':' + pad2(now.getMinutes());
+
+  const totalTons = rows.reduce((s,r) => s + rowTons(r), 0).toFixed(3);
+  const totalPcs  = rows.reduce((s,r) => s + (parseInt(r['Pcs']||r['pcs']||0)||0), 0);
+
+  // Sort SCSC first, then by date
+  rows.sort((a,b) => {
+    const da = String(a['Date']||a['date']||'');
+    const db = String(b['Date']||b['date']||'');
+    return da.localeCompare(db);
+  });
+
+  let rowsHtml = '';
+  rows.forEach((r, i) => {
+    const bg = i % 2 === 0 ? '#ffffff' : '#f8fafc';
+    const id = rowId(r);
+    const emailShort = String(r['Submitter_email'] || r['submitter_email'] || '-').split('@')[0];
+    rowsHtml += '<tr style="background:' + bg + '">' +
+      '<td style="padding:5px 6px;border:1px solid #cbd5e1;text-align:right;font-size:11px">' + (i+1) + '</td>' +
+      '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:10px;font-family:\'Courier New\',monospace">' + (id||'-') + '</td>' +
+      '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:11px;white-space:nowrap">' + excelDateToStr(r['Date']||r['date']) + '</td>' +
+      '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:11px">' + (r['Customer Group']||r['customer_group']||'-') + '</td>' +
+      '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:10px;font-family:\'Courier New\',monospace">' + (r['Sales Order No.']||r['sales_order_no']||r['SalesOrderNo']||'-') + '</td>' +
+      '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:11px">' + (r['Customer Name']||r['customer_name']||'-') + '</td>' +
+      '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:10px">' + (r['Item Description']||r['item_description']||'-') + '</td>' +
+      '<td style="padding:5px 6px;border:1px solid #cbd5e1;text-align:right;font-size:11px">' + (r['Tons']||r['tons']||'-') + '</td>' +
+      '<td style="padding:5px 6px;border:1px solid #cbd5e1;text-align:right;font-size:11px">' + (r['Pcs']||r['pcs']||'-') + '</td>' +
+      '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:11px">' + (r['Incoterms']||r['incoterms']||r['term']||'-') + '</td>' +
+      '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:11px;white-space:nowrap">' + excelDateToStr(deliveryDateVal(r)) + '</td>' +
+      '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:11px">' + (r['Sales Person']||r['sales_person']||'-') + '</td>' +
+      '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:11px">' + emailShort + '</td>' +
+      '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:11px">' + (r['Remark']||r['remark']||r['order_remark']||'-') + '</td>' +
+    '</tr>';
+  });
+
+  const html = '<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"/>' +
+    '<title>ใบสรุปสั่งพับเหล็ก — ' + targetPlant + ' — ' + todayStr + '</title>' +
+    '<style>' +
+    '@page{size:A4 landscape;margin:15mm 12mm}' +
+    'body{font-family:Arial,Tahoma,sans-serif;font-size:12px;color:#0f172a;margin:0;padding:0}' +
+    '.print-bar{position:fixed;top:0;left:0;right:0;background:#0f2a4a;padding:8px 16px;display:flex;align-items:center;gap:12px;z-index:999;box-shadow:0 2px 8px rgba(0,0,0,.3)}' +
+    '.print-bar span{color:rgba(255,255,255,.7);font-size:12px;flex:1}' +
+    '.print-btn{height:34px;padding:0 20px;background:#16a34a;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;font-family:Arial,sans-serif}' +
+    '.print-btn:hover{background:#15803d}' +
+    '.close-btn{height:34px;padding:0 14px;background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:7px;font-size:12px;cursor:pointer;font-family:Arial,sans-serif}' +
+    '.content{margin-top:54px;padding:0 4px}' +
+    '@media print{.print-bar{display:none}.content{margin-top:0}}' +
+    'table{width:100%;border-collapse:collapse}' +
+    'th{background:#0f2a4a;color:#fff;padding:5px 5px;text-align:left;font-size:10px;font-weight:600;white-space:nowrap;border:1px solid #0f2a4a}' +
+    'td{border:1px solid #cbd5e1;padding:4px 5px;vertical-align:middle}' +
+    '.hdr-title{font-size:16px;font-weight:700;color:#0f2a4a;margin-bottom:3px}' +
+    '.hdr-sub{font-size:11px;color:#475569;margin-bottom:10px}' +
+    '.stats{display:flex;gap:14px;margin:8px 0 12px;flex-wrap:wrap}' +
+    '.stat{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:6px 16px;text-align:center}' +
+    '.stat-n{font-size:18px;font-weight:700;color:#0f2a4a}' +
+    '.stat-l{font-size:10px;color:#64748b}' +
+    '.sig-row{margin-top:24px;display:flex;gap:32px}' +
+    '.sig-box{flex:1;border-top:1px solid #94a3b8;padding-top:6px;font-size:11px;color:#475569}' +
+    '.sig-name{font-size:13px;font-weight:600;color:#0f2a4a;margin-bottom:22px}' +
+    '</style></head><body>' +
+    '<div class="print-bar">' +
+      '<span>ใบสรุปรายการสั่งพับเหล็ก — ' + targetPlant + ' (Plant ' + plantCode + ') — ' + todayStr + ' ' + timeStr + '</span>' +
+      '<button class="close-btn" onclick="window.close()">&#10005; ปิด</button>' +
+      '<button class="print-btn" onclick="window.print()">&#128438; พิมพ์</button>' +
+    '</div>' +
+    '<div class="content">' +
+      '<div class="hdr-title">ใบสรุปรายการสั่งพับเหล็ก — โรงงาน ' + targetPlant + ' (Plant ' + plantCode + ')</div>' +
+      '<div class="hdr-sub">Tata Steel Thailand | SCM Demand Team &nbsp;|&nbsp; พิมพ์เมื่อ: ' + todayStr + ' ' + timeStr + '</div>' +
+      '<div class="stats">' +
+        '<div class="stat"><div class="stat-n">' + rows.length + '</div><div class="stat-l">รายการ Pending</div></div>' +
+        '<div class="stat"><div class="stat-n">' + totalTons + '</div><div class="stat-l">ตัน (Tons)</div></div>' +
+        '<div class="stat"><div class="stat-n">' + totalPcs + '</div><div class="stat-l">เส้น (PCS)</div></div>' +
+      '</div>' +
+      '<table><thead><tr>' +
+        '<th style="width:22px">No.</th>' +
+        '<th>Order ID</th>' +
+        '<th>วันที่สั่ง</th>' +
+        '<th>แผนก</th>' +
+        '<th>Sales Order</th>' +
+        '<th>ลูกค้า</th>' +
+        '<th>สินค้า (Item Description)</th>' +
+        '<th style="text-align:right">Tons</th>' +
+        '<th style="text-align:right">PCS</th>' +
+        '<th>Incoterms</th>' +
+        '<th>วันรับสินค้า</th>' +
+        '<th>Sales</th>' +
+        '<th>ผู้ส่ง</th>' +
+        '<th>หมายเหตุ</th>' +
+      '</tr></thead>' +
+      '<tbody>' + rowsHtml + '</tbody>' +
+    '</table>' +
+    '<div class="sig-row">' +
+      '<div class="sig-box"><div class="sig-name">ผู้จัดทำ / Prepared by</div>ชื่อ: ___________________________<br/>วันที่: ' + todayStr + '</div>' +
+      '<div class="sig-box"><div class="sig-name">ผู้อนุมัติ / Approved by</div>ชื่อ: ___________________________<br/>วันที่: _______________</div>' +
+      '<div class="sig-box"><div class="sig-name">โรงงาน / Factory received</div>ลงชื่อ: ___________________________<br/>วันที่: _______________</div>' +
+    '</div>' +
+    '</div></body></html>';
+
+  const w = window.open('', '_blank', 'width=1100,height=750,scrollbars=yes');
+  if (!w) { alert('กรุณาอนุญาต popup ใน browser ก่อนพิมพ์'); return; }
+  w.document.write(html);
+  w.document.close();
 }
 
 // ── Fetch ─────────────────────────────────────────────────────────────────────
@@ -342,7 +480,7 @@ function applyFilter() {
   if (currentView === 'pending') rows = rows.filter(r => getStatus(r) === 'Pending');
   if (currentPlant) rows = rows.filter(r => rowPlant(r) === currentPlant);
 
-  // Sort: SCSC before NTS, then by date ascending (oldest first for processing priority)
+  // Sort: SCSC before NTS, then oldest first
   rows.sort((a, b) => {
     const pa = rowPlant(a) === 'SCSC' ? 0 : 1;
     const pb = rowPlant(b) === 'SCSC' ? 0 : 1;
@@ -354,8 +492,8 @@ function applyFilter() {
 
   filteredRows = rows;
 
-  // Stats always computed from full allRows pending
-  const allPending = allRows.filter(r => getStatus(r) === 'Pending');
+  // Stats: always computed from ALL rows (not filtered by plant)
+  const allPending  = allRows.filter(r => getStatus(r) === 'Pending');
   const scscPending = allPending.filter(r => rowPlant(r) === 'SCSC');
   const ntsPending  = allPending.filter(r => rowPlant(r) === 'NTS');
   const totalTons   = allPending.reduce((s, r) => s + rowTons(r), 0);
@@ -373,7 +511,7 @@ function applyFilter() {
 
 // ── Render ────────────────────────────────────────────────────────────────────
 function renderTable(rows) {
-  document.getElementById('countLabel').textContent = `แสดง ${rows.length} รายการ`;
+  document.getElementById('countLabel').textContent = 'แสดง ' + rows.length + ' รายการ';
 
   if (rows.length === 0) {
     document.getElementById('tableCard').style.display = 'none';
@@ -390,25 +528,26 @@ function renderTable(rows) {
     const isSelected = id && selectedIds.has(id);
     const emailShort = String(r['Submitter_email'] || r['submitter_email'] || '-').split('@')[0];
 
-    return `<tr${isSelected ? ' class="selected"' : ''}>
-      <td class="cb-td">${isPending && id
-        ? `<input type="checkbox" data-id="${id}"${isSelected ? ' checked' : ''} onchange="toggleRow('${id}',this.checked)"/>`
-        : ''}</td>
-      <td class="mono" style="font-size:11px">${id || '-'}</td>
-      <td class="mono">${excelDateToStr(r['Date'] || r['date'])}</td>
-      <td>${plantBadge(rowPlant(r))}</td>
-      <td>${r['Customer Group'] || r['customer_group'] || '-'}</td>
-      <td style="max-width:160px;font-size:11px">${r['Item Description'] || r['item_description'] || '-'}</td>
-      <td class="mono">${r['Tons'] || r['tons'] || '-'}</td>
-      <td class="mono">${r['Pcs'] || r['pcs'] || '-'}</td>
-      <td style="font-size:11px">${r['Customer Name'] || r['customer_name'] || '-'}</td>
-      <td style="font-size:11px">${r['Sales Person'] || r['sales_person'] || '-'}</td>
-      <td class="mono" style="font-size:11px">${r['Sales Order No.'] || r['sales_order_no'] || r['SalesOrderNo'] || '-'}</td>
-      <td class="mono" style="font-size:11px">${excelDateToStr(deliveryDateVal(r))}</td>
-      <td class="mono" style="font-size:11px">${cutoffDisplay(r)}</td>
-      <td class="mono" style="font-size:11px">${emailShort}</td>
-      <td>${statusBadge(r)}</td>
-    </tr>`;
+    return '<tr' + (isSelected ? ' class="selected"' : '') + '>' +
+      '<td class="cb-td">' + (isPending && id
+        ? '<input type="checkbox" data-id="' + id + '"' + (isSelected ? ' checked' : '') + ' onchange="toggleRow(\'' + id + '\',this.checked)"/>'
+        : '') + '</td>' +
+      '<td class="mono" style="font-size:11px">' + (id || '-') + '</td>' +
+      '<td class="mono">' + excelDateToStr(r['Date'] || r['date']) + '</td>' +
+      '<td>' + plantBadge(rowPlant(r)) + '</td>' +
+      '<td>' + (r['Customer Group'] || r['customer_group'] || '-') + '</td>' +
+      '<td style="max-width:160px;font-size:11px">' + (r['Item Description'] || r['item_description'] || '-') + '</td>' +
+      '<td class="mono">' + (r['Tons'] || r['tons'] || '-') + '</td>' +
+      '<td class="mono">' + (r['Pcs'] || r['pcs'] || '-') + '</td>' +
+      '<td style="font-size:11px">' + (r['Customer Name'] || r['customer_name'] || '-') + '</td>' +
+      '<td style="font-size:11px">' + (r['Sales Person'] || r['sales_person'] || '-') + '</td>' +
+      '<td class="mono" style="font-size:11px">' + (r['Sales Order No.'] || r['sales_order_no'] || r['SalesOrderNo'] || '-') + '</td>' +
+      '<td class="mono" style="font-size:11px">' + excelDateToStr(deliveryDateVal(r)) + '</td>' +
+      '<td class="mono" style="font-size:11px">' + cutoffDisplay(r) + '</td>' +
+      '<td class="mono" style="font-size:11px">' + emailShort + '</td>' +
+      '<td>' + statusBadge(r) + '</td>' +
+      '<td style="text-align:center">' + sapBadge(r) + '</td>' +
+    '</tr>';
   }).join('');
 }
 
@@ -416,7 +555,7 @@ function renderTable(rows) {
 function toggleRow(id, checked) {
   if (checked) selectedIds.add(id);
   else selectedIds.delete(id);
-  const tr = document.querySelector(`input[data-id="${id}"]`)?.closest('tr');
+  const tr = document.querySelector('input[data-id="' + id + '"]')?.closest('tr');
   if (tr) tr.classList.toggle('selected', checked);
   updateSelCount();
 }
@@ -442,17 +581,16 @@ function updateSelCount() {
   const scsc = rows.filter(r => rowPlant(r) === 'SCSC').length;
   const nts  = rows.filter(r => rowPlant(r) === 'NTS').length;
 
-  let info = `เลือก <strong>${n}</strong> รายการ`;
+  let info = 'เลือก <strong>' + n + '</strong> รายการ';
   if (n > 0) {
     const parts = [];
-    if (scsc) parts.push(`SCSC ${scsc}`);
-    if (nts)  parts.push(`NTS ${nts}`);
-    info += ` — ${parts.join(', ')} — ${tons.toFixed(3)} ตัน`;
+    if (scsc) parts.push('SCSC ' + scsc);
+    if (nts)  parts.push('NTS ' + nts);
+    info += ' — ' + parts.join(', ') + ' — ' + tons.toFixed(3) + ' ตัน';
   }
   document.getElementById('selInfo').innerHTML = info;
   document.getElementById('markBtn').disabled  = n === 0;
 
-  // sync header checkboxes
   const pendingInView = filteredRows.filter(r => getStatus(r) === 'Pending' && rowId(r));
   const allSelected   = pendingInView.length > 0 && pendingInView.every(r => selectedIds.has(rowId(r)));
   document.getElementById('selectAll').checked = allSelected;
@@ -463,23 +601,16 @@ function updateSelCount() {
 async function markAsSent() {
   if (selectedIds.size === 0) return;
 
-  if (MARK_SENT_URL === 'PASTE_FLOW6_URL_HERE') {
-    document.getElementById('warnBox').innerHTML =
-      '⚠️ ยังไม่ได้ตั้งค่า Flow 6 URL — กรุณาใส่ค่า <code>MARK_SENT_URL</code> ในไฟล์ steel_bend_admin.html';
-    document.getElementById('warnBox').style.display = 'block';
-    return;
-  }
-
   const ids  = [...selectedIds];
   const rows = allRows.filter(r => ids.includes(rowId(r)));
   const scsc = rows.filter(r => rowPlant(r) === 'SCSC').length;
   const nts  = rows.filter(r => rowPlant(r) === 'NTS').length;
   const tons = rows.reduce((s, r) => s + rowTons(r), 0).toFixed(3);
 
-  let msg = `ยืนยัน Mark as Sent สำหรับ ${ids.length} รายการ?\n\n`;
-  if (scsc) msg += `• SCSC: ${scsc} รายการ\n`;
-  if (nts)  msg += `• NTS: ${nts} รายการ\n`;
-  msg += `• น้ำหนักรวม: ${tons} ตัน`;
+  let msg = 'ยืนยัน Mark as Sent สำหรับ ' + ids.length + ' รายการ?\n\n';
+  if (scsc) msg += '• SCSC: ' + scsc + ' รายการ\n';
+  if (nts)  msg += '• NTS: ' + nts + ' รายการ\n';
+  msg += '• น้ำหนักรวม: ' + tons + ' ตัน';
 
   if (!confirm(msg)) return;
 
@@ -503,7 +634,7 @@ async function markAsSent() {
       throw new Error(data.message || text || 'HTTP ' + res.status);
 
     document.getElementById('okBox').textContent =
-      `✅ Mark as Sent สำเร็จ ${ids.length} รายการ (SCSC: ${scsc}, NTS: ${nts})`;
+      'Mark as Sent สำเร็จ ' + ids.length + ' รายการ (SCSC: ' + scsc + ', NTS: ' + nts + ')';
     document.getElementById('okBox').style.display = 'block';
     selectedIds.clear();
     await fetchData();
