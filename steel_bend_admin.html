@@ -248,23 +248,17 @@ function excelDateToStr(val) {
   return String(val).split('T')[0] || '-';
 }
 
-function normalizeStatus(value) {
-  if (value === true) return 'Sent';
-  if (value === false) return 'Pending';
-  const s = String(value ?? '').trim().toLowerCase();
-  if (!s || s==='false'||s==='0'||s==='no'||s==='pending') return 'Pending';
-  if (s==='true'||s==='1'||s==='yes'||s==='sent'||s==='done'||s==='completed'||s==='complete') return 'Sent';
-  if (s==='error'||s==='failed'||s==='fail') return 'Error';
-  if (s==='cancelled'||s==='canceled'||s==='cancel') return 'Cancelled';
-  return String(value ?? '').trim();
-}
-
 function getStatus(row) {
-  const st = row['Status_Text'] ?? row['status_text'] ?? row['Status Text'] ?? row['statusText'];
-  if (String(st ?? '').trim()) return normalizeStatus(st);
-  return normalizeStatus(row['Status'] ?? row['status'] ?? '');
+  // Status_Text = workflow เท่านั้น
+  // Status (True/False) = SAP — ไม่นำมาใช้
+  const st = String(row['Status_Text'] ?? row['status_text'] ?? '').trim();
+  const l = st.toLowerCase();
+  if (!l || l==='pending') return 'Pending';
+  if (l==='sent'||l==='done'||l==='completed') return 'Sent';
+  if (l==='cancelled'||l==='canceled'||l==='cancel') return 'Cancelled';
+  if (l==='error'||l==='failed') return 'Error';
+  return st || 'Pending';
 }
-
 function rowId(row) { return row['OrderID'] || row['order_id'] || ''; }
 function rowPlant(row) { return row['Plant'] || row['plant'] || ''; }
 function rowTons(row) { return parseFloat(row['Tons'] || row['tons'] || 0) || 0; }
