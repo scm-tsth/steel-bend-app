@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin — ระบบสั่งพับเหล็ก</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--bd:#0f2a4a;--bm:#1a3d6b;--ba:#2563b0;--bl:#dbeafe;--sl:#f1f5f9;--gr:#16a34a;--gl:#dcfce7;--rd:#dc2626;--rl:#fee2e2;--am:#d97706;--al:#fef3c7;--tx:#0f172a;--t2:#475569;--t3:#94a3b8;--br:#e2e8f0;--ra:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--tx);min-height:100vh;padding:1.25rem 1rem 3rem}
+.page{max-width:1380px;margin:0 auto}
+
+.hdr{background:var(--bd);border-radius:12px;padding:.9rem 1.25rem;margin-bottom:1.1rem;display:flex;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(15,42,74,.15)}
+.hdr-icon{width:34px;height:34px;background:rgba(255,255,255,.13);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.hdr-icon svg{width:22px;height:22px}
+.hdr-text{flex:1}
+.hdr-text h1{color:#fff;font-size:15px;font-weight:600}
+.hdr-text p{color:rgba(255,255,255,.5);font-size:11px;margin-top:1px}
+.admin-badge{background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.4);color:#fde68a;border-radius:6px;padding:2px 10px;font-size:11px;font-weight:600;white-space:nowrap;letter-spacing:.3px}
+.home-btn{height:34px;padding:0 12px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.1);color:#fff;border-radius:8px;font-size:12px;font-weight:500;font-family:'IBM Plex Sans Thai',sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;margin-left:6px}
+.home-btn:hover{background:rgba(255,255,255,.18)}
+
+.card{background:#fff;border:1px solid var(--br);border-radius:var(--ra);padding:1rem 1.2rem;margin-bottom:.9rem;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+
+.filter-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.filter-label{font-size:12px;font-weight:500;color:var(--t2);white-space:nowrap}
+.pill{height:30px;padding:0 14px;border:1.5px solid var(--br);background:#fff;color:var(--t2);border-radius:20px;font-size:12px;font-weight:500;font-family:'IBM Plex Sans Thai',sans-serif;cursor:pointer;white-space:nowrap;transition:all .15s}
+.pill:hover{border-color:var(--bm);color:var(--bm)}
+.pill.active{border-color:var(--bm);background:var(--bm);color:#fff}
+.pill.scsc.active{border-color:#0369a1;background:#0369a1;color:#fff}
+.pill.nts.active{border-color:var(--gr);background:var(--gr);color:#fff}
+.sep{color:var(--br);font-size:18px;user-select:none}
+.view-toggle{display:flex;border:1.5px solid var(--br);border-radius:8px;overflow:hidden}
+.view-toggle button{height:30px;padding:0 13px;border:none;background:#fff;color:var(--t2);font-size:12px;font-family:'IBM Plex Sans Thai',sans-serif;cursor:pointer;white-space:nowrap;transition:all .15s;border-right:1px solid var(--br)}
+.view-toggle button:last-child{border-right:none}
+.view-toggle button.active{background:var(--bd);color:#fff}
+.icon-btn{height:30px;padding:0 12px;border:1.5px solid var(--br);background:#fff;color:var(--t2);border-radius:8px;font-size:12px;font-family:'IBM Plex Sans Thai',sans-serif;cursor:pointer;white-space:nowrap;transition:all .15s;display:inline-flex;align-items:center;gap:5px}
+.icon-btn:hover{border-color:var(--bm);color:var(--bm)}
+
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:.9rem}
+.stat-box{background:#fff;border:1px solid var(--br);border-radius:var(--ra);padding:.75rem 1rem;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.stat-num{font-size:22px;font-weight:600;color:var(--bm)}
+.stat-num.amber{color:var(--am)}
+.stat-num.blue{color:var(--ba)}
+.stat-num.green{color:var(--gr)}
+.stat-label{font-size:11px;color:var(--t2);margin-top:2px}
+
+.action-bar{background:#fff;border:1px solid var(--br);border-radius:var(--ra);padding:.7rem 1.2rem;margin-bottom:.9rem;display:flex;align-items:center;gap:12px;box-shadow:0 1px 3px rgba(0,0,0,.06);flex-wrap:wrap}
+.cb-wrap{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--tx);cursor:pointer;user-select:none;white-space:nowrap}
+.cb-wrap input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--bm)}
+.sel-info{font-size:12px;color:var(--t2);flex:1}
+.sel-info strong{color:var(--bm)}
+.mark-btn{height:36px;padding:0 20px;background:var(--gr);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;font-family:'IBM Plex Sans Thai',sans-serif;cursor:pointer;white-space:nowrap;transition:background .15s;display:inline-flex;align-items:center;gap:7px}
+.mark-btn:hover:not(:disabled){background:#15803d}
+.mark-btn:disabled{background:var(--t3);cursor:not-allowed}
+.mark-spin{display:none;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+.mark-btn.loading .mark-spin{display:inline-block}
+.mark-btn.loading .mark-label{display:none}
+
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:1280px}
+thead th{background:var(--bd);color:#fff;padding:.5rem .65rem;text-align:left;font-weight:500;font-size:11px;letter-spacing:.3px;white-space:nowrap}
+thead th:first-child{border-radius:8px 0 0 0}
+thead th:last-child{border-radius:0 8px 0 0}
+thead th.cb-th{width:38px;text-align:center;padding:.5rem .4rem}
+tbody tr{border-bottom:.5px solid var(--br);transition:background .1s}
+tbody tr:hover{background:#f8fafc}
+tbody tr.selected{background:#eff6ff}
+tbody td{padding:.5rem .65rem;vertical-align:middle;line-height:1.4}
+tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t2)}
+tbody td.cb-td{text-align:center;padding:.5rem .4rem}
+tbody td.cb-td input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--bm)}
+
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500;white-space:nowrap}
+.badge.pending{background:var(--al);color:#92400e}
+.badge.done{background:var(--gl);color:#15803d}
+.badge.error{background:var(--rl);color:var(--rd)}
+.badge.cancelled{background:var(--sl);color:var(--t2)}
+.badge.scsc{background:#e0f2fe;color:#0369a1;font-weight:600}
+.badge.nts{background:var(--gl);color:#15803d;font-weight:600}
+
+.count-label{font-size:12px;color:var(--t2);margin-bottom:.5rem}
+.empty{text-align:center;padding:2.5rem 1rem;color:var(--t3);font-size:13px}
+.loading-box{text-align:center;padding:2rem 1rem;color:var(--t2);font-size:13px}
+.spin{display:inline-block;width:18px;height:18px;border:2px solid var(--br);border-top-color:var(--bm);border-radius:50%;animation:spin .7s linear infinite;vertical-align:-4px;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.err-box{background:var(--rl);border:1px solid #fca5a5;border-radius:var(--ra);padding:.75rem 1rem;font-size:13px;color:var(--rd);margin-bottom:.9rem}
+.ok-box{background:var(--gl);border:1px solid #86efac;border-radius:var(--ra);padding:.75rem 1rem;font-size:13px;color:#15803d;margin-bottom:.9rem}
+.warn-box{background:var(--al);border:1px solid #fcd34d;border-radius:var(--ra);padding:.65rem 1rem;font-size:12px;color:#92400e;margin-bottom:.9rem}
+
+@media(max-width:900px){
+  body{padding:.75rem .5rem 2rem}
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  table{min-width:1280px}
+  .hdr{flex-wrap:wrap}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="hdr">
+  <div class="hdr-icon">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="3" y="3" width="18" height="18" rx="2.5" stroke="rgba(255,255,255,0.8)" stroke-width="1.5" fill="none"/>
+      <path d="M7 8h10M7 12h6M7 16h8" stroke="rgba(255,255,255,0.7)" stroke-width="1.4" stroke-linecap="round"/>
+      <circle cx="18.5" cy="17.5" r="4" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.8)" stroke-width="1.3"/>
+      <path d="M17 17.5l1.2 1.2 2-2" stroke="rgba(255,255,255,0.95)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <div class="hdr-text">
+    <h1>Admin Panel — ระบบสั่งพับเหล็ก</h1>
+    <p>จัดการรายการสั่งพับ และ Mark as Sent</p>
+  </div>
+  <span class="admin-badge">ADMIN</span>
+  <a class="home-btn" href="index.html">← หน้าหลัก</a>
+</div>
+
+<div id="warnBox" class="warn-box" style="display:none"></div>
+<div id="errBox" class="err-box" style="display:none"></div>
+<div id="okBox" class="ok-box" style="display:none"></div>
+
+<!-- FILTER -->
+<div class="card">
+  <div class="filter-bar">
+    <span class="filter-label">Plant:</span>
+    <button class="pill active" id="pillAll" onclick="setPlant('')">ทั้งหมด</button>
+    <button class="pill scsc" id="pillSCSC" onclick="setPlant('SCSC')">SCSC</button>
+    <button class="pill nts" id="pillNTS" onclick="setPlant('NTS')">NTS</button>
+    <span class="sep">|</span>
+    <span class="filter-label">แสดง:</span>
+    <div class="view-toggle">
+      <button class="active" id="viewPending" onclick="setView('pending')">⏳ Pending</button>
+      <button id="viewAll" onclick="setView('all')">ทั้งหมด</button>
+    </div>
+    <span class="sep">|</span>
+    <button class="icon-btn" onclick="fetchData()">🔄 Refresh</button>
+    <button class="icon-btn" onclick="printOrders()" style="border-color:#d97706;color:#d97706">🖨️ พิมพ์ใบสรุป</button>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-row" id="statsRow" style="display:none">
+  <div class="stat-box">
+    <div class="stat-num amber" id="statPending">0</div>
+    <div class="stat-label">Pending ทั้งหมด</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-num blue" id="statSCSC">0</div>
+    <div class="stat-label">SCSC Pending</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-num green" id="statNTS">0</div>
+    <div class="stat-label">NTS Pending</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-num" id="statTons">0</div>
+    <div class="stat-label">Tons รวม (Pending)</div>
+  </div>
+</div>
+
+<!-- ACTION BAR -->
+<div class="action-bar" id="actionBar" style="display:none">
+  <label class="cb-wrap">
+    <input type="checkbox" id="selectAll" onchange="setSelectAll(this.checked)"/>
+    เลือกทั้งหมด
+  </label>
+  <span class="sel-info" id="selInfo">เลือก <strong>0</strong> รายการ</span>
+  <button class="mark-btn" id="markBtn" onclick="markAsSent()" disabled>
+    <span class="mark-label">✅ Mark as Sent</span>
+    <span class="mark-spin"></span>
+  </button>
+</div>
+
+<!-- TABLE -->
+<div class="card" id="tableCard" style="display:none">
+  <div class="count-label" id="countLabel"></div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="cb-th">
+            <input type="checkbox" id="hdrCb"
+              style="width:15px;height:15px;cursor:pointer;accent-color:rgba(255,255,255,.8)"
+              onchange="setSelectAll(this.checked)"/>
+          </th>
+          <th>Order ID</th>
+          <th>วันที่สั่ง</th>
+          <th>Plant</th>
+          <th>แผนก</th>
+          <th>สินค้า</th>
+          <th>Tons</th>
+          <th>PCS</th>
+          <th>ลูกค้า</th>
+          <th>Sales</th>
+          <th>Sales Order</th>
+          <th>วันรับสินค้า</th>
+          <th>รอบ Cutoff</th>
+          <th>Submitter</th>
+          <th>สถานะ</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div id="loadingBox" class="loading-box" style="display:none">
+  <span class="spin"></span>กำลังโหลดข้อมูล...
+</div>
+<div id="emptyBox" class="card empty" style="display:none">ไม่พบรายการที่ตรงกับเงื่อนไข</div>
+
+</div>
+<script>
+// ── URLs ─────────────────────────────────────────────────────────────────────
+const FLOW_URL = 'https://defaultc49eedf2bcd84a848b29b3e5f61a3d.03.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/dd06128deabc40d8ba6a54df6e6327bd/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=J_ZPZCb4OzwlGSQ3GXc27pDL8NKs_VmWYqzVdg-pe0w';
+const MARK_SENT_URL = 'https://defaultc49eedf2bcd84a848b29b3e5f61a3d.03.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/1e4a17125d7840b888494c29add2d889/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=aAVPqqnU7rOm3gDmVUVI441GlvPjZ4xD4p0-rrG5wbA';
+
+// ── Admin whitelist ───────────────────────────────────────────────────────────
+const ADMIN_EMAILS = ['kittiphums', 'chontichac', 'chayanisn'];
+
+(function checkAdmin() {
+  const user = (localStorage.getItem('steel_user') || '').toLowerCase().trim();
+  if (!user || !ADMIN_EMAILS.includes(user)) {
+    alert('ไม่มีสิทธิ์เข้าหน้า Admin กรุณาเข้าสู่ระบบด้วยบัญชีที่ได้รับสิทธิ์');
+    window.location.href = 'index.html';
+  }
+})();
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let allRows = [];
+let filteredRows = [];
+const selectedIds = new Set();
+let currentPlant = '';
+let currentView = 'pending';
+
+// ── Utilities ─────────────────────────────────────────────────────────────────
+function excelDateToStr(val) {
+  if (!val) return '-';
+  if (typeof val === 'string' && /^\d+(\.\d+)?$/.test(val)) val = Number(val);
+  if (typeof val === 'string' && val.includes('-')) return val.split('T')[0];
+  if (typeof val === 'number') {
+    const d = new Date((val - 25569) * 86400 * 1000);
+    return String(d.getUTCDate()).padStart(2,'0') + '/' +
+           String(d.getUTCMonth()+1).padStart(2,'0') + '/' + d.getUTCFullYear();
+  }
+  return String(val).split('T')[0] || '-';
+}
+
+function normalizeStatus(value) {
+  if (value === true) return 'Sent';
+  if (value === false) return 'Pending';
+  const s = String(value ?? '').trim().toLowerCase();
+  if (!s || s==='false'||s==='0'||s==='no'||s==='pending') return 'Pending';
+  if (s==='true'||s==='1'||s==='yes'||s==='sent'||s==='done'||s==='completed'||s==='complete') return 'Sent';
+  if (s==='error'||s==='failed'||s==='fail') return 'Error';
+  if (s==='cancelled'||s==='canceled'||s==='cancel') return 'Cancelled';
+  return String(value ?? '').trim();
+}
+
+function getStatus(row) {
+  const st = row['Status_Text'] ?? row['status_text'] ?? row['Status Text'] ?? row['statusText'];
+  if (String(st ?? '').trim()) return normalizeStatus(st);
+  return normalizeStatus(row['Status'] ?? row['status'] ?? '');
+}
+
+function rowId(row) { return row['OrderID'] || row['order_id'] || ''; }
+function rowPlant(row) { return row['Plant'] || row['plant'] || ''; }
+function rowTons(row) { return parseFloat(row['Tons'] || row['tons'] || 0) || 0; }
+
+function cutoffDisplay(row) {
+  const at = String(row['Cutoff_At_ISO'] ?? row['Cutoff_At'] ?? row['cutoff_at'] ?? '').trim();
+  if (at) return at.replace('T',' ').replace('+07:00','');
+  const date = String(row['Cutoff_Date'] ?? row['cutoff_date'] ?? row['Cutoff Date'] ?? '').trim();
+  return date ? excelDateToStr(date) + ' 10:00' : '-';
+}
+
+function deliveryDateVal(row) {
+  return row['Delivery_Date'] ?? row['Delivery Date'] ?? row['delivery_date'] ?? row['Receive Date'] ?? row['receive_date'] ?? row['request_date'] ?? '';
+}
+
+function statusBadge(row) {
+  const s = getStatus(row);
+  if (s === 'Pending')   return '<span class="badge pending">⏳ รอ</span>';
+  if (s === 'Error')     return '<span class="badge error">⚠️ Error</span>';
+  if (s === 'Cancelled') return '<span class="badge cancelled">ยกเลิก</span>';
+  return '<span class="badge done">✅ Sent</span>';
+}
+
+function plantBadge(plant) {
+  if (plant === 'SCSC') return '<span class="badge scsc">SCSC</span>';
+  if (plant === 'NTS')  return '<span class="badge nts">NTS</span>';
+  return plant || '-';
+}
+
+// ── Fetch ─────────────────────────────────────────────────────────────────────
+async function fetchData() {
+  document.getElementById('loadingBox').style.display = 'block';
+  document.getElementById('tableCard').style.display = 'none';
+  document.getElementById('statsRow').style.display = 'none';
+  document.getElementById('actionBar').style.display = 'none';
+  document.getElementById('emptyBox').style.display = 'none';
+  document.getElementById('errBox').style.display = 'none';
+  document.getElementById('okBox').style.display = 'none';
+  selectedIds.clear();
+  updateSelCount();
+
+  try {
+    const res = await fetch(FLOW_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({})
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    allRows = Array.isArray(data) ? data : (data.value || []);
+    applyFilter();
+  } catch(e) {
+    document.getElementById('errBox').textContent = 'เกิดข้อผิดพลาดในการโหลดข้อมูล: ' + e.message;
+    document.getElementById('errBox').style.display = 'block';
+  } finally {
+    document.getElementById('loadingBox').style.display = 'none';
+  }
+}
+
+// ── Filter & Sort ─────────────────────────────────────────────────────────────
+function setPlant(plant) {
+  currentPlant = plant;
+  document.getElementById('pillAll').classList.toggle('active', plant === '');
+  document.getElementById('pillSCSC').classList.toggle('active', plant === 'SCSC');
+  document.getElementById('pillNTS').classList.toggle('active', plant === 'NTS');
+  selectedIds.clear();
+  applyFilter();
+}
+
+function setView(view) {
+  currentView = view;
+  document.getElementById('viewPending').classList.toggle('active', view === 'pending');
+  document.getElementById('viewAll').classList.toggle('active', view === 'all');
+  selectedIds.clear();
+  applyFilter();
+}
+
+function applyFilter() {
+  let rows = [...allRows];
+
+  if (currentView === 'pending') rows = rows.filter(r => getStatus(r) === 'Pending');
+  if (currentPlant) rows = rows.filter(r => rowPlant(r) === currentPlant);
+
+  // Sort: SCSC before NTS, then by date ascending (oldest first for processing priority)
+  rows.sort((a, b) => {
+    const pa = rowPlant(a) === 'SCSC' ? 0 : 1;
+    const pb = rowPlant(b) === 'SCSC' ? 0 : 1;
+    if (pa !== pb) return pa - pb;
+    const da = String(a['Date'] || a['date'] || '');
+    const db = String(b['Date'] || b['date'] || '');
+    return da.localeCompare(db);
+  });
+
+  filteredRows = rows;
+
+  // Stats always computed from full allRows pending
+  const allPending = allRows.filter(r => getStatus(r) === 'Pending');
+  const scscPending = allPending.filter(r => rowPlant(r) === 'SCSC');
+  const ntsPending  = allPending.filter(r => rowPlant(r) === 'NTS');
+  const totalTons   = allPending.reduce((s, r) => s + rowTons(r), 0);
+
+  document.getElementById('statPending').textContent = allPending.length;
+  document.getElementById('statSCSC').textContent    = scscPending.length;
+  document.getElementById('statNTS').textContent     = ntsPending.length;
+  document.getElementById('statTons').textContent    = totalTons.toFixed(3);
+  document.getElementById('statsRow').style.display  = 'grid';
+  document.getElementById('actionBar').style.display = 'flex';
+
+  renderTable(rows);
+  updateSelCount();
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function renderTable(rows) {
+  document.getElementById('countLabel').textContent = `แสดง ${rows.length} รายการ`;
+
+  if (rows.length === 0) {
+    document.getElementById('tableCard').style.display = 'none';
+    document.getElementById('emptyBox').style.display  = 'block';
+    return;
+  }
+  document.getElementById('emptyBox').style.display = 'none';
+  document.getElementById('tableCard').style.display = 'block';
+
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = rows.map(r => {
+    const id        = rowId(r);
+    const isPending = getStatus(r) === 'Pending';
+    const isSelected = id && selectedIds.has(id);
+    const emailShort = String(r['Submitter_email'] || r['submitter_email'] || '-').split('@')[0];
+
+    return `<tr${isSelected ? ' class="selected"' : ''}>
+      <td class="cb-td">${isPending && id
+        ? `<input type="checkbox" data-id="${id}"${isSelected ? ' checked' : ''} onchange="toggleRow('${id}',this.checked)"/>`
+        : ''}</td>
+      <td class="mono" style="font-size:11px">${id || '-'}</td>
+      <td class="mono">${excelDateToStr(r['Date'] || r['date'])}</td>
+      <td>${plantBadge(rowPlant(r))}</td>
+      <td>${r['Customer Group'] || r['customer_group'] || '-'}</td>
+      <td style="max-width:160px;font-size:11px">${r['Item Description'] || r['item_description'] || '-'}</td>
+      <td class="mono">${r['Tons'] || r['tons'] || '-'}</td>
+      <td class="mono">${r['Pcs'] || r['pcs'] || '-'}</td>
+      <td style="font-size:11px">${r['Customer Name'] || r['customer_name'] || '-'}</td>
+      <td style="font-size:11px">${r['Sales Person'] || r['sales_person'] || '-'}</td>
+      <td class="mono" style="font-size:11px">${r['Sales Order No.'] || r['sales_order_no'] || r['SalesOrderNo'] || '-'}</td>
+      <td class="mono" style="font-size:11px">${excelDateToStr(deliveryDateVal(r))}</td>
+      <td class="mono" style="font-size:11px">${cutoffDisplay(r)}</td>
+      <td class="mono" style="font-size:11px">${emailShort}</td>
+      <td>${statusBadge(r)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Selection ─────────────────────────────────────────────────────────────────
+function toggleRow(id, checked) {
+  if (checked) selectedIds.add(id);
+  else selectedIds.delete(id);
+  const tr = document.querySelector(`input[data-id="${id}"]`)?.closest('tr');
+  if (tr) tr.classList.toggle('selected', checked);
+  updateSelCount();
+}
+
+function setSelectAll(checked) {
+  const pendingInView = filteredRows.filter(r => getStatus(r) === 'Pending' && rowId(r));
+  if (checked) pendingInView.forEach(r => selectedIds.add(rowId(r)));
+  else         pendingInView.forEach(r => selectedIds.delete(rowId(r)));
+
+  document.querySelectorAll('tbody input[type=checkbox][data-id]').forEach(cb => {
+    cb.checked = selectedIds.has(cb.dataset.id);
+    cb.closest('tr').classList.toggle('selected', cb.checked);
+  });
+  document.getElementById('selectAll').checked = checked;
+  document.getElementById('hdrCb').checked     = checked;
+  updateSelCount();
+}
+
+function updateSelCount() {
+  const n = selectedIds.size;
+  const rows = allRows.filter(r => selectedIds.has(rowId(r)));
+  const tons = rows.reduce((s, r) => s + rowTons(r), 0);
+  const scsc = rows.filter(r => rowPlant(r) === 'SCSC').length;
+  const nts  = rows.filter(r => rowPlant(r) === 'NTS').length;
+
+  let info = `เลือก <strong>${n}</strong> รายการ`;
+  if (n > 0) {
+    const parts = [];
+    if (scsc) parts.push(`SCSC ${scsc}`);
+    if (nts)  parts.push(`NTS ${nts}`);
+    info += ` — ${parts.join(', ')} — ${tons.toFixed(3)} ตัน`;
+  }
+  document.getElementById('selInfo').innerHTML = info;
+  document.getElementById('markBtn').disabled  = n === 0;
+
+  // sync header checkboxes
+  const pendingInView = filteredRows.filter(r => getStatus(r) === 'Pending' && rowId(r));
+  const allSelected   = pendingInView.length > 0 && pendingInView.every(r => selectedIds.has(rowId(r)));
+  document.getElementById('selectAll').checked = allSelected;
+  document.getElementById('hdrCb').checked     = allSelected;
+}
+
+// ── Mark as Sent ──────────────────────────────────────────────────────────────
+async function markAsSent() {
+  if (selectedIds.size === 0) return;
+
+  if (MARK_SENT_URL === 'PASTE_FLOW6_URL_HERE') {
+    document.getElementById('warnBox').innerHTML =
+      '⚠️ ยังไม่ได้ตั้งค่า Flow 6 URL — กรุณาใส่ค่า <code>MARK_SENT_URL</code> ในไฟล์ steel_bend_admin.html';
+    document.getElementById('warnBox').style.display = 'block';
+    return;
+  }
+
+  const ids  = [...selectedIds];
+  const rows = allRows.filter(r => ids.includes(rowId(r)));
+  const scsc = rows.filter(r => rowPlant(r) === 'SCSC').length;
+  const nts  = rows.filter(r => rowPlant(r) === 'NTS').length;
+  const tons = rows.reduce((s, r) => s + rowTons(r), 0).toFixed(3);
+
+  let msg = `ยืนยัน Mark as Sent สำหรับ ${ids.length} รายการ?\n\n`;
+  if (scsc) msg += `• SCSC: ${scsc} รายการ\n`;
+  if (nts)  msg += `• NTS: ${nts} รายการ\n`;
+  msg += `• น้ำหนักรวม: ${tons} ตัน`;
+
+  if (!confirm(msg)) return;
+
+  const btn = document.getElementById('markBtn');
+  btn.classList.add('loading');
+  btn.disabled = true;
+  document.getElementById('errBox').style.display = 'none';
+  document.getElementById('okBox').style.display  = 'none';
+
+  try {
+    const res = await fetch(MARK_SENT_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({order_ids: ids})
+    });
+    const text = await res.text();
+    let data = {};
+    try { data = JSON.parse(text); } catch(_) {}
+
+    if (!res.ok || data.success === false)
+      throw new Error(data.message || text || 'HTTP ' + res.status);
+
+    document.getElementById('okBox').textContent =
+      `✅ Mark as Sent สำเร็จ ${ids.length} รายการ (SCSC: ${scsc}, NTS: ${nts})`;
+    document.getElementById('okBox').style.display = 'block';
+    selectedIds.clear();
+    await fetchData();
+  } catch(e) {
+    document.getElementById('errBox').textContent = 'Mark as Sent ไม่สำเร็จ: ' + e.message;
+    document.getElementById('errBox').style.display = 'block';
+    btn.disabled = false;
+  } finally {
+    btn.classList.remove('loading');
+    updateSelCount();
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+fetchData();
+</script>
+</body>
+</html>
