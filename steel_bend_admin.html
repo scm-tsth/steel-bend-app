@@ -311,10 +311,16 @@ function plantBadge(plant) {
 }
 
 // ── Print Orders ──────────────────────────────────────────────────────────────
-  function getProdName(r) {
-  var sp = r['PROD_ID_SP'] || r['prod_id_sp'] || '';
-  var fp = r['PROD_ID_FP'] || r['prod_id_fp'] || '';
-  return PROD_MAP[sp] || PROD_MAP[fp] || r['Item Description'] || r['item_description'] || '-';
+  function parseProdName(desc) {
+  const m = String(desc||'').match(/^(SR24|SD40\(S\)|SD40\(NT\)|SD40|SD50|B400B-R)\s+(DB|RB)(\d+)\/(\d+)/i);
+  if (!m) return null;
+  return m[2].toUpperCase()+' '+m[1].toUpperCase()+' '+parseInt(m[3])+' mm. '+parseInt(m[4])+' m. TATA TISCON';
+}
+function getProdName(r) {
+  var sp=r['PROD_ID_SP']||r['prod_id_sp']||'';
+  var fp=r['PROD_ID_FP']||r['prod_id_fp']||'';
+  var desc=String(r['Item Description']||r['item_description']||'').trim();
+  return PROD_MAP[sp]||PROD_MAP[fp]||parseProdName(desc)||desc||'-';
 }
   function printOrders() {
   let targetPlant = currentPlant;
