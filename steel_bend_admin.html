@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="th">
+<script src="product_map.js"></script>
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -312,7 +313,12 @@ function plantBadge(plant) {
 }
 
 // ── Print Orders ──────────────────────────────────────────────────────────────
-function printOrders() {
+  function getProdName(r) {
+  var sp = r['PROD_ID_SP'] || r['prod_id_sp'] || '';
+  var fp = r['PROD_ID_FP'] || r['prod_id_fp'] || '';
+  return PROD_MAP[sp] || PROD_MAP[fp] || r['Item Description'] || r['item_description'] || '-';
+}
+  function printOrders() {
   let targetPlant = currentPlant;
   if (!targetPlant) {
     const choice = confirm('พิมพ์ใบสรุปสำหรับโรงงานไหน?\n\nกด OK = SCSC\nกด Cancel = NTS');
@@ -349,7 +355,7 @@ function printOrders() {
     const emailShort = String(r['Submitter_email'] || r['submitter_email'] || '-').split('@')[0];
   rowsHtml += '<tr style="background:' + bg + '">' +
   '<td style="padding:5px 6px;border:1px solid #cbd5e1;text-align:right;font-size:11px">' + (i+1) + '</td>' +
-  '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:10px">' + (r['Item Description']||r['item_description']||'-') + '</td>' +
+  '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:10px">' + getProdName(r) + '</td>' +
   '<td style="padding:5px 6px;border:1px solid #cbd5e1;text-align:right;font-size:11px">' + (r['Tons']||r['tons']||'-') + '</td>' +
   '<td style="padding:5px 6px;border:1px solid #cbd5e1;text-align:right;font-size:11px">' + (r['Pcs']||r['pcs']||'-') + '</td>' +
   '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:10px;font-family:\'Courier New\',monospace">' + (r['Sales Order No.']||r['sales_order_no']||r['SalesOrderNo']||'-') + '</td>' +
