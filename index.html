@@ -42,9 +42,11 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
 .menu-card{background:#fff;border:1.5px solid var(--br);border-radius:var(--ra);padding:1.3rem 1.4rem;cursor:pointer;transition:all .2s;text-decoration:none;display:flex;align-items:center;gap:1rem;box-shadow:0 1px 4px rgba(0,0,0,.06)}
 .menu-card:hover{border-color:var(--ba);box-shadow:0 4px 20px rgba(37,99,176,.12);transform:translateY(-2px)}
 .menu-card.track:hover{border-color:var(--gr)}
+.menu-card.admin:hover{border-color:#d97706}
 .card-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px}
 .order .card-icon{background:var(--bl)}
 .track .card-icon{background:var(--gl)}
+.admin .card-icon{background:#fef3c7}
 .card-text h2{font-size:14px;font-weight:600;color:var(--tx);margin-bottom:3px}
 .card-text p{font-size:12px;color:var(--t2);line-height:1.5}
 .arrow{margin-left:auto;color:var(--t3);font-size:18px;flex-shrink:0;transition:transform .2s}
@@ -113,6 +115,14 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
         </div>
         <div class="arrow">›</div>
       </a>
+      <a class="menu-card admin" href="steel_bend_admin.html" id="adminCard" style="display:none">
+        <div class="card-icon">⚙️</div>
+        <div class="card-text">
+          <h2>Admin Panel</h2>
+          <p>จัดการรายการ Pending<br/>Mark as Sent เพื่อส่งโรงงาน</p>
+        </div>
+        <div class="arrow">›</div>
+      </a>
     </div>
     <div class="signout" onclick="signOut()">ออกจากระบบ</div>
   </div>
@@ -122,6 +132,7 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
 
 <script>
 const AUTH_URL='https://defaultc49eedf2bcd84a848b29b3e5f61a3d.03.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/89ec33c02cda46e6b5a53c86ad0cdae4/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=KAOAU4tru--J9rAwcQgUj6kywEszKoEDkEr4LP3tuYQ';
+const ADMIN_EMAILS=['kittiphums','chontichac','chayanisn'];
 
 // เช็ค session
 window.onload=function(){
@@ -178,6 +189,8 @@ function showMenu(email){
   document.getElementById('loginCard').classList.add('hide');
   document.getElementById('menuView').classList.add('show');
   document.getElementById('greetName').textContent=email+'@tatasteelthailand.com';
+  const isAdmin=ADMIN_EMAILS.includes(email.toLowerCase().trim());
+  document.getElementById('adminCard').style.display=isAdmin?'flex':'none';
 }
 
 function signOut(){
