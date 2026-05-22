@@ -323,114 +323,136 @@ function getProdName(r) {
   return PROD_MAP[sp]||PROD_MAP[fp]||parseProdName(desc)||desc||'-';
 }
   function printOrders() {
-  let targetPlant = currentPlant;
+  var targetPlant = currentPlant;
   if (!targetPlant) {
-    const choice = confirm('พิมพ์ใบสรุปสำหรับโรงงานไหน?\n\nกด OK = SCSC\nกด Cancel = NTS');
+    var choice = confirm('พิมพ์ใบสรุปสำหรับโรงงานไหน?\n\nกด OK = SCSC\nกด Cancel = NTS');
     targetPlant = choice ? 'SCSC' : 'NTS';
   }
+  var plantCode = targetPlant === 'SCSC' ? '0435' : '0431';
+  var rows = allRows.filter(function(r){ return getStatus(r)==='Pending' && rowPlant(r)===targetPlant; });
+  if (rows.length === 0) { alert('ไม่มีรายการ Pending สำหรับ ' + targetPlant); return; }
 
-  const plantCode = targetPlant === 'SCSC' ? '0435' : '0431';
-  const rows = allRows.filter(r => getStatus(r) === 'Pending' && rowPlant(r) === targetPlant);
+  var now = new Date();
+  var pad2 = function(n){ return String(n).padStart(2,'0'); };
+  var todayStr = pad2(now.getDate())+'/'+pad2(now.getMonth()+1)+'/'+now.getFullYear();
+  var timeStr  = pad2(now.getHours())+':'+pad2(now.getMinutes());
 
-  if (rows.length === 0) {
-    alert('ไม่มีรายการ Pending สำหรับ ' + targetPlant);
-    return;
-  }
+  rows.sort(function(a,b){ return String(a['Date']||'').localeCompare(String(b['Date']||'')); });
 
-  const now = new Date();
-  const pad2 = n => String(n).padStart(2,'0');
-  const todayStr = pad2(now.getDate()) + '/' + pad2(now.getMonth()+1) + '/' + now.getFullYear();
-  const timeStr  = pad2(now.getHours()) + ':' + pad2(now.getMinutes());
+  var totalTons = rows.reduce(function(s,r){ return s+rowTons(r); },0).toFixed(3);
+  var totalPcs  = rows.reduce(function(s,r){ return s+(parseInt(r['Pcs']||r['pcs']||0)||0); },0);
 
-  const totalTons = rows.reduce((s,r) => s + rowTons(r), 0).toFixed(3);
-  const totalPcs  = rows.reduce((s,r) => s + (parseInt(r['Pcs']||r['pcs']||0)||0), 0);
+  // ── สรุปตามเกรด ───────────────────────────────────────────────────────────
+  var sumMap = {};
+  rows.forEach(function(r){
+    var name = getProdName(r);
+    if (!sumMap[name]) sumMap[name] = {tons:0, pcs:0};
+    sumMap[name].tons += rowTons(r);
+    sumMap[name].pcs  += parseInt(r['Pcs']||r['pcs']||0)||0;
+  });
+  var sumEntries = Object.entries(sumMap).sort(function(a,b){ return a[0].localeCompare(b[0]); });
 
-  // Sort SCSC first, then by date
-  rows.sort((a,b) => {
-    const da = String(a['Date']||a['date']||'');
-    const db = String(b['Date']||b['date']||'');
-    return da.localeCompare(db);
+  var sumHtml = '';
+  sumEntries.forEach(function(e, i){
+    var bg = i%2===0 ? '#ffffff' : '#f0f9ff';
+    sumHtml += '<tr style="background:'+bg+'">'
+      +'<td style="padding:6px 8px;border:1px solid #cbd5e1;text-align:right;font-size:11px">'+(i+1)+'</td>'
+      +'<td style="padding:6px 8px;border:1px solid #cbd5e1;font-size:12px;font-weight:600">'+ e[0] +'</td>'
+      +'<td style="padding:6px 8px;border:1px solid #cbd5e1;text-align:right;font-size:12px;font-weight:700;color:#0f2a4a">'+ e[1].tons.toFixed(3) +'</td>'
+      +'<td style="padding:6px 8px;border:1px solid #cbd5e1;text-align:right;font-size:12px;font-weight:700;color:#0f2a4a">'+ e[1].pcs.toLocaleString() +'</td>'
+      +'</tr>';
   });
 
-  let rowsHtml = '';
-  rows.forEach((r, i) => {
-    const bg = i % 2 === 0 ? '#ffffff' : '#f8fafc';
-    const id = rowId(r);
-    const emailShort = String(r['Submitter_email'] || r['submitter_email'] || '-').split('@')[0];
-  rowsHtml += '<tr style="background:' + bg + '">' +
-  '<td style="padding:5px 6px;border:1px solid #cbd5e1;text-align:right;font-size:11px">' + (i+1) + '</td>' +
-  '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:10px">' + getProdName(r) + '</td>' +
-  '<td style="padding:5px 6px;border:1px solid #cbd5e1;text-align:right;font-size:11px">' + (r['Tons']||r['tons']||'-') + '</td>' +
-  '<td style="padding:5px 6px;border:1px solid #cbd5e1;text-align:right;font-size:11px">' + (r['Pcs']||r['pcs']||'-') + '</td>' +
-  '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:10px;font-family:\'Courier New\',monospace">' + (r['Sales Order No.']||r['sales_order_no']||r['SalesOrderNo']||'-') + '</td>' +
-  '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:11px">' + (r['Customer Name']||r['customer_name']||'-') + '</td>' +
-  '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:11px">' + (r['Sales Person']||r['sales_person']||'-') + '</td>' +
-  '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:11px;white-space:nowrap">' + excelDateToStr(deliveryDateVal(r)) + '</td>' +
-  '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:11px">' + (r['Incoterms']||r['incoterms']||r['term']||'-') + '</td>' +
-  '<td style="padding:5px 6px;border:1px solid #cbd5e1;font-size:11px">' + (r['Remark']||r['remark']||r['order_remark']||'-') + '</td>' +
-'</tr>';
+  // ── รายละเอียดทุกรายการ ───────────────────────────────────────────────────
+  var detHtml = '';
+  rows.forEach(function(r, i){
+    var bg = i%2===0 ? '#ffffff' : '#f8fafc';
+    detHtml += '<tr style="background:'+bg+'">'
+      +'<td style="padding:4px 5px;border:1px solid #cbd5e1;text-align:right;font-size:10px">'+(i+1)+'</td>'
+      +'<td style="padding:4px 5px;border:1px solid #cbd5e1;font-size:10px">'+ getProdName(r) +'</td>'
+      +'<td style="padding:4px 5px;border:1px solid #cbd5e1;text-align:right;font-size:10px">'+(r['Tons']||r['tons']||'-')+'</td>'
+      +'<td style="padding:4px 5px;border:1px solid #cbd5e1;text-align:right;font-size:10px">'+(r['Pcs']||r['pcs']||'-')+'</td>'
+      +'<td style="padding:4px 5px;border:1px solid #cbd5e1;font-size:10px;font-family:Courier New,monospace">'+(r['Sales Order No.']||r['sales_order_no']||r['SalesOrderNo']||'-')+'</td>'
+      +'<td style="padding:4px 5px;border:1px solid #cbd5e1;font-size:10px">'+(r['Customer Name']||r['customer_name']||'-')+'</td>'
+      +'<td style="padding:4px 5px;border:1px solid #cbd5e1;font-size:10px">'+(r['Sales Person']||r['sales_person']||'-')+'</td>'
+      +'<td style="padding:4px 5px;border:1px solid #cbd5e1;font-size:10px;white-space:nowrap">'+excelDateToStr(deliveryDateVal(r))+'</td>'
+      +'<td style="padding:4px 5px;border:1px solid #cbd5e1;font-size:10px">'+(r['Incoterms']||r['incoterms']||r['term']||'-')+'</td>'
+      +'<td style="padding:4px 5px;border:1px solid #cbd5e1;font-size:10px">'+(r['Remark']||r['remark']||r['order_remark']||'-')+'</td>'
+      +'</tr>';
   });
 
-  const html = '<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"/>' +
-    '<title>ใบสรุปสั่งพับเหล็ก — ' + targetPlant + ' — ' + todayStr + '</title>' +
-    '<style>' +
-    '@page{size:A4 landscape;margin:15mm 12mm}' +
-    'body{font-family:Arial,Tahoma,sans-serif;font-size:12px;color:#0f172a;margin:0;padding:0}' +
-    '.print-bar{position:fixed;top:0;left:0;right:0;background:#0f2a4a;padding:8px 16px;display:flex;align-items:center;gap:12px;z-index:999;box-shadow:0 2px 8px rgba(0,0,0,.3)}' +
-    '.print-bar span{color:rgba(255,255,255,.7);font-size:12px;flex:1}' +
-    '.print-btn{height:34px;padding:0 20px;background:#16a34a;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;font-family:Arial,sans-serif}' +
-    '.print-btn:hover{background:#15803d}' +
-    '.close-btn{height:34px;padding:0 14px;background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:7px;font-size:12px;cursor:pointer;font-family:Arial,sans-serif}' +
-    '.content{margin-top:54px;padding:0 4px}' +
-    '@media print{.print-bar{display:none}.content{margin-top:0}}' +
-    'table{width:100%;border-collapse:collapse}' +
-    'th{background:#0f2a4a;color:#fff;padding:5px 5px;text-align:left;font-size:10px;font-weight:600;white-space:nowrap;border:1px solid #0f2a4a}' +
-    'td{border:1px solid #cbd5e1;padding:4px 5px;vertical-align:middle}' +
-    '.hdr-title{font-size:16px;font-weight:700;color:#0f2a4a;margin-bottom:3px}' +
-    '.hdr-sub{font-size:11px;color:#475569;margin-bottom:10px}' +
-    '.stats{display:flex;gap:14px;margin:8px 0 12px;flex-wrap:wrap}' +
-    '.stat{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:6px 16px;text-align:center}' +
-    '.stat-n{font-size:18px;font-weight:700;color:#0f2a4a}' +
-    '.stat-l{font-size:10px;color:#64748b}' +
-    '.sig-row{margin-top:24px;display:flex;gap:32px}' +
-    '.sig-box{flex:1;border-top:1px solid #94a3b8;padding-top:6px;font-size:11px;color:#475569}' +
-    '.sig-name{font-size:13px;font-weight:600;color:#0f2a4a;margin-bottom:22px}' +
-    '</style></head><body>' +
-    '<div class="print-bar">' +
-      '<span>ใบสรุปรายการสั่งพับเหล็ก — ' + targetPlant + ' (Plant ' + plantCode + ') — ' + todayStr + ' ' + timeStr + '</span>' +
-      '<button class="close-btn" onclick="window.close()">&#10005; ปิด</button>' +
-      '<button class="print-btn" onclick="window.print()">&#128438; พิมพ์</button>' +
-    '</div>' +
-    '<div class="content">' +
-      '<div class="hdr-title">ใบสรุปรายการสั่งพับเหล็ก — โรงงาน ' + targetPlant + ' (Plant ' + plantCode + ')</div>' +
-      '<div class="hdr-sub">Tata Steel Thailand | SCM Demand Team &nbsp;|&nbsp; พิมพ์เมื่อ: ' + todayStr + ' ' + timeStr + '</div>' +
-      '<div class="stats">' +
-        '<div class="stat"><div class="stat-n">' + rows.length + '</div><div class="stat-l">รายการ Pending</div></div>' +
-        '<div class="stat"><div class="stat-n">' + totalTons + '</div><div class="stat-l">ตัน (Tons)</div></div>' +
-        '<div class="stat"><div class="stat-n">' + totalPcs + '</div><div class="stat-l">เส้น (PCS)</div></div>' +
-      '</div>' +
-      '<table><thead><tr>' +
-        '<th style="width:22px">No.</th>' +
-      '<th>สินค้า (Item Description)</th>' +
-      '<th style="text-align:right">Tons</th>' +
-      '<th style="text-align:right">PCS</th>' +
-      '<th>Sales Order</th>' +
-      '<th>ลูกค้า</th>' +
-      '<th>Sales</th>' +
-      '<th>วันรับสินค้า</th>' +
-      '<th>Incoterms</th>' +
-      '<th>หมายเหตุ</th>' +
-      '</tr></thead>' +
-      '<tbody>' + rowsHtml + '</tbody>' +
-    '</table>' +
-    '<div class="sig-row">' +
-      '<div class="sig-box"><div class="sig-name">ผู้จัดทำ / Prepared by</div>ชื่อ: ___________________________<br/>วันที่: ' + todayStr + '</div>' +
-      '<div class="sig-box"><div class="sig-name">ผู้อนุมัติ / Approved by</div>ชื่อ: ___________________________<br/>วันที่: _______________</div>' +
-      '<div class="sig-box"><div class="sig-name">โรงงาน / Factory received</div>ลงชื่อ: ___________________________<br/>วันที่: _______________</div>' +
-    '</div>' +
-    '</div></body></html>';
+  // ── สร้าง HTML ─────────────────────────────────────────────────────────────
+  var html = '<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"/>'
+    +'<title>ใบสรุปสั่งพับเหล็ก — '+targetPlant+' — '+todayStr+'</title>'
+    +'<style>'
+    +'@page{size:A4 landscape;margin:12mm 10mm}'
+    +'body{font-family:Arial,Tahoma,sans-serif;font-size:12px;color:#0f172a;margin:0;padding:0}'
+    +'.print-bar{position:fixed;top:0;left:0;right:0;background:#0f2a4a;padding:8px 16px;display:flex;align-items:center;gap:10px;z-index:999}'
+    +'.print-bar span{color:rgba(255,255,255,.7);font-size:12px;flex:1}'
+    +'.print-btn{height:32px;padding:0 18px;background:#16a34a;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer}'
+    +'.close-btn{height:32px;padding:0 12px;background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:6px;font-size:12px;cursor:pointer}'
+    +'@media print{.print-bar{display:none}.content{margin-top:0!important}}'
+    +'.content{margin-top:50px;padding:0 2px}'
+    +'.hdr-title{font-size:15px;font-weight:700;color:#0f2a4a;margin-bottom:2px}'
+    +'.hdr-sub{font-size:10px;color:#475569;margin-bottom:8px}'
+    +'.stats{display:flex;gap:12px;margin-bottom:10px}'
+    +'.stat{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:5px;padding:5px 14px;text-align:center}'
+    +'.stat-n{font-size:16px;font-weight:700;color:#0f2a4a}'
+    +'.stat-l{font-size:9px;color:#64748b}'
+    +'.section-label{font-size:11px;font-weight:700;color:#0f2a4a;border-left:3px solid #0f2a4a;padding-left:7px;margin:10px 0 5px}'
+    +'table{width:100%;border-collapse:collapse}'
+    +'th{background:#0f2a4a;color:#fff;padding:5px 6px;text-align:left;font-size:10px;font-weight:600;border:1px solid #0f2a4a}'
+    +'.sig-row{display:flex;gap:24px;margin-top:20px}'
+    +'.sig-box{flex:1;border-top:1px solid #94a3b8;padding-top:5px;font-size:10px;color:#475569}'
+    +'.sig-name{font-size:12px;font-weight:600;color:#0f2a4a;margin-bottom:18px}'
+    +'</style></head><body>'
+    +'<div class="print-bar">'
+      +'<span>ใบสรุปรายการสั่งพับเหล็ก — '+targetPlant+' (Plant '+plantCode+') — '+todayStr+' '+timeStr+'</span>'
+      +'<button class="close-btn" onclick="window.close()">✕ ปิด</button>'
+      +'<button class="print-btn" onclick="window.print()">🖨️ พิมพ์</button>'
+    +'</div>'
+    +'<div class="content">'
+      +'<div class="hdr-title">ใบสรุปรายการสั่งพับเหล็ก — โรงงาน '+targetPlant+' (Plant '+plantCode+')</div>'
+      +'<div class="hdr-sub">Tata Steel Thailand | SCM Demand Team &nbsp;|&nbsp; พิมพ์เมื่อ: '+todayStr+' '+timeStr+'</div>'
+      +'<div class="stats">'
+        +'<div class="stat"><div class="stat-n">'+rows.length+'</div><div class="stat-l">รายการ Pending</div></div>'
+        +'<div class="stat"><div class="stat-n">'+sumEntries.length+'</div><div class="stat-l">เกรดสินค้า</div></div>'
+        +'<div class="stat"><div class="stat-n">'+totalTons+'</div><div class="stat-l">ตัน (รวม)</div></div>'
+        +'<div class="stat"><div class="stat-n">'+totalPcs.toLocaleString()+'</div><div class="stat-l">เส้น (รวม)</div></div>'
+      +'</div>'
 
-  const w = window.open('', '_blank', 'width=1100,height=750,scrollbars=yes');
+      // ── ตารางสรุปเกรด
+      +'<div class="section-label">สรุปตามเกรดสินค้า</div>'
+      +'<table><thead><tr>'
+        +'<th style="width:30px">No.</th>'
+        +'<th>สินค้า (Item Description)</th>'
+        +'<th style="text-align:right;width:90px">รวมตัน</th>'
+        +'<th style="text-align:right;width:90px">รวมเส้น</th>'
+      +'</tr></thead><tbody>'+sumHtml+'</tbody></table>'
+
+      // ── ตารางรายละเอียด
+      +'<div class="section-label" style="margin-top:14px">รายละเอียดทุกรายการ</div>'
+      +'<table><thead><tr>'
+        +'<th style="width:22px">No.</th>'
+        +'<th>สินค้า (Item Description)</th>'
+        +'<th style="text-align:right">Tons</th>'
+        +'<th style="text-align:right">PCS</th>'
+        +'<th>Sales Order</th>'
+        +'<th>ลูกค้า</th>'
+        +'<th>Sales</th>'
+        +'<th>วันรับสินค้า</th>'
+        +'<th>Incoterms</th>'
+        +'<th>หมายเหตุ</th>'
+      +'</tr></thead><tbody>'+detHtml+'</tbody></table>'
+
+      +'<div class="sig-row">'
+        +'<div class="sig-box"><div class="sig-name">ผู้จัดทำ / Prepared by</div>ชื่อ: ___________________________<br/>วันที่: '+todayStr+'</div>'
+        +'<div class="sig-box"><div class="sig-name">ผู้อนุมัติ / Approved by</div>ชื่อ: ___________________________<br/>วันที่: _______________</div>'
+        +'<div class="sig-box"><div class="sig-name">โรงงาน / Factory received</div>ลงชื่อ: ___________________________<br/>วันที่: _______________</div>'
+      +'</div>'
+    +'</div></body></html>';
+
+  var w = window.open('','_blank','width=1100,height=750,scrollbars=yes');
   if (!w) { alert('กรุณาอนุญาต popup ใน browser ก่อนพิมพ์'); return; }
   w.document.write(html);
   w.document.close();
