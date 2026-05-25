@@ -223,7 +223,8 @@ tbody td.cb-td input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent
 // ── URLs ─────────────────────────────────────────────────────────────────────
 const FLOW_URL = 'https://defaultc49eedf2bcd84a848b29b3e5f61a3d.03.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/dd06128deabc40d8ba6a54df6e6327bd/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=J_ZPZCb4OzwlGSQ3GXc27pDL8NKs_VmWYqzVdg-pe0w';
 const MARK_SENT_URL = 'https://defaultc49eedf2bcd84a848b29b3e5f61a3d.03.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/1e4a17125d7840b888494c29add2d889/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=aAVPqqnU7rOm3gDmVUVI441GlvPjZ4xD4p0-rrG5wbA';
-
+const SAP_DONE_URL = 'https://defaultc49eedf2bcd84a848b29b3e5f61a3d.03.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/217b6c25991e459c92da5a57416d0e61/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dyaVxfFcMaw-q9Tk3NTQCbAsQySX3AAS4Cmb1Lx89-8';
+  
 // ── Admin whitelist ───────────────────────────────────────────────────────────
 const ADMIN_EMAILS = ['kittiphums', 'chontichac', 'chayanisn'];
 
@@ -276,9 +277,10 @@ function getSapStatus(row) {
 
 function sapBadge(row) {
   const done = getSapStatus(row);
-  return done
-    ? '<span style="color:#16a34a;font-size:12px;font-weight:600">&#10003; Done</span>'
-    : '<span style="color:#94a3b8;font-size:12px">— รอ</span>';
+  const id = rowId(row);
+  if (done) return '<span style="color:#16a34a;font-size:12px;font-weight:600">&#10003; Done</span>';
+  if (!id)  return '<span style="color:#94a3b8;font-size:12px">— รอ</span>';
+  return `<button onclick="markSapDone('${id}')" style="background:none;border:1px solid #cbd5e1;border-radius:6px;padding:2px 8px;font-size:11px;color:#94a3b8;cursor:pointer;font-family:'IBM Plex Sans Thai',sans-serif" onmouseover="this.style.borderColor='#16a34a';this.style.color='#16a34a'" onmouseout="this.style.borderColor='#cbd5e1';this.style.color='#94a3b8'">— รอ ✎</button>`;
 }
 
 function rowId(row) { return row['OrderID'] || row['order_id'] || ''; }
@@ -459,7 +461,26 @@ function getProdName(r) {
 }
 
 // ── Fetch ─────────────────────────────────────────────────────────────────────
-async function fetchData() {
+async function markSapDone(orderId) {
+  if (!confirm(`ยืนยัน SAP Done สำหรับ Order: ${orderId}?`)) return;
+  document.getElementById('errBox').style.display = 'none';
+  document.getElementById('okBox').style.display  = 'none';
+  try {
+    const res = await fetch(SAP_DONE_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ order_ids: [orderId] })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    document.getElementById('okBox').textContent = `✅ SAP Done สำเร็จ: ${orderId}`;
+    document.getElementById('okBox').style.display = 'block';
+    await fetchData();
+  } catch(e) {
+    document.getElementById('errBox').textContent = 'SAP Done ไม่สำเร็จ: ' + e.message;
+    document.getElementById('errBox').style.display = 'block';
+  }
+}
+  async function fetchData() {
   document.getElementById('loadingBox').style.display = 'block';
   document.getElementById('tableCard').style.display = 'none';
   document.getElementById('statsRow').style.display = 'none';
