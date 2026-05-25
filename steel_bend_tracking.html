@@ -134,7 +134,7 @@ tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t
 <select class="filter-select" id="fStatus" onchange="applyFilter()">
   <option value="">ทุกสถานะ</option>
   <option value="pending">⏳ รอดำเนินการ</option>
-  <option value="done">✅ ส่งแล้ว</option>
+  <option value="done">✅ สำเร็จ</option>
   <option value="cancelled">ยกเลิกแล้ว</option>
   <option value="error">⚠️ Error</option>
 </select>
@@ -315,7 +315,7 @@ function statusBadge(row){
   if(statusText==='Pending') return '<span class="badge pending">⏳ รอดำเนินการ</span>';
   if(statusText==='Error') return '<span class="badge error">⚠️ Error</span>';
   if(statusText==='Cancelled') return '<span class="badge cancelled">ยกเลิก</span>';
-  return '<span class="badge done">✅ ส่งแล้ว</span>';
+  return '<span class="badge done">✅ สำเร็จ</span>';
 }
 
 function statusSortOrder(row){
