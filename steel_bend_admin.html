@@ -89,7 +89,10 @@ tbody td.cb-td input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent
 .err-box{background:var(--rl);border:1px solid #fca5a5;border-radius:var(--ra);padding:.75rem 1rem;font-size:13px;color:var(--rd);margin-bottom:.9rem}
 .ok-box{background:var(--gl);border:1px solid #86efac;border-radius:var(--ra);padding:.75rem 1rem;font-size:13px;color:#15803d;margin-bottom:.9rem}
 .warn-box{background:var(--al);border:1px solid #fcd34d;border-radius:var(--ra);padding:.65rem 1rem;font-size:12px;color:#92400e;margin-bottom:.9rem}
-
+.fg{display:flex;flex-direction:column;gap:6px}
+.fg-label{font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;white-space:nowrap}
+.fg-sep{width:1px;background:var(--br);margin:0 20px;align-self:stretch}
+.filter-grid{display:flex;align-items:stretch;flex-wrap:wrap;row-gap:14px}
 @media(max-width:900px){
   body{padding:.75rem .5rem 2rem}
   .stats-row{grid-template-columns:repeat(2,1fr)}
@@ -123,28 +126,49 @@ tbody td.cb-td input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent
 <div id="okBox" class="ok-box" style="display:none"></div>
 
 <!-- FILTER -->
-<div class="card">
-  <div class="filter-bar">
-    <span class="filter-label">Plant:</span>
-    <button class="pill active" id="pillAll" onclick="setPlant('')">ทั้งหมด</button>
-    <button class="pill scsc" id="pillSCSC" onclick="setPlant('SCSC')">SCSC</button>
-    <button class="pill nts" id="pillNTS" onclick="setPlant('NTS')">NTS</button>
-    <span class="sep">|</span>
-<span class="filter-label">แสดง:</span>
-    <div class="view-toggle">
-      <button class="active" id="viewPending" onclick="setView('pending')">⏳ Pending</button>
-      <button id="viewAll" onclick="setView('all')">ทั้งหมด</button>
+<div class="card" style="padding:1.1rem 1.5rem">
+  <div class="filter-grid">
+
+    <div class="fg">
+      <div class="fg-label">โรงงาน</div>
+      <div style="display:flex;gap:5px">
+        <button class="pill active" id="pillAll"  onclick="setPlant('')">ทั้งหมด</button>
+        <button class="pill scsc"   id="pillSCSC" onclick="setPlant('SCSC')">SCSC</button>
+        <button class="pill nts"    id="pillNTS"  onclick="setPlant('NTS')">NTS</button>
+      </div>
     </div>
-    <span class="sep">|</span>
-    <span class="filter-label">SAP:</span>
-    <div class="view-toggle">
-      <button class="active" id="sapAll" onclick="setSap('')">ทั้งหมด</button>
-      <button id="sapDone" onclick="setSap('done')">&#10003; Done</button>
-      <button id="sapWait" onclick="setSap('pending')">— รอ</button>
+
+    <div class="fg-sep"></div>
+
+    <div class="fg">
+      <div class="fg-label">สถานะรายการ</div>
+      <div class="view-toggle">
+        <button class="active" id="viewPending" onclick="setView('pending')">⏳ Pending</button>
+        <button                id="viewAll"     onclick="setView('all')">ทั้งหมด</button>
+      </div>
     </div>
-    <span class="sep">|</span>
-    <button class="icon-btn" onclick="fetchData()">🔄 Refresh</button>
-    <button class="icon-btn" onclick="printOrders()" style="border-color:#d97706;color:#d97706">🖨️ พิมพ์ใบสรุป</button>
+
+    <div class="fg-sep"></div>
+
+    <div class="fg">
+      <div class="fg-label">SAP</div>
+      <div class="view-toggle">
+        <button class="active" id="sapAll"  onclick="setSap('')">ทั้งหมด</button>
+        <button                id="sapDone" onclick="setSap('done')">✓ Done</button>
+        <button                id="sapWait" onclick="setSap('pending')">— รอ</button>
+      </div>
+    </div>
+
+    <div class="fg" style="margin-left:auto">
+      <div class="fg-label" style="visibility:hidden">-</div>
+      <div style="display:flex;gap:8px">
+        <button class="icon-btn" onclick="fetchData()">🔄 Refresh</button>
+        <button class="icon-btn" onclick="printOrders()" style="border-color:#d97706;color:#d97706">🖨️ พิมพ์ใบสรุป</button>
+      </div>
+    </div>
+
+  </div>
+</div>
 
 <!-- STATS -->
 <div class="stats-row" id="statsRow" style="display:none">
