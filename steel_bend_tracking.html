@@ -33,6 +33,7 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
 .filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:.75rem}
 .filter-select{height:32px;padding:0 8px;font-size:12px;font-family:'IBM Plex Sans Thai',sans-serif;border:1px solid var(--br);border-radius:7px;background:#fff;color:var(--tx);outline:none}
 .filter-select:focus{border-color:var(--ba)}
+.note-cell{max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px;color:var(--t2)}
 .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:.9rem}
 .stat-box{background:#fff;border:1px solid var(--br);border-radius:var(--ra);padding:.75rem 1rem;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.05)}
 .stat-num{font-size:22px;font-weight:600;color:var(--bm)}
@@ -169,6 +170,7 @@ tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t
           <th class="receive-col">วันที่รับสินค้า</th>
           <th class="cutoff-col">รอบตัดยอด</th>
           <th>Email ผู้สั่ง</th>
+          <th class="note-col">หมายเหตุ</th>
           <th>สถานะ</th>
           <th>จัดการ</th>
         </tr>
@@ -308,6 +310,12 @@ function cutoffDisplay(row){
 
 function hasCutoff(row){
   return cutoffDisplay(row) !== '';
+}
+  function noteValue(row){
+  return String(row['Order_Remark']??row['order_remark']??row['Remark']??row['remark']??row['Note']??row['note']??'').trim();
+}
+function hasNote(row){
+  return noteValue(row) !== '';
 }
 
 function statusBadge(row){
@@ -450,6 +458,7 @@ function renderTable(rows){
   const pending=rows.filter(r=>isPending(r)).length;
   const showReceiveDate=allRows.some(r=>hasReceiveDate(r));
   const showCutoff=allRows.some(r=>hasCutoff(r));
+  const showNote=rows.some(r=>hasNote(r));
 
   document.getElementById('statTotal').textContent=rows.length;
   document.getElementById('statDone').textContent=done;
@@ -458,6 +467,7 @@ function renderTable(rows){
   document.getElementById('countLabel').textContent=`แสดง ${rows.length} รายการ`;
   document.querySelectorAll('.receive-col').forEach(el=>{el.style.display=showReceiveDate?'':'none';});
   document.querySelectorAll('.cutoff-col').forEach(el=>{el.style.display=showCutoff?'':'none';});
+  document.querySelectorAll('.note-col').forEach(el=>{el.style.display=showNote?'':'none';});
 
   if(rows.length===0){
     document.getElementById('tableCard').style.display='none';
@@ -485,6 +495,8 @@ function renderTable(rows){
       ${showReceiveDate?`<td class="mono receive-col">${excelDateToStr(receiveDateValue(r))}</td>`:''}
       ${showCutoff?`<td class="mono cutoff-col" style="font-size:11px">${cutoffDisplay(r)||'-'}</td>`:''}
       <td class="mono" style="font-size:11px">${emailShort}</td>
+      ${showNote?`<td class="note-col"><span class="note-cell" title="${noteValue(r).replace(/"/g,'&quot;')}">${noteValue(r)||'-'}</span></td>`:''}
+      <td>${statusBadge(r)}</td>
       <td>${statusBadge(r)}</td>
       <td>${cancelAction(r,rowIndex)}</td>
     </tr>`;
