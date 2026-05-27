@@ -62,6 +62,7 @@ tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t
 .badge.pending{background:var(--al);color:#92400e}
 .badge.error{background:var(--rl);color:var(--rd)}
 .badge.cancelled{background:var(--sl);color:var(--t2)}
+.badge.bending{background:#dbeafe;color:#1e40af}
 .cancel-btn{height:28px;padding:0 10px;border:1px solid #fca5a5;background:#fff;color:var(--rd);border-radius:7px;font-size:11px;font-family:'IBM Plex Sans Thai',sans-serif;cursor:pointer;white-space:nowrap}
 .cancel-btn:hover{background:var(--rl)}
 .cancel-btn:disabled{border-color:var(--br);color:var(--t3);background:var(--sl);cursor:not-allowed}
@@ -134,7 +135,8 @@ tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t
 
 <select class="filter-select" id="fStatus" onchange="applyFilter()">
   <option value="">ทุกสถานะ</option>
-  <option value="pending">⏳ รอดำเนินการ</option>
+  <option value="waiting">⏳ รอดำเนินการ</option>
+  <option value="bending">🔩 รอพับเหล็ก</option>
   <option value="done">✅ สำเร็จ</option>
   <option value="cancelled">ยกเลิกแล้ว</option>
   <option value="error">⚠️ Error</option>
@@ -239,13 +241,8 @@ function getStatusText(row){
   return st||'Pending';
 }
 
-function isPending(row){
-  return getStatusText(row)==='Pending';
-}
-
-function isDoneStatus(row){
-  return getStatusText(row)==='Sent';
-}
+function isPending(row){ return getDisplayStatus(row)==='waiting'; }
+function isDoneStatus(row){ return getDisplayStatus(row)==='done'; }
 
 function fullEmail(value){
   const v=String(value||'').trim().toLowerCase();
@@ -317,21 +314,43 @@ function hasCutoff(row){
 function hasNote(row){
   return noteValue(row) !== '';
 }
-
-function statusBadge(row){
-  const statusText=getStatusText(row);
-  if(statusText==='Pending') return '<span class="badge pending">⏳ รอดำเนินการ</span>';
-  if(statusText==='Error') return '<span class="badge error">⚠️ Error</span>';
-  if(statusText==='Cancelled') return '<span class="badge cancelled">ยกเลิก</span>';
-  return '<span class="badge done">✅ สำเร็จ</span>';
+function getSapDone(row){
+  return isTrue(row['Status']??row['status']??'');
 }
-
+function getDisplayStatus(row){
+  const wf=getStatusText(row);
+  if(wf==='Pending') return 'waiting';
+  if(wf==='Sent') return getSapDone(row)?'done':'bending';
+  if(wf==='Cancelled') return 'cancelled';
+  if(wf==='Error') return 'error';
+  return 'waiting';
+}
+function getSapDone(row){
+  return isTrue(row['Status']??row['status']??'');
+}
+function getDisplayStatus(row){
+  const wf=getStatusText(row);
+  if(wf==='Pending') return 'waiting';
+  if(wf==='Sent') return getSapDone(row)?'done':'bending';
+  if(wf==='Cancelled') return 'cancelled';
+  if(wf==='Error') return 'error';
+  return 'waiting';
+}
+function statusBadge(row){
+  const s=getDisplayStatus(row);
+  if(s==='waiting') return '<span class="badge pending">⏳ รอดำเนินการ</span>';
+  if(s==='bending') return '<span class="badge bending">🔩 รอพับเหล็ก</span>';
+  if(s==='done')    return '<span class="badge done">✅ สำเร็จ</span>';
+  if(s==='cancelled') return '<span class="badge cancelled">ยกเลิก</span>';
+  return '<span class="badge error">⚠️ Error</span>';
+}
 function statusSortOrder(row){
-  const statusText=getStatusText(row);
-  if(statusText==='Pending') return 0;
-  if(statusText==='Error') return 1;
-  if(statusText==='Cancelled') return 2;
-  return 3;
+  const s=getDisplayStatus(row);
+  if(s==='waiting') return 0;
+  if(s==='bending') return 1;
+  if(s==='error')   return 2;
+  if(s==='cancelled') return 3;
+  return 4;
 }
 
 function cancelAction(row,idx){
@@ -431,13 +450,7 @@ if(fItem){
   );
 }
 
-if(fStatus==='done') rows=rows.filter(r=>isDoneStatus(r));
-
-if(fStatus==='pending') rows=rows.filter(r=>isPending(r));
-
-if(fStatus==='cancelled') rows=rows.filter(r=>getStatusText(r)==='Cancelled');
-
-if(fStatus==='error') rows=rows.filter(r=>getStatusText(r)==='Error');
+if(fStatus) rows=rows.filter(r=>getDisplayStatus(r)===fStatus);
 
   renderTable(rows);
 }
