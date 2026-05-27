@@ -312,7 +312,7 @@ function hasCutoff(row){
   return cutoffDisplay(row) !== '';
 }
   function noteValue(row){
-  return String(row['Order_Remark']??row['order_remark']??row['Remark']??row['remark']??row['Note']??row['note']??'').trim();
+  return String(row['Order Remark']??row['Order_Remark']??row['order_remark']??row['Remark']??row['remark']??'').trim();
 }
 function hasNote(row){
   return noteValue(row) !== '';
