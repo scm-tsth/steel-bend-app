@@ -566,6 +566,7 @@ function setPlant(plant) {
 function setView(view) {
   currentView = view;
   document.getElementById('viewPending').classList.toggle('active', view === 'pending');
+  document.getElementById('viewSent').classList.toggle('active', view === 'sent');
   document.getElementById('viewAll').classList.toggle('active', view === 'all');
   selectedIds.clear();
   applyFilter();
@@ -582,6 +583,7 @@ function applyFilter() {
   let rows = [...allRows];
 
   if (currentView === 'pending') rows = rows.filter(r => getStatus(r) === 'Pending');
+  if (currentView === 'sent')    rows = rows.filter(r => getStatus(r) === 'Sent');
   if (currentPlant) rows = rows.filter(r => rowPlant(r) === currentPlant);
   if (currentSap === 'done')    rows = rows.filter(r => getSapStatus(r) === true);
 if (currentSap === 'pending') rows = rows.filter(r => getSapStatus(r) === false);
