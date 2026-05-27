@@ -742,7 +742,8 @@ async function markAsSent() {
       'Mark as Sent สำเร็จ ' + ids.length + ' รายการ (SCSC: ' + scsc + ', NTS: ' + nts + ')';
     document.getElementById('okBox').style.display = 'block';
     selectedIds.clear();
-    await fetchData();
+     await new Promise(r => setTimeout(r, 8000));
+     await fetchData();
   } catch(e) {
     document.getElementById('errBox').textContent = 'Mark as Sent ไม่สำเร็จ: ' + e.message;
     document.getElementById('errBox').style.display = 'block';
