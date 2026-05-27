@@ -497,7 +497,6 @@ function renderTable(rows){
       <td class="mono" style="font-size:11px">${emailShort}</td>
       ${showNote?`<td class="note-col"><span class="note-cell" title="${noteValue(r).replace(/"/g,'&quot;')}">${noteValue(r)||'-'}</span></td>`:''}
       <td>${statusBadge(r)}</td>
-      <td>${statusBadge(r)}</td>
       <td>${cancelAction(r,rowIndex)}</td>
     </tr>`;
   }).join('');
