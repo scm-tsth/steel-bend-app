@@ -363,7 +363,8 @@ function makeItem(id,idx){
       <div class="field"><label>จำนวน (Tons) <span class="req">*</span></label>
         <input type="number" id="ton-${id}" placeholder="0.000" step="0.001" min="0" oninput="calcPcs(${id})"/></div>
       <div class="field"><label>PCS (เส้น)</label>
-        <input type="number" id="pcs-${id}" placeholder="อัตโนมัติ" min="0"/></div>
+  <input type="number" id="pcs-${id}" placeholder="อัตโนมัติ" min="0"/>
+  <div id="pcs-warn-${id}" style="display:none;font-size:11px;color:#dc2626;margin-top:3px;font-weight:500">⚠️ น้ำหนักไม่เต็มเส้น</div></div>
     </div>
     <div class="field" style="margin-bottom:.7rem"><label>เลขที่ SO</label>
       <input type="text" id="so-${id}" placeholder="ระบุถ้ามี"/></div>
@@ -417,17 +418,20 @@ function calcPcs(id){
   const ton=document.getElementById('ton-'+id)?.value;
   const tonVal=parseFloat(ton);
   const pcsEl=document.getElementById('pcs-'+id);
-  if(!ton||!tonVal){pcsEl.value='';return;}
+  const warnEl=document.getElementById('pcs-warn-'+id);
+  const hideWarn=()=>{if(warnEl)warnEl.style.display='none';};
+  if(!ton||!tonVal){pcsEl.value='';hideWarn();return;}
   const uw=UW[mat]||0;
-  if(!uw){pcsEl.value='';return;}
+  if(!uw){pcsEl.value='';hideWarn();return;}
   const exact=tonVal*1000/uw;
   const floored=Math.floor(exact);
   const diff=exact-floored;
-  // ถ้าเกินจำนวนเต็ม (เช่น 160.01x) ให้ปัดขึ้นเป็นจำนวนเต็ม
-  // ถ้าขาด (เช่น 159.9xx) ให้แสดงทศนิยม 3 ตำแหน่ง
-  if(diff<0.001){pcsEl.value=floored;}         // แทบลงตัว → จำนวนเต็ม
-  else if(diff>0.999){pcsEl.value=floored+1;}   // เกินนิดเดียว → ปัดขึ้น
-  else{pcsEl.value=parseFloat(exact.toFixed(3));} // ขาด → แสดงทศนิยม 3 ตำแหน่ง
+  if(diff<0.001){pcsEl.value=floored;hideWarn();}
+  else if(diff>0.999){pcsEl.value=floored+1;hideWarn();}
+  else{
+    pcsEl.value=parseFloat(exact.toFixed(3));
+    if(warnEl)warnEl.style.display='block';
+  }
 }
 function gv(id){const el=document.getElementById(id);return el?el.value.trim():'';}
 function toast(msg,type=''){
