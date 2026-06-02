@@ -426,11 +426,14 @@ function calcPcs(id){
   const exact=tonVal*1000/uw;
   const floored=Math.floor(exact);
   const diff=exact-floored;
-  if(diff<0.001){pcsEl.value=floored;hideWarn();}
-  else if(diff>0.999){pcsEl.value=floored+1;hideWarn();}
-  else{
+  if(diff<0.001){pcsEl.value=floored;hideWarn();}         // ลงตัว
+  else if(diff>0.999){pcsEl.value=floored+1;hideWarn();}  // เกินนิดเดียว → ปัดขึ้น
+  else if(diff>=0.5){                                      // เศษขาด → แจ้งเตือน
     pcsEl.value=parseFloat(exact.toFixed(3));
     if(warnEl)warnEl.style.display='block';
+  } else {                                                 // เศษเกิน → ปกติ
+    pcsEl.value=parseFloat(exact.toFixed(3));
+    hideWarn();
   }
 }
 function gv(id){const el=document.getElementById(id);return el?el.value.trim():'';}
