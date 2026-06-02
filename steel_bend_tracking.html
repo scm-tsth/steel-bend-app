@@ -512,7 +512,7 @@ function renderTable(rows){
 
     return 0;
   });
-  cconst waiting=rows.filter(r=>getDisplayStatus(r)==='waiting');
+  const waiting=rows.filter(r=>getDisplayStatus(r)==='waiting');
 const bending=rows.filter(r=>getDisplayStatus(r)==='bending');
 const done=rows.filter(r=>getDisplayStatus(r)==='done');
   const showReceiveDate=allRows.some(r=>hasReceiveDate(r));
