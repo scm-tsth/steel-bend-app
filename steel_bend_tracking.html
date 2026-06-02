@@ -34,7 +34,17 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
 .filter-select{height:32px;padding:0 8px;font-size:12px;font-family:'IBM Plex Sans Thai',sans-serif;border:1px solid var(--br);border-radius:7px;background:#fff;color:var(--tx);outline:none}
 .filter-select:focus{border-color:var(--ba)}
 .note-cell{max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px;color:var(--t2)}
-.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:.9rem}
+.stats-row{display:grid;grid-template-columns:1fr 1fr 1.4fr 1.4fr;gap:8px;margin-bottom:.9rem}
+.stat-split{display:flex;align-items:center;gap:6px;margin:4px 0 3px}
+.stat-split-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px}
+.stat-split-num{font-size:20px;font-weight:700;color:var(--am);line-height:1}
+.stat-split-num.blue{color:var(--ba)}
+.stat-split-tag{font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px}
+.stat-split-tag.scsc{background:#e0f2fe;color:#0369a1}
+.stat-split-tag.nts{background:var(--gl);color:#15803d}
+.stat-split-sep{width:1px;height:28px;background:var(--br);flex-shrink:0}
+.stat-split-total{font-size:10px;color:var(--t2);text-align:center;margin-top:1px}
+.stat-box-head{font-size:11px;font-weight:600;margin-bottom:2px}
 .stat-box{background:#fff;border:1px solid var(--br);border-radius:var(--ra);padding:.75rem 1rem;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.05)}
 .stat-num{font-size:22px;font-weight:600;color:var(--bm)}
 .stat-num.green{color:var(--gr)}
@@ -148,9 +158,44 @@ tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t
 
 <!-- STATS -->
 <div class="stats-row" id="statsRow" style="display:none">
-  <div class="stat-box"><div class="stat-num" id="statTotal">0</div><div class="stat-label">รายการทั้งหมด</div></div>
-  <div class="stat-box"><div class="stat-num done green" id="statDone">0</div><div class="stat-label">ดำเนินการแล้ว</div></div>
-  <div class="stat-box"><div class="stat-num amber" id="statPending">0</div><div class="stat-label">รอดำเนินการ</div></div>
+  <div class="stat-box">
+    <div class="stat-num" id="statTotal">0</div>
+    <div class="stat-label">รายการทั้งหมด</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-num green" id="statDone">0</div>
+    <div class="stat-label">ดำเนินการแล้ว</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-box-head" style="color:var(--am)">⏳ รอดำเนินการ</div>
+    <div class="stat-split">
+      <div class="stat-split-item">
+        <span class="stat-split-num" id="statPendingSCSC">0</span>
+        <span class="stat-split-tag scsc">SCSC</span>
+      </div>
+      <div class="stat-split-sep"></div>
+      <div class="stat-split-item">
+        <span class="stat-split-num" id="statPendingNTS">0</span>
+        <span class="stat-split-tag nts">NTS</span>
+      </div>
+    </div>
+    <div class="stat-split-total">รวม <strong id="statPending">0</strong> รายการ</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-box-head" style="color:var(--ba)">🔩 รอพับเหล็ก</div>
+    <div class="stat-split">
+      <div class="stat-split-item">
+        <span class="stat-split-num blue" id="statBendSCSC">0</span>
+        <span class="stat-split-tag scsc">SCSC</span>
+      </div>
+      <div class="stat-split-sep"></div>
+      <div class="stat-split-item">
+        <span class="stat-split-num blue" id="statBendNTS">0</span>
+        <span class="stat-split-tag nts">NTS</span>
+      </div>
+    </div>
+    <div class="stat-split-total">รวม <strong id="statBend">0</strong> รายการ</div>
+  </div>
 </div>
 
 <!-- TABLE -->
@@ -467,16 +512,22 @@ function renderTable(rows){
 
     return 0;
   });
-  const done=rows.filter(r=>isDoneStatus(r)).length;
-  const pending=rows.filter(r=>isPending(r)).length;
+  cconst waiting=rows.filter(r=>getDisplayStatus(r)==='waiting');
+const bending=rows.filter(r=>getDisplayStatus(r)==='bending');
+const done=rows.filter(r=>getDisplayStatus(r)==='done');
   const showReceiveDate=allRows.some(r=>hasReceiveDate(r));
   const showCutoff=allRows.some(r=>hasCutoff(r));
   const showNote=rows.some(r=>hasNote(r));
 
   document.getElementById('statTotal').textContent=rows.length;
-  document.getElementById('statDone').textContent=done;
-  document.getElementById('statPending').textContent=pending;
-  document.getElementById('statsRow').style.display='grid';
+document.getElementById('statDone').textContent=done.length;
+document.getElementById('statPending').textContent=waiting.length;
+document.getElementById('statPendingSCSC').textContent=waiting.filter(r=>(r['Plant']||r['plant']||'')==='SCSC').length;
+document.getElementById('statPendingNTS').textContent=waiting.filter(r=>(r['Plant']||r['plant']||'')==='NTS').length;
+document.getElementById('statBend').textContent=bending.length;
+document.getElementById('statBendSCSC').textContent=bending.filter(r=>(r['Plant']||r['plant']||'')==='SCSC').length;
+document.getElementById('statBendNTS').textContent=bending.filter(r=>(r['Plant']||r['plant']||'')==='NTS').length;
+document.getElementById('statsRow').style.display='grid';
   document.getElementById('countLabel').textContent=`แสดง ${rows.length} รายการ`;
   document.querySelectorAll('.receive-col').forEach(el=>{el.style.display=showReceiveDate?'':'none';});
   document.querySelectorAll('.cutoff-col').forEach(el=>{el.style.display=showCutoff?'':'none';});
