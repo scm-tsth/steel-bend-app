@@ -386,7 +386,7 @@ function getProdName(r) {
   rows.sort(function(a,b){ return String(a['Date']||'').localeCompare(String(b['Date']||'')); });
 
   var totalTons = rows.reduce(function(s,r){ return s+rowTons(r); },0).toFixed(3);
-  var totalPcs  = rows.reduce(function(s,r){ return s+(parseInt(r['Pcs']||r['pcs']||0)||0); },0);
+  var totalTons = Math.round(rows.reduce(function(s,r){ return s+rowTons(r); },0)).toLocaleString();
 
   // ── สรุปตามเกรด ───────────────────────────────────────────────────────────
   var sumMap = {};
@@ -404,8 +404,8 @@ function getProdName(r) {
     sumHtml += '<tr style="background:'+bg+'">'
       +'<td style="padding:6px 8px;border:1px solid #cbd5e1;text-align:right;font-size:11px">'+(i+1)+'</td>'
       +'<td style="padding:6px 8px;border:1px solid #cbd5e1;font-size:12px;font-weight:600">'+ e[0] +'</td>'
-      +'<td style="padding:6px 8px;border:1px solid #cbd5e1;text-align:right;font-size:12px;font-weight:700;color:#0f2a4a">'+ e[1].tons.toFixed(3) +'</td>'
-      +'<td style="padding:6px 8px;border:1px solid #cbd5e1;text-align:right;font-size:12px;font-weight:700;color:#0f2a4a">'+ e[1].pcs.toLocaleString() +'</td>'
+      +'<td style="padding:6px 8px;border:1px solid #cbd5e1;text-align:right;font-size:12px;font-weight:700;color:#0f2a4a">'+ Math.round(e[1].tons).toLocaleString() +'</td>'
+      +'<td style="padding:6px 8px;border:1px solid #cbd5e1;text-align:right;font-size:12px;font-weight:700;color:#0f2a4a">'+ Math.round(e[1].pcs).toLocaleString() +'</td>'
       +'</tr>';
   });
 
