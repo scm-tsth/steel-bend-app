@@ -385,8 +385,8 @@ function getProdName(r) {
 
   rows.sort(function(a,b){ return String(a['Date']||'').localeCompare(String(b['Date']||'')); });
 
-  var totalTons = rows.reduce(function(s,r){ return s+rowTons(r); },0).toFixed(3);
-  var totalTons = Math.round(rows.reduce(function(s,r){ return s+rowTons(r); },0)).toLocaleString();
+var totalTons = Math.round(rows.reduce(function(s,r){ return s+rowTons(r); },0)).toLocaleString();
+var totalPcs  = rows.reduce(function(s,r){ return s+(parseInt(r['Pcs']||r['pcs']||0)||0); },0);
 
   // ── สรุปตามเกรด ───────────────────────────────────────────────────────────
   var sumMap = {};
