@@ -159,6 +159,17 @@ tbody td.cb-td input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent
         <button                id="sapWait" onclick="setSap('pending')">— รอ</button>
       </div>
     </div>
+    <div class="fg-sep"></div>
+
+    <div class="fg">
+      <div class="fg-label">ค้นหาสินค้า</div>
+      <input type="text" id="fItem"
+        placeholder="เช่น DB12, RB25, SD40..."
+        oninput="setItem(this.value)"
+        style="height:30px;padding:0 10px;font-size:12px;font-family:'IBM Plex Sans Thai',sans-serif;border:1.5px solid var(--br);border-radius:8px;background:#fff;color:var(--tx);outline:none;width:190px;transition:border .15s"
+        onfocus="this.style.borderColor='#2563b0'"
+        onblur="this.style.borderColor='var(--br)'"/>
+    </div>
 
     <div class="fg" style="margin-left:auto">
       <div class="fg-label" style="visibility:hidden">-</div>
@@ -268,6 +279,7 @@ const selectedIds = new Set();
 let currentPlant = '';
 let currentView = 'pending';
 let currentSap = '';   // '' = ทั้งหมด, 'done' = SAP Done, 'pending' = SAP รอ
+let currentItem = '';
 
 // ── Utilities ─────────────────────────────────────────────────────────────────
 function excelDateToStr(val) {
@@ -579,6 +591,10 @@ function setSap(val){
   selectedIds.clear();
   applyFilter();
 }
+  function setItem(val) {
+  currentItem = val.trim().toLowerCase();
+  applyFilter();
+}
 function applyFilter() {
   let rows = [...allRows];
 
@@ -586,7 +602,10 @@ function applyFilter() {
   if (currentView === 'sent')    rows = rows.filter(r => getStatus(r) === 'Sent');
   if (currentPlant) rows = rows.filter(r => rowPlant(r) === currentPlant);
   if (currentSap === 'done')    rows = rows.filter(r => getSapStatus(r) === true);
-if (currentSap === 'pending') rows = rows.filter(r => getSapStatus(r) === false);
+  if (currentSap === 'pending') rows = rows.filter(r => getSapStatus(r) === false);
+  if (currentItem) rows = rows.filter(r =>
+  String(r['Item Description'] || r['item_description'] || '').toLowerCase().includes(currentItem)
+);
 
   // Sort: SCSC before NTS, then oldest first
   rows.sort((a, b) => {
