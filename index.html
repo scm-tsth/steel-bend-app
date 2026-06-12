@@ -42,10 +42,12 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
 .menu-card{background:#fff;border:1.5px solid var(--br);border-radius:var(--ra);padding:1.3rem 1.4rem;cursor:pointer;transition:all .2s;text-decoration:none;display:flex;align-items:center;gap:1rem;box-shadow:0 1px 4px rgba(0,0,0,.06)}
 .menu-card:hover{border-color:var(--ba);box-shadow:0 4px 20px rgba(37,99,176,.12);transform:translateY(-2px)}
 .menu-card.track:hover{border-color:var(--gr)}
+.menu-card.dash:hover{border-color:#7c3aed;box-shadow:0 4px 20px rgba(124,58,237,.12)}
 .menu-card.admin:hover{border-color:#d97706}
 .card-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px}
 .order .card-icon{background:var(--bl)}
 .track .card-icon{background:var(--gl)}
+.dash  .card-icon{background:#ede9fe}
 .admin .card-icon{background:#fef3c7}
 .card-text h2{font-size:14px;font-weight:600;color:var(--tx);margin-bottom:3px}
 .card-text p{font-size:12px;color:var(--t2);line-height:1.5}
@@ -99,6 +101,7 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
   <div class="menu-view" id="menuView">
     <div class="greeting">สวัสดีครับ <strong id="greetName"></strong></div>
     <div class="cards">
+
       <a class="menu-card order" href="steel_bend_order.html">
         <div class="card-icon">🔩</div>
         <div class="card-text">
@@ -107,6 +110,7 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
         </div>
         <div class="arrow">›</div>
       </a>
+
       <a class="menu-card track" href="steel_bend_tracking.html">
         <div class="card-icon">📋</div>
         <div class="card-text">
@@ -115,6 +119,23 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
         </div>
         <div class="arrow">›</div>
       </a>
+
+      <a class="menu-card dash" href="steel_bend_dashboard.html">
+        <div class="card-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <rect x="3"    y="3"    width="7.5" height="7.5" rx="1.5" fill="#7c3aed"/>
+            <rect x="13.5" y="3"    width="7.5" height="7.5" rx="1.5" fill="#7c3aed" opacity=".4"/>
+            <rect x="3"    y="13.5" width="7.5" height="7.5" rx="1.5" fill="#7c3aed" opacity=".4"/>
+            <rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5" fill="#7c3aed"/>
+          </svg>
+        </div>
+        <div class="card-text">
+          <h2>Dashboard</h2>
+          <p>ภาพรวมการสั่งพับ Top สินค้า<br/>และสรุปยอดตาม Customer Group</p>
+        </div>
+        <div class="arrow">›</div>
+      </a>
+
       <a class="menu-card admin" href="steel_bend_admin.html" id="adminCard" style="display:none">
         <div class="card-icon">⚙️</div>
         <div class="card-text">
@@ -123,6 +144,7 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
         </div>
         <div class="arrow">›</div>
       </a>
+
     </div>
     <div class="signout" onclick="signOut()">ออกจากระบบ</div>
   </div>
@@ -134,28 +156,20 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
 const AUTH_URL='https://defaultc49eedf2bcd84a848b29b3e5f61a3d.03.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/89ec33c02cda46e6b5a53c86ad0cdae4/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=KAOAU4tru--J9rAwcQgUj6kywEszKoEDkEr4LP3tuYQ';
 const ADMIN_EMAILS=['kittiphums','chontichac','chayanisn'];
 
-// เช็ค session
 window.onload=function(){
   const saved=localStorage.getItem('steel_user');
-  if(saved){
-    showMenu(saved);
-  }
+  if(saved) showMenu(saved);
 };
 
 async function doLogin(){
   const email=document.getElementById('emailInput').value.trim().toLowerCase();
   if(!email){document.getElementById('emailInput').focus();return;}
-
   const btn=document.getElementById('loginBtn');
   const txt=document.getElementById('loginText');
   const spin=document.getElementById('loginSpin');
   const err=document.getElementById('errMsg');
-
-  btn.disabled=true;
-  txt.style.display='none';
-  spin.style.display='inline-block';
+  btn.disabled=true; txt.style.display='none'; spin.style.display='inline-block';
   err.classList.remove('show');
-
   try{
     const controller=new AbortController();
     const tid=setTimeout(()=>controller.abort(),15000);
@@ -179,9 +193,7 @@ async function doLogin(){
     err.textContent='⚠️ เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง';
     err.classList.add('show');
   }finally{
-    btn.disabled=false;
-    txt.style.display='inline';
-    spin.style.display='none';
+    btn.disabled=false; txt.style.display='inline'; spin.style.display='none';
   }
 }
 
