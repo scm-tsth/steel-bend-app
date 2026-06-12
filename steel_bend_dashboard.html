@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dashboard — ระบบสั่งพับเหล็ก</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--bd:#0f2a4a;--bm:#1a3d6b;--ba:#2563b0;--bl:#dbeafe;--sl:#f1f5f9;--gr:#16a34a;--gl:#dcfce7;--rd:#dc2626;--rl:#fee2e2;--am:#d97706;--al:#fef3c7;--tx:#0f172a;--t2:#475569;--t3:#94a3b8;--br:#e2e8f0;--ra:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--tx);min-height:100vh;padding:1.25rem 1rem 3rem}
+.page{max-width:1440px;margin:0 auto}
+
+/* Header */
+.hdr{background:var(--bd);border-radius:12px;padding:.9rem 1.25rem;margin-bottom:1.1rem;display:flex;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(15,42,74,.15)}
+.hdr-icon{width:34px;height:34px;background:rgba(255,255,255,.13);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.hdr-text{flex:1}
+.hdr-text h1{color:#fff;font-size:15px;font-weight:600}
+.hdr-text p{color:rgba(255,255,255,.5);font-size:11px;margin-top:1px}
+.last-upd{font-size:11px;color:rgba(255,255,255,.45)}
+.hdr-btn{height:34px;padding:0 13px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.1);color:#fff;border-radius:8px;font-size:12px;font-weight:500;font-family:'IBM Plex Sans Thai',sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;cursor:pointer;transition:background .15s;margin-left:6px}
+.hdr-btn:hover{background:rgba(255,255,255,.2)}
+
+/* Card */
+.card{background:#fff;border:1px solid var(--br);border-radius:var(--ra);box-shadow:0 1px 3px rgba(0,0,0,.06)}
+
+/* KPI */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:.9rem}
+.kpi-box{background:#fff;border:1px solid var(--br);border-radius:var(--ra);padding:.9rem 1rem;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.kpi-num{font-size:30px;font-weight:700;color:var(--bm);line-height:1.1}
+.kpi-num.blue{color:var(--ba)}
+.kpi-num.amber{color:var(--am)}
+.kpi-num.red{color:var(--rd)}
+.kpi-label{font-size:11px;color:var(--t2);margin-top:4px}
+.kpi-sub{font-size:10px;color:var(--t3);margin-top:3px}
+
+/* Main grid */
+.main-grid{display:grid;grid-template-columns:1fr 1.55fr;gap:12px}
+
+/* Section title */
+.sec-title{font-size:13px;font-weight:600;color:var(--bd);margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.sec-title::before{content:'';width:4px;height:16px;background:var(--bd);border-radius:2px;flex-shrink:0}
+
+/* Chart card */
+.chart-card{padding:1.1rem 1.2rem}
+.chart-wrap{position:relative;height:290px}
+
+/* Group table card */
+.grp-card{padding:1.1rem 1.2rem 0}
+.grp-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:0}
+.grp-table thead th{background:var(--bd);color:#fff;padding:.45rem .75rem;text-align:left;font-weight:500;font-size:11px;letter-spacing:.3px;white-space:nowrap}
+.grp-table thead th:first-child{border-radius:8px 0 0 0}
+.grp-table thead th:last-child{border-radius:0 8px 0 0}
+.grp-table th.r{text-align:right}
+
+/* Group row */
+.grp-row{cursor:pointer}
+.grp-row td{padding:.65rem .75rem;border-bottom:1px solid var(--br);font-weight:500;vertical-align:middle;transition:background .1s}
+.grp-row:hover td{background:#f8fafc}
+.grp-row td.r{text-align:right;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t2)}
+
+/* Customer detail row */
+.cust-detail td{padding:0;border-bottom:2px solid var(--br)}
+.inner-table{width:100%;border-collapse:collapse;background:#f8fafc}
+.inner-hdr td{padding:.3rem .75rem .3rem 1.7rem;font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;background:#f1f5f9;border-bottom:.5px solid var(--br)}
+.inner-hdr td.r{text-align:right;padding:.3rem .75rem}
+.inner-hdr td.bar-td{padding:.3rem 1rem .3rem .5rem}
+.inner-tr td{padding:.38rem .75rem .38rem 1.7rem;font-size:11px;color:var(--tx);border-bottom:.5px solid var(--br)}
+.inner-tr:last-child td{border-bottom:none}
+.inner-tr td.r{text-align:right;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t2);padding:.38rem .75rem}
+.inner-tr td.bar-td{padding:.38rem 1rem .38rem .5rem;width:110px}
+.more-note{padding:.32rem .75rem .32rem 1.7rem;font-size:10px;color:var(--t3);font-style:italic}
+
+/* Mini bar */
+.mini-bar-track{height:5px;background:#e2e8f0;border-radius:3px;overflow:hidden}
+.mini-bar-fill{height:5px;border-radius:3px}
+
+/* Pct bar */
+.pct-row{display:flex;align-items:center;gap:6px}
+.pct-track{flex:1;height:5px;background:#e2e8f0;border-radius:3px;overflow:hidden;min-width:50px}
+.pct-fill{height:5px;border-radius:3px}
+.pct-txt{font-size:11px;color:var(--t2);white-space:nowrap;min-width:38px;text-align:right;font-family:'IBM Plex Mono',monospace}
+
+/* Chevron */
+.chev{font-size:9px;color:var(--t3);transition:transform .2s;display:inline-block}
+.chev.open{transform:rotate(180deg)}
+
+/* Group badge */
+.grp-badge{display:inline-flex;padding:2px 10px;border-radius:10px;font-size:11px;font-weight:600;white-space:nowrap}
+
+/* Loading / Error */
+.loading-box{text-align:center;padding:4rem 1rem;color:var(--t2);font-size:13px;background:#fff;border:1px solid var(--br);border-radius:var(--ra);box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.spin{display:inline-block;width:18px;height:18px;border:2px solid var(--br);border-top-color:var(--bm);border-radius:50%;animation:spin .7s linear infinite;vertical-align:-4px;margin-right:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.err-box{background:var(--rl);border:1px solid #fca5a5;border-radius:var(--ra);padding:.75rem 1rem;font-size:13px;color:var(--rd);margin-bottom:.9rem}
+
+@media(max-width:960px){
+  .kpi-row{grid-template-columns:repeat(2,1fr)}
+  .main-grid{grid-template-columns:1fr}
+  body{padding:.75rem .5rem 2rem}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-icon">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="3" width="7.5" height="7.5" rx="1.5" fill="rgba(255,255,255,0.85)"/>
+      <rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5" fill="rgba(255,255,255,0.45)"/>
+      <rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5" fill="rgba(255,255,255,0.45)"/>
+      <rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5" fill="rgba(255,255,255,0.85)"/>
+    </svg>
+  </div>
+  <div class="hdr-text">
+    <h1>Dashboard — ระบบสั่งพับเหล็ก</h1>
+    <p>ภาพรวมการสั่งพับเหล็ก | SCM Demand Team | Tata Steel Thailand</p>
+  </div>
+  <span class="last-upd" id="lastUpd"></span>
+  <button class="hdr-btn" onclick="loadData()">🔄 Refresh</button>
+  <a class="hdr-btn" href="index.html">← หน้าหลัก</a>
+</div>
+
+<div id="errBox" class="err-box" style="display:none"></div>
+
+<!-- KPI ROW -->
+<div class="kpi-row">
+  <div class="kpi-box">
+    <div class="kpi-num" id="kpiTotal">—</div>
+    <div class="kpi-label">Orders ทั้งหมด</div>
+  </div>
+  <div class="kpi-box">
+    <div class="kpi-num blue" id="kpiTons">—</div>
+    <div class="kpi-label">ตันรวมทั้งหมด</div>
+  </div>
+  <div class="kpi-box">
+    <div class="kpi-num amber" id="kpiActive">—</div>
+    <div class="kpi-label">กำลัง Active</div>
+    <div class="kpi-sub" id="kpiActiveSub"></div>
+  </div>
+  <div class="kpi-box">
+    <div class="kpi-num red" id="kpiSapWait">—</div>
+    <div class="kpi-label">รอ SAP ยืนยัน</div>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div id="loadingBox" class="loading-box">
+  <span class="spin"></span>กำลังโหลดข้อมูล...
+</div>
+
+<!-- MAIN GRID -->
+<div class="main-grid" id="mainGrid" style="display:none">
+
+  <!-- LEFT: Top 5 สินค้า -->
+  <div class="card chart-card">
+    <div class="sec-title">Top 5 สินค้าที่สั่งมากที่สุด (ตันรวม)</div>
+    <div class="chart-wrap">
+      <canvas id="chartTop5"></canvas>
+    </div>
+  </div>
+
+  <!-- RIGHT: Customer Group + Top Customers -->
+  <div class="card grp-card">
+    <div class="sec-title">สรุปตาม Customer Group + Top ลูกค้า</div>
+    <table class="grp-table">
+      <thead>
+        <tr>
+          <th style="width:110px">Group</th>
+          <th class="r">รายการ</th>
+          <th class="r">ตัน</th>
+          <th style="min-width:140px">สัดส่วน</th>
+          <th style="width:26px"></th>
+        </tr>
+      </thead>
+      <tbody id="grpBody"></tbody>
+    </table>
+  </div>
+
+</div>
+</div>
+
+<script>
+// ── FLOW URL ──────────────────────────────────────────────────────────────────
+const FLOW_URL = 'https://defaultc49eedf2bcd84a848b29b3e5f61a3d.03.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/dd06128deabc40d8ba6a54df6e6327bd/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=J_ZPZCb4OzwlGSQ3GXc27pDL8NKs_VmWYqzVdg-pe0w';
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function getStatus(row) {
+  const s = String(row['Status_Text'] ?? row['status_text'] ?? '').trim().toLowerCase();
+  if (!s || s === 'pending') return 'Pending';
+  if (s === 'sent' || s === 'done' || s === 'completed') return 'Sent';
+  if (s === 'cancelled' || s === 'canceled' || s === 'cancel') return 'Cancelled';
+  return 'Error';
+}
+function getSapDone(row) {
+  const v = row['Status'] ?? row['status'];
+  return v === true || String(v ?? '').toLowerCase() === 'true';
+}
+function getDisplayStatus(row) {
+  const wf = getStatus(row);
+  if (wf === 'Pending')   return 'waiting';
+  if (wf === 'Sent')      return getSapDone(row) ? 'done' : 'bending';
+  if (wf === 'Cancelled') return 'cancelled';
+  return 'error';
+}
+function rowTons(row) { return parseFloat(row['Tons'] || row['tons'] || 0) || 0; }
+function p2(n) { return String(n).padStart(2,'0'); }
+
+// ── Chart ─────────────────────────────────────────────────────────────────────
+let chartTop5 = null;
+
+// ── Load ──────────────────────────────────────────────────────────────────────
+async function loadData() {
+  document.getElementById('loadingBox').style.display = 'block';
+  document.getElementById('mainGrid').style.display   = 'none';
+  document.getElementById('errBox').style.display     = 'none';
+  ['kpiTotal','kpiTons','kpiActive','kpiSapWait']
+    .forEach(id => { document.getElementById(id).textContent = '—'; });
+  document.getElementById('kpiActiveSub').textContent = '';
+
+  try {
+    const res  = await fetch(FLOW_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body:'{}' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const rows = Array.isArray(data) ? data : (data.value || []);
+    renderAll(rows);
+    const n = new Date();
+    document.getElementById('lastUpd').textContent =
+      'อัพเดต ' + p2(n.getHours()) + ':' + p2(n.getMinutes()) + ':' + p2(n.getSeconds());
+  } catch(e) {
+    document.getElementById('errBox').textContent = 'โหลดข้อมูลไม่สำเร็จ: ' + e.message;
+    document.getElementById('errBox').style.display = 'block';
+  } finally {
+    document.getElementById('loadingBox').style.display = 'none';
+    document.getElementById('mainGrid').style.display   = 'grid';
+  }
+}
+
+function renderAll(rows) {
+  renderKPI(rows);
+  renderTop5(rows);
+  renderGroupTable(rows);
+}
+
+// ── KPI ───────────────────────────────────────────────────────────────────────
+function renderKPI(rows) {
+  const totalTons = rows.reduce((s,r) => s + rowTons(r), 0);
+  const waiting   = rows.filter(r => getDisplayStatus(r) === 'waiting').length;
+  const bending   = rows.filter(r => getDisplayStatus(r) === 'bending').length;
+  const sapWait   = rows.filter(r => getStatus(r) === 'Sent' && !getSapDone(r)).length;
+
+  document.getElementById('kpiTotal').textContent    = rows.length.toLocaleString();
+  document.getElementById('kpiTons').textContent     = totalTons.toFixed(3);
+  document.getElementById('kpiActive').textContent   = (waiting + bending).toLocaleString();
+  document.getElementById('kpiActiveSub').textContent= 'รอดำเนินการ ' + waiting + '  |  รอพับ ' + bending;
+  document.getElementById('kpiSapWait').textContent  = sapWait.toLocaleString();
+}
+
+// ── Top 5 Products ────────────────────────────────────────────────────────────
+function renderTop5(rows) {
+  const map = {};
+  rows.forEach(r => {
+    const item = String(r['Item Description'] || r['item_description'] || '(ไม่ระบุ)').trim();
+    if (!map[item]) map[item] = { tons:0, count:0 };
+    map[item].tons  += rowTons(r);
+    map[item].count += 1;
+  });
+
+  const top5 = Object.entries(map)
+    .sort((a,b) => b[1].tons - a[1].tons)
+    .slice(0,5)
+    .reverse(); // bottom = first for horizontal bar
+
+  const labels   = top5.map(([nm]) => nm.length > 32 ? nm.slice(0,30)+'…' : nm);
+  const tonsData = top5.map(([,v]) => parseFloat(v.tons.toFixed(3)));
+  const opacity  = [0.85, 0.72, 0.60, 0.48, 0.38];
+
+  if (chartTop5) chartTop5.destroy();
+  chartTop5 = new Chart(document.getElementById('chartTop5'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label:           'ตันรวม',
+        data:            tonsData,
+        backgroundColor: opacity.map(o => `rgba(37,99,176,${o})`).reverse(),
+        borderColor:     '#2563b0',
+        borderWidth:     1,
+        borderRadius:    4,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            afterLabel: ctx => {
+              const entry = top5[top5.length - 1 - ctx.dataIndex];
+              return entry ? ('  ' + entry[1].count + ' รายการ') : '';
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid:  { color:'#e2e8f0' },
+          ticks: { font:{ family:'IBM Plex Sans Thai', size:10 }, color:'#475569' },
+          title: { display:true, text:'ตัน', font:{size:10}, color:'#94a3b8' }
+        },
+        y: {
+          grid:  { display:false },
+          ticks: { font:{ family:'IBM Plex Sans Thai', size:10.5 }, color:'#0f2a4a' }
+        }
+      }
+    }
+  });
+}
+
+// ── Customer Group Table ──────────────────────────────────────────────────────
+const GRP_ORDER = ['Project','Retail','Direct','Export'];
+const GRP_STYLE = {
+  Project:{ bg:'#ede9fe', color:'#5b21b6', bar:'#7c3aed' },
+  Retail: { bg:'#dbeafe', color:'#1d4ed8', bar:'#2563b0' },
+  Direct: { bg:'#fef3c7', color:'#92400e', bar:'#d97706' },
+  Export: { bg:'#dcfce7', color:'#15803d', bar:'#16a34a' },
+};
+const DEFAULT_ST = { bg:'#f1f5f9', color:'#334155', bar:'#64748b' };
+
+function renderGroupTable(rows) {
+  // Build aggregation
+  const grpData = {};
+  GRP_ORDER.forEach(g => { grpData[g] = { count:0, tons:0, custMap:{} }; });
+
+  rows.forEach(r => {
+    const grp  = String(r['Customer Group'] || r['customer_group'] || '').trim() || '(ไม่ระบุ)';
+    const cust = String(r['Customer Name']  || r['customer_name']  || '').trim();
+    const tons = rowTons(r);
+    if (!grpData[grp]) grpData[grp] = { count:0, tons:0, custMap:{} };
+    grpData[grp].count += 1;
+    grpData[grp].tons  += tons;
+    if (cust && cust !== '-') {
+      if (!grpData[grp].custMap[cust]) grpData[grp].custMap[cust] = { count:0, tons:0 };
+      grpData[grp].custMap[cust].count += 1;
+      grpData[grp].custMap[cust].tons  += tons;
+    }
+  });
+
+  const allGroups = [
+    ...GRP_ORDER.filter(g => grpData[g]?.count > 0),
+    ...Object.keys(grpData).filter(g => !GRP_ORDER.includes(g) && grpData[g].count > 0),
+  ];
+
+  const grandTons = allGroups.reduce((s,g) => s + grpData[g].tons, 0);
+  const maxTons   = Math.max(...allGroups.map(g => grpData[g].tons), 1);
+
+  const tbody = document.getElementById('grpBody');
+  tbody.innerHTML = '';
+
+  allGroups.forEach((grp, gi) => {
+    const g  = grpData[grp];
+    const st = GRP_STYLE[grp] || DEFAULT_ST;
+    const pct  = grandTons > 0 ? (g.tons / grandTons * 100) : 0;
+    const barW = maxTons   > 0 ? (g.tons / maxTons   * 100) : 0;
+
+    const topCusts   = Object.entries(g.custMap)
+      .sort((a,b) => b[1].tons - a[1].tons)
+      .slice(0, 5);
+    const maxCT      = topCusts.length > 0 ? topCusts[0][1].tons : 1;
+    const extraCount = Object.keys(g.custMap).length - topCusts.length;
+    const safeId     = 'cust-grp-' + gi; // use index to avoid special char issues
+
+    // ── Group row ────────────────────────────────────────────────────────────
+    const grpTr = document.createElement('tr');
+    grpTr.className = 'grp-row';
+    grpTr.dataset.gid = safeId;
+    grpTr.onclick = () => toggleGroup(safeId);
+    grpTr.innerHTML =
+      '<td><span class="grp-badge" style="background:'+st.bg+';color:'+st.color+'">'+grp+'</span></td>' +
+      '<td class="r">'+g.count.toLocaleString()+'</td>' +
+      '<td class="r">'+g.tons.toFixed(3)+'</td>' +
+      '<td>' +
+        '<div class="pct-row">' +
+          '<div class="pct-track"><div class="pct-fill" style="width:'+barW.toFixed(1)+'%;background:'+st.bar+'"></div></div>' +
+          '<span class="pct-txt">'+pct.toFixed(1)+'%</span>' +
+        '</div>' +
+      '</td>' +
+      '<td style="text-align:center"><span class="chev" id="chev-'+safeId+'">▼</span></td>';
+    tbody.appendChild(grpTr);
+
+    // ── Customer detail row (hidden by default) ───────────────────────────────
+    const detTr = document.createElement('tr');
+    detTr.className = 'cust-detail';
+    detTr.id = safeId;
+    detTr.style.display = 'none';
+
+    // Build inner table HTML
+    let innerHtml =
+      '<table class="inner-table">' +
+      '<tr class="inner-hdr">' +
+        '<td>ลูกค้า</td>' +
+        '<td class="r">รายการ</td>' +
+        '<td class="r">ตัน</td>' +
+        '<td class="bar-td">สัดส่วนในกลุ่ม</td>' +
+      '</tr>';
+
+    if (topCusts.length === 0) {
+      innerHtml += '<tr class="inner-tr"><td colspan="4" style="color:var(--t3)">ไม่มีข้อมูลชื่อลูกค้า</td></tr>';
+    } else {
+      topCusts.forEach(function([cust, cv]) {
+        var cBarW = maxCT > 0 ? (cv.tons / maxCT * 100) : 0;
+        innerHtml +=
+          '<tr class="inner-tr">' +
+          '<td>'+cust+'</td>' +
+          '<td class="r">'+cv.count+'</td>' +
+          '<td class="r">'+cv.tons.toFixed(3)+'</td>' +
+          '<td class="bar-td">' +
+            '<div class="mini-bar-track">' +
+              '<div class="mini-bar-fill" style="width:'+cBarW.toFixed(1)+'%;background:'+st.bar+'"></div>' +
+            '</div>' +
+          '</td>' +
+          '</tr>';
+      });
+      if (extraCount > 0) {
+        innerHtml += '<tr><td class="more-note" colspan="4">+ อีก '+extraCount+' ลูกค้า</td></tr>';
+      }
+    }
+    innerHtml += '</table>';
+
+    detTr.innerHTML = '<td colspan="5">'+innerHtml+'</td>';
+    tbody.appendChild(detTr);
+  });
+}
+
+function toggleGroup(safeId) {
+  var row  = document.getElementById(safeId);
+  var chev = document.getElementById('chev-' + safeId);
+  if (!row) return;
+  var hidden = (row.style.display === 'none' || row.style.display === '');
+  row.style.display = hidden ? 'table-row' : 'none';
+  if (chev) chev.classList.toggle('open', hidden);
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+loadData();
+</script>
+</body>
+</html>
