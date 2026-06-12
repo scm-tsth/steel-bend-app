@@ -159,16 +159,15 @@ tbody td.cb-td input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent
         <button                id="sapWait" onclick="setSap('pending')">— รอ</button>
       </div>
     </div>
-    <div class="fg-sep"></div>
-
-    <div class="fg">
-      <div class="fg-label">ค้นหาสินค้า</div>
+       <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--br);display:flex;align-items:center;gap:10px">
+      <span style="font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;white-space:nowrap">🔍 ค้นหาสินค้า</span>
       <input type="text" id="fItem"
-        placeholder="เช่น DB12, RB25, SD40..."
+        placeholder="พิมพ์เพื่อกรอง เช่น DB12, RB25, SD40..."
         oninput="setItem(this.value)"
-        style="height:30px;padding:0 10px;font-size:12px;font-family:'IBM Plex Sans Thai',sans-serif;border:1.5px solid var(--br);border-radius:8px;background:#fff;color:var(--tx);outline:none;width:190px;transition:border .15s"
+        style="height:32px;padding:0 10px;font-size:12px;font-family:'IBM Plex Sans Thai',sans-serif;border:1.5px solid var(--br);border-radius:8px;background:#fff;color:var(--tx);outline:none;width:260px;transition:border .15s"
         onfocus="this.style.borderColor='#2563b0'"
         onblur="this.style.borderColor='var(--br)'"/>
+      <span id="fItemHint" style="font-size:11px;color:var(--t2)"></span>
     </div>
 
     <div class="fg" style="margin-left:auto">
