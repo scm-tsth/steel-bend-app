@@ -109,6 +109,8 @@ tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t
     <h1>Tracking — ระบบสั่งพับเหล็ก</h1>
     <p>ติดตามสถานะรายการสั่งพับเหล็ก</p>
   </div>
+  <span id="lastUpd" style="font-size:11px;color:rgba(255,255,255,.45);white-space:nowrap"></span>
+  <button class="home-btn" onclick="fetchData()">🔄 Refresh</button>
   <a class="home-btn" href="index.html">← กลับหน้าหลัก</a>
 </div>
 
@@ -123,7 +125,6 @@ tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t
       </div>
       <button class="load-btn" id="searchBtn" onclick="loadByEmail()">🔍 ค้นหา</button>
       <button class="all-btn" onclick="loadAll()">ทั้งหมด</button>
-      <button class="all-btn" onclick="fetchData()">🔄 Refresh</button>
     </div>
   </div>
   <div class="filter-row">
@@ -370,17 +371,6 @@ function getDisplayStatus(row){
   if(wf==='Error') return 'error';
   return 'waiting';
 }
-function getSapDone(row){
-  return isTrue(row['Status']??row['status']??'');
-}
-function getDisplayStatus(row){
-  const wf=getStatusText(row);
-  if(wf==='Pending') return 'waiting';
-  if(wf==='Sent') return getSapDone(row)?'done':'bending';
-  if(wf==='Cancelled') return 'cancelled';
-  if(wf==='Error') return 'error';
-  return 'waiting';
-}
 function statusBadge(row){
   const s=getDisplayStatus(row);
   if(s==='waiting') return '<span class="badge pending">⏳ รอดำเนินการ</span>';
@@ -450,6 +440,10 @@ async function fetchData(){
     const data=await res.json();
     allRows=Array.isArray(data)?data:(data.value||[]);
     applyFilter();
+    const n=new Date();
+    const pad=v=>String(v).padStart(2,'0');
+    document.getElementById('lastUpd').textContent=
+      'อัพเดต '+pad(n.getHours())+':'+pad(n.getMinutes())+':'+pad(n.getSeconds());
   }catch(e){
     document.getElementById('errBox').textContent='เกิดข้อผิดพลาดในการโหลดข้อมูล: '+e.message;
     document.getElementById('errBox').style.display='block';
