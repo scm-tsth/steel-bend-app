@@ -13,54 +13,74 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
 .page{max-width:1440px;margin:0 auto}
 
 /* Header */
-.hdr{background:var(--bd);border-radius:12px;padding:.9rem 1.25rem;margin-bottom:1.1rem;display:flex;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(15,42,74,.15)}
+.hdr{background:var(--bd);border-radius:12px;padding:.9rem 1.25rem;margin-bottom:.85rem;display:flex;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(15,42,74,.15)}
 .hdr-icon{width:34px;height:34px;background:rgba(255,255,255,.13);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .hdr-text{flex:1}
 .hdr-text h1{color:#fff;font-size:15px;font-weight:600}
 .hdr-text p{color:rgba(255,255,255,.5);font-size:11px;margin-top:1px}
-.last-upd{font-size:11px;color:rgba(255,255,255,.45)}
+.last-upd{font-size:11px;color:rgba(255,255,255,.45);white-space:nowrap}
 .hdr-btn{height:34px;padding:0 13px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.1);color:#fff;border-radius:8px;font-size:12px;font-weight:500;font-family:'IBM Plex Sans Thai',sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;cursor:pointer;transition:background .15s;margin-left:6px}
 .hdr-btn:hover{background:rgba(255,255,255,.2)}
+
+/* Filter bar */
+.filter-bar{background:#fff;border:1px solid var(--br);border-radius:var(--ra);padding:.65rem 1.1rem;margin-bottom:.85rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.filter-group{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.filter-label{font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+.filter-sep{width:1px;height:22px;background:var(--br);flex-shrink:0}
+.fpill{padding:4px 12px;border-radius:14px;border:1px solid var(--br);background:#fff;color:var(--t2);font-size:12px;font-family:'IBM Plex Sans Thai',sans-serif;cursor:pointer;transition:all .15s;font-weight:500;white-space:nowrap}
+.fpill:hover{border-color:var(--ba);color:var(--ba)}
+.fpill.on{background:var(--bm);border-color:var(--bm);color:#fff}
+.fpill.scsc.on{background:#7c3aed;border-color:#7c3aed;color:#fff}
+.fpill.nts.on{background:#0369a1;border-color:#0369a1;color:#fff}
+.filter-result{margin-left:auto;font-size:11px;color:var(--t3);white-space:nowrap}
+.filter-result strong{color:var(--bm)}
 
 /* Card */
 .card{background:#fff;border:1px solid var(--br);border-radius:var(--ra);box-shadow:0 1px 3px rgba(0,0,0,.06)}
 
 /* KPI */
-.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:.9rem}
-.kpi-box{background:#fff;border:1px solid var(--br);border-radius:var(--ra);padding:.9rem 1rem;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.05)}
-.kpi-num{font-size:30px;font-weight:700;color:var(--bm);line-height:1.1}
+.kpi-row{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:.85rem}
+.kpi-box{background:#fff;border:1px solid var(--br);border-radius:var(--ra);padding:.8rem 1rem;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.kpi-num{font-size:26px;font-weight:700;color:var(--bm);line-height:1.1;font-family:'IBM Plex Mono',monospace}
 .kpi-num.blue{color:var(--ba)}
 .kpi-num.amber{color:var(--am)}
-.kpi-num.red{color:var(--rd)}
+.kpi-num.green{color:var(--gr)}
+.kpi-num.slate{color:#64748b}
 .kpi-label{font-size:11px;color:var(--t2);margin-top:4px}
-.kpi-sub{font-size:10px;color:var(--t3);margin-top:3px}
+.kpi-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px;vertical-align:1px}
 
 /* Main grid */
-.main-grid{display:grid;grid-template-columns:1fr 1.55fr;gap:12px}
+.main-grid{display:grid;grid-template-columns:1fr 1.55fr;gap:12px;align-items:start}
+.left-col{display:flex;flex-direction:column;gap:12px}
+.right-col{display:flex;flex-direction:column;gap:12px}
 
 /* Section title */
 .sec-title{font-size:13px;font-weight:600;color:var(--bd);margin-bottom:14px;display:flex;align-items:center;gap:7px}
 .sec-title::before{content:'';width:4px;height:16px;background:var(--bd);border-radius:2px;flex-shrink:0}
 
-/* Chart card */
+/* Chart cards */
 .chart-card{padding:1.1rem 1.2rem}
-.chart-wrap{position:relative;height:290px}
+.chart-wrap{position:relative}
+.chart-wrap.h240{height:240px}
+.chart-wrap.h260{height:260px}
+.chart-wrap.h300{height:300px}
+
+/* Donut legend */
+.donut-legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:12px;justify-content:center}
+.dl-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t2)}
+.dl-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
 
 /* Group table card */
 .grp-card{padding:1.1rem 1.2rem 0}
-.grp-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:0}
+.grp-table{width:100%;border-collapse:collapse;font-size:12px}
 .grp-table thead th{background:var(--bd);color:#fff;padding:.45rem .75rem;text-align:left;font-weight:500;font-size:11px;letter-spacing:.3px;white-space:nowrap}
 .grp-table thead th:first-child{border-radius:8px 0 0 0}
 .grp-table thead th:last-child{border-radius:0 8px 0 0}
 .grp-table th.r{text-align:right}
-
-/* Group row */
 .grp-row{cursor:pointer}
 .grp-row td{padding:.65rem .75rem;border-bottom:1px solid var(--br);font-weight:500;vertical-align:middle;transition:background .1s}
 .grp-row:hover td{background:#f8fafc}
 .grp-row td.r{text-align:right;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t2)}
-
-/* Customer detail row */
 .cust-detail td{padding:0;border-bottom:2px solid var(--br)}
 .inner-table{width:100%;border-collapse:collapse;background:#f8fafc}
 .inner-hdr td{padding:.3rem .75rem .3rem 1.7rem;font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;background:#f1f5f9;border-bottom:.5px solid var(--br)}
@@ -71,22 +91,14 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
 .inner-tr td.r{text-align:right;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t2);padding:.38rem .75rem}
 .inner-tr td.bar-td{padding:.38rem 1rem .38rem .5rem;width:110px}
 .more-note{padding:.32rem .75rem .32rem 1.7rem;font-size:10px;color:var(--t3);font-style:italic}
-
-/* Mini bar */
 .mini-bar-track{height:5px;background:#e2e8f0;border-radius:3px;overflow:hidden}
 .mini-bar-fill{height:5px;border-radius:3px}
-
-/* Pct bar */
 .pct-row{display:flex;align-items:center;gap:6px}
 .pct-track{flex:1;height:5px;background:#e2e8f0;border-radius:3px;overflow:hidden;min-width:50px}
 .pct-fill{height:5px;border-radius:3px}
 .pct-txt{font-size:11px;color:var(--t2);white-space:nowrap;min-width:38px;text-align:right;font-family:'IBM Plex Mono',monospace}
-
-/* Chevron */
 .chev{font-size:9px;color:var(--t3);transition:transform .2s;display:inline-block}
 .chev.open{transform:rotate(180deg)}
-
-/* Group badge */
 .grp-badge{display:inline-flex;padding:2px 10px;border-radius:10px;font-size:11px;font-weight:600;white-space:nowrap}
 
 /* Loading / Error */
@@ -94,12 +106,15 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
 .spin{display:inline-block;width:18px;height:18px;border:2px solid var(--br);border-top-color:var(--bm);border-radius:50%;animation:spin .7s linear infinite;vertical-align:-4px;margin-right:8px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .err-box{background:var(--rl);border:1px solid #fca5a5;border-radius:var(--ra);padding:.75rem 1rem;font-size:13px;color:var(--rd);margin-bottom:.9rem}
+.empty-trend{display:flex;align-items:center;justify-content:center;height:100%;font-size:12px;color:var(--t3)}
 
+@media(max-width:1100px){.kpi-row{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:960px){
   .kpi-row{grid-template-columns:repeat(2,1fr)}
   .main-grid{grid-template-columns:1fr}
   body{padding:.75rem .5rem 2rem}
 }
+@media(max-width:480px){.kpi-row{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
@@ -124,6 +139,25 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
   <a class="hdr-btn" href="index.html">← หน้าหลัก</a>
 </div>
 
+<!-- FILTER BAR -->
+<div class="filter-bar">
+  <div class="filter-group">
+    <span class="filter-label">ช่วงเวลา</span>
+    <button class="fpill" data-range="today" onclick="setRange('today')">วันนี้</button>
+    <button class="fpill" data-range="7" onclick="setRange('7')">7 วัน</button>
+    <button class="fpill on" data-range="30" onclick="setRange('30')">30 วัน</button>
+    <button class="fpill" data-range="all" onclick="setRange('all')">ทั้งหมด</button>
+  </div>
+  <div class="filter-sep"></div>
+  <div class="filter-group">
+    <span class="filter-label">Plant</span>
+    <button class="fpill on" data-plant="" onclick="setPlant('')">ทั้งหมด</button>
+    <button class="fpill scsc" data-plant="SCSC" onclick="setPlant('SCSC')">SCSC</button>
+    <button class="fpill nts" data-plant="NTS" onclick="setPlant('NTS')">NTS</button>
+  </div>
+  <div class="filter-result" id="filterResult"></div>
+</div>
+
 <div id="errBox" class="err-box" style="display:none"></div>
 
 <!-- KPI ROW -->
@@ -134,16 +168,23 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
   </div>
   <div class="kpi-box">
     <div class="kpi-num blue" id="kpiTons">—</div>
-    <div class="kpi-label">ตันรวมทั้งหมด</div>
+    <div class="kpi-label">ตันรวม</div>
   </div>
   <div class="kpi-box">
-    <div class="kpi-num amber" id="kpiActive">—</div>
-    <div class="kpi-label">กำลัง Active</div>
-    <div class="kpi-sub" id="kpiActiveSub"></div>
+    <div class="kpi-num amber" id="kpiWaiting">—</div>
+    <div class="kpi-label"><span class="kpi-dot" style="background:#d97706"></span>รอดำเนินการ</div>
   </div>
   <div class="kpi-box">
-    <div class="kpi-num red" id="kpiSapWait">—</div>
-    <div class="kpi-label">รอ SAP ยืนยัน</div>
+    <div class="kpi-num blue" id="kpiBending">—</div>
+    <div class="kpi-label"><span class="kpi-dot" style="background:#2563b0"></span>รอพับ</div>
+  </div>
+  <div class="kpi-box">
+    <div class="kpi-num green" id="kpiDone">—</div>
+    <div class="kpi-label"><span class="kpi-dot" style="background:#16a34a"></span>เสร็จแล้ว</div>
+  </div>
+  <div class="kpi-box">
+    <div class="kpi-num slate" id="kpiCancel">—</div>
+    <div class="kpi-label"><span class="kpi-dot" style="background:#64748b"></span>ยกเลิก</div>
   </div>
 </div>
 
@@ -155,82 +196,179 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
 <!-- MAIN GRID -->
 <div class="main-grid" id="mainGrid" style="display:none">
 
-  <!-- LEFT: Top 5 สินค้า -->
-  <div class="card chart-card">
-    <div class="sec-title">Top 5 สินค้าที่สั่งมากที่สุด (ตันรวม)</div>
-    <div class="chart-wrap">
-      <canvas id="chartTop5"></canvas>
+  <!-- LEFT COLUMN -->
+  <div class="left-col">
+
+    <!-- Status Distribution Donut -->
+    <div class="card chart-card">
+      <div class="sec-title">สถานะ Orders</div>
+      <div class="chart-wrap h240">
+        <canvas id="chartDonut"></canvas>
+      </div>
+      <div class="donut-legend" id="donutLegend"></div>
     </div>
+
+    <!-- Top 5 Products -->
+    <div class="card chart-card">
+      <div class="sec-title">Top 5 สินค้า (ตันรวม)</div>
+      <div class="chart-wrap h260">
+        <canvas id="chartTop5"></canvas>
+      </div>
+    </div>
+
   </div>
 
-  <!-- RIGHT: Customer Group + Top Customers -->
-  <div class="card grp-card">
-    <div class="sec-title">สรุปตาม Customer Group + Top ลูกค้า</div>
-    <table class="grp-table">
-      <thead>
-        <tr>
-          <th style="width:110px">Group</th>
-          <th class="r">รายการ</th>
-          <th class="r">ตัน</th>
-          <th style="min-width:140px">สัดส่วน</th>
-          <th style="width:26px"></th>
-        </tr>
-      </thead>
-      <tbody id="grpBody"></tbody>
-    </table>
-  </div>
+  <!-- RIGHT COLUMN -->
+  <div class="right-col">
 
+    <!-- Trend Chart -->
+    <div class="card chart-card">
+      <div class="sec-title" id="trendTitle">แนวโน้ม Orders</div>
+      <div class="chart-wrap h300" id="trendWrap">
+        <canvas id="chartTrend"></canvas>
+      </div>
+    </div>
+
+    <!-- Customer Group Table -->
+    <div class="card grp-card">
+      <div class="sec-title">สรุปตาม Customer Group</div>
+      <table class="grp-table">
+        <thead>
+          <tr>
+            <th style="width:110px">Group</th>
+            <th class="r">รายการ</th>
+            <th class="r">ตัน</th>
+            <th style="min-width:130px">สัดส่วน</th>
+            <th style="width:26px"></th>
+          </tr>
+        </thead>
+        <tbody id="grpBody"></tbody>
+      </table>
+    </div>
+
+  </div>
 </div>
 </div>
 
 <script>
-// ── FLOW URL ──────────────────────────────────────────────────────────────────
+// ── Config ────────────────────────────────────────────────────────────────────
 const FLOW_URL = 'https://defaultc49eedf2bcd84a848b29b3e5f61a3d.03.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/dd06128deabc40d8ba6a54df6e6327bd/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=J_ZPZCb4OzwlGSQ3GXc27pDL8NKs_VmWYqzVdg-pe0w';
 
+const TH_MONTHS  = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const STATUS_COLOR = { waiting:'#d97706', bending:'#2563b0', done:'#16a34a', cancelled:'#64748b', error:'#dc2626' };
+const STATUS_LABEL = { waiting:'รอดำเนินการ', bending:'รอพับ', done:'เสร็จแล้ว', cancelled:'ยกเลิก', error:'Error' };
+const GRP_ORDER    = ['Project','Retail','Direct','Export'];
+const GRP_STYLE    = {
+  Project:{ bg:'#ede9fe', color:'#5b21b6', bar:'#7c3aed' },
+  Retail: { bg:'#dbeafe', color:'#1d4ed8', bar:'#2563b0' },
+  Direct: { bg:'#fef3c7', color:'#92400e', bar:'#d97706' },
+  Export: { bg:'#dcfce7', color:'#15803d', bar:'#16a34a' },
+};
+const DEFAULT_ST = { bg:'#f1f5f9', color:'#334155', bar:'#64748b' };
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let allRows       = [];
+let selectedRange = '30';
+let selectedPlant = '';
+let chartDonut    = null;
+let chartTop5     = null;
+let chartTrend    = null;
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
-function getStatus(row) {
+function p2(n){ return String(n).padStart(2,'0'); }
+
+function getStatus(row){
   const s = String(row['Status_Text'] ?? row['status_text'] ?? '').trim().toLowerCase();
   if (!s || s === 'pending') return 'Pending';
   if (s === 'sent' || s === 'done' || s === 'completed') return 'Sent';
   if (s === 'cancelled' || s === 'canceled' || s === 'cancel') return 'Cancelled';
   return 'Error';
 }
-function getSapDone(row) {
+function getSapDone(row){
   const v = row['Status'] ?? row['status'];
   return v === true || String(v ?? '').toLowerCase() === 'true';
 }
-function getDisplayStatus(row) {
+function getDisplayStatus(row){
   const wf = getStatus(row);
   if (wf === 'Pending')   return 'waiting';
   if (wf === 'Sent')      return getSapDone(row) ? 'done' : 'bending';
   if (wf === 'Cancelled') return 'cancelled';
   return 'error';
 }
-function rowTons(row) { return parseFloat(row['Tons'] || row['tons'] || 0) || 0; }
-function p2(n) { return String(n).padStart(2,'0'); }
+function rowTons(row){ return parseFloat(row['Tons'] || row['tons'] || 0) || 0; }
 
-// ── Chart ─────────────────────────────────────────────────────────────────────
-let chartTop5 = null;
+function parseRowDate(row){
+  const val = row['Date'] || row['date'] || row['Submitted_At'] || row['submitted_at'];
+  if (val == null || val === '') return null;
+  if (typeof val === 'number') return new Date((val - 25569) * 86400 * 1000);
+  const s = String(val).trim();
+  if (!s || s === '-') return null;
+  const d = new Date(s.includes('T') ? s : s.split('T')[0]);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function startOfDay(d){ return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+
+// ── Filter ────────────────────────────────────────────────────────────────────
+function getFilteredRows(){
+  let rows = allRows;
+
+  if (selectedRange !== 'all'){
+    const today = startOfDay(new Date());
+    let from;
+    if (selectedRange === 'today'){
+      from = today;
+    } else {
+      from = new Date(today);
+      from.setDate(from.getDate() - parseInt(selectedRange) + 1);
+    }
+    rows = rows.filter(r => {
+      const d = parseRowDate(r);
+      return d && startOfDay(d) >= from;
+    });
+  }
+
+  if (selectedPlant){
+    rows = rows.filter(r => (r['Plant'] || r['plant'] || '') === selectedPlant);
+  }
+
+  return rows;
+}
+
+function setRange(v){
+  selectedRange = v;
+  document.querySelectorAll('.fpill[data-range]').forEach(el => {
+    el.classList.toggle('on', el.dataset.range === v);
+  });
+  renderAll(getFilteredRows());
+}
+
+function setPlant(v){
+  selectedPlant = v;
+  document.querySelectorAll('.fpill[data-plant]').forEach(el => {
+    el.classList.toggle('on', el.dataset.plant === v);
+  });
+  renderAll(getFilteredRows());
+}
 
 // ── Load ──────────────────────────────────────────────────────────────────────
-async function loadData() {
+async function loadData(){
   document.getElementById('loadingBox').style.display = 'block';
   document.getElementById('mainGrid').style.display   = 'none';
   document.getElementById('errBox').style.display     = 'none';
-  ['kpiTotal','kpiTons','kpiActive','kpiSapWait']
+  ['kpiTotal','kpiTons','kpiWaiting','kpiBending','kpiDone','kpiCancel']
     .forEach(id => { document.getElementById(id).textContent = '—'; });
-  document.getElementById('kpiActiveSub').textContent = '';
 
   try {
     const res  = await fetch(FLOW_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body:'{}' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
-    const rows = Array.isArray(data) ? data : (data.value || []);
-    renderAll(rows);
+    allRows = Array.isArray(data) ? data : (data.value || []);
+    renderAll(getFilteredRows());
     const n = new Date();
     document.getElementById('lastUpd').textContent =
       'อัพเดต ' + p2(n.getHours()) + ':' + p2(n.getMinutes()) + ':' + p2(n.getSeconds());
-  } catch(e) {
+  } catch(e){
     document.getElementById('errBox').textContent = 'โหลดข้อมูลไม่สำเร็จ: ' + e.message;
     document.getElementById('errBox').style.display = 'block';
   } finally {
@@ -239,28 +377,75 @@ async function loadData() {
   }
 }
 
-function renderAll(rows) {
+// ── Render All ────────────────────────────────────────────────────────────────
+function renderAll(rows){
+  const plantTxt = selectedPlant ? (' · ' + selectedPlant) : '';
+  document.getElementById('filterResult').innerHTML =
+    rows.length === allRows.length
+      ? '<strong>' + allRows.length + '</strong> รายการทั้งหมด'
+      : '<strong>' + rows.length + '</strong> จาก ' + allRows.length + ' รายการ' + plantTxt;
+
   renderKPI(rows);
+  renderDonut(rows);
   renderTop5(rows);
+  renderTrend(rows);
   renderGroupTable(rows);
 }
 
 // ── KPI ───────────────────────────────────────────────────────────────────────
-function renderKPI(rows) {
+function renderKPI(rows){
   const totalTons = rows.reduce((s,r) => s + rowTons(r), 0);
   const waiting   = rows.filter(r => getDisplayStatus(r) === 'waiting').length;
   const bending   = rows.filter(r => getDisplayStatus(r) === 'bending').length;
-  const sapWait   = rows.filter(r => getStatus(r) === 'Sent' && !getSapDone(r)).length;
+  const done      = rows.filter(r => getDisplayStatus(r) === 'done').length;
+  const cancelled = rows.filter(r => getDisplayStatus(r) === 'cancelled').length;
 
-  document.getElementById('kpiTotal').textContent    = rows.length.toLocaleString();
-  document.getElementById('kpiTons').textContent     = totalTons.toFixed(3);
-  document.getElementById('kpiActive').textContent   = (waiting + bending).toLocaleString();
-  document.getElementById('kpiActiveSub').textContent= 'รอดำเนินการ ' + waiting + '  |  รอพับ ' + bending;
-  document.getElementById('kpiSapWait').textContent  = sapWait.toLocaleString();
+  document.getElementById('kpiTotal').textContent   = rows.length.toLocaleString();
+  document.getElementById('kpiTons').textContent    = totalTons.toFixed(3);
+  document.getElementById('kpiWaiting').textContent = waiting.toLocaleString();
+  document.getElementById('kpiBending').textContent = bending.toLocaleString();
+  document.getElementById('kpiDone').textContent    = done.toLocaleString();
+  document.getElementById('kpiCancel').textContent  = cancelled.toLocaleString();
+}
+
+// ── Status Donut ──────────────────────────────────────────────────────────────
+function renderDonut(rows){
+  const counts = { waiting:0, bending:0, done:0, cancelled:0, error:0 };
+  rows.forEach(r => { counts[getDisplayStatus(r)]++; });
+
+  const keys   = Object.keys(counts).filter(k => counts[k] > 0);
+  const data   = keys.map(k => counts[k]);
+  const colors = keys.map(k => STATUS_COLOR[k]);
+  const labels = keys.map(k => STATUS_LABEL[k]);
+
+  if (chartDonut) chartDonut.destroy();
+  chartDonut = new Chart(document.getElementById('chartDonut'), {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{ data, backgroundColor: colors, borderWidth: 2, borderColor: '#fff', hoverOffset: 6 }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '65%',
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ' ' + ctx.label + ': ' + ctx.parsed + ' รายการ' } }
+      }
+    }
+  });
+
+  document.getElementById('donutLegend').innerHTML = keys.map((k,i) =>
+    '<div class="dl-item">' +
+      '<div class="dl-dot" style="background:' + colors[i] + '"></div>' +
+      labels[i] + ' <strong style="color:var(--tx)">' + data[i] + '</strong>' +
+    '</div>'
+  ).join('');
 }
 
 // ── Top 5 Products ────────────────────────────────────────────────────────────
-function renderTop5(rows) {
+function renderTop5(rows){
   const map = {};
   rows.forEach(r => {
     const item = String(r['Item Description'] || r['item_description'] || '(ไม่ระบุ)').trim();
@@ -272,11 +457,11 @@ function renderTop5(rows) {
   const top5 = Object.entries(map)
     .sort((a,b) => b[1].tons - a[1].tons)
     .slice(0,5)
-    .reverse(); // bottom = first for horizontal bar
+    .reverse();
 
-  const labels   = top5.map(([nm]) => nm.length > 32 ? nm.slice(0,30)+'…' : nm);
+  const labels   = top5.map(([nm]) => nm.length > 28 ? nm.slice(0,26)+'…' : nm);
   const tonsData = top5.map(([,v]) => parseFloat(v.tons.toFixed(3)));
-  const opacity  = [0.85, 0.72, 0.60, 0.48, 0.38];
+  const opacity  = [0.38, 0.52, 0.66, 0.78, 0.90];
 
   if (chartTop5) chartTop5.destroy();
   chartTop5 = new Chart(document.getElementById('chartTop5'), {
@@ -286,7 +471,7 @@ function renderTop5(rows) {
       datasets: [{
         label:           'ตันรวม',
         data:            tonsData,
-        backgroundColor: opacity.map(o => `rgba(37,99,176,${o})`).reverse(),
+        backgroundColor: opacity.map(o => `rgba(37,99,176,${o})`),
         borderColor:     '#2563b0',
         borderWidth:     1,
         borderRadius:    4,
@@ -301,7 +486,7 @@ function renderTop5(rows) {
         tooltip: {
           callbacks: {
             afterLabel: ctx => {
-              const entry = top5[top5.length - 1 - ctx.dataIndex];
+              const entry = top5[ctx.dataIndex];
               return entry ? ('  ' + entry[1].count + ' รายการ') : '';
             }
           }
@@ -322,18 +507,125 @@ function renderTop5(rows) {
   });
 }
 
-// ── Customer Group Table ──────────────────────────────────────────────────────
-const GRP_ORDER = ['Project','Retail','Direct','Export'];
-const GRP_STYLE = {
-  Project:{ bg:'#ede9fe', color:'#5b21b6', bar:'#7c3aed' },
-  Retail: { bg:'#dbeafe', color:'#1d4ed8', bar:'#2563b0' },
-  Direct: { bg:'#fef3c7', color:'#92400e', bar:'#d97706' },
-  Export: { bg:'#dcfce7', color:'#15803d', bar:'#16a34a' },
-};
-const DEFAULT_ST = { bg:'#f1f5f9', color:'#334155', bar:'#64748b' };
+// ── Trend Chart ───────────────────────────────────────────────────────────────
+function renderTrend(rows){
+  const wrap  = document.getElementById('trendWrap');
+  const titleEl = document.getElementById('trendTitle');
 
-function renderGroupTable(rows) {
-  // Build aggregation
+  // Detect if monthly grouping is better (all-time + span > 90 days)
+  let useMonth = false;
+  if (selectedRange === 'all'){
+    const dates = rows.map(r => parseRowDate(r)).filter(Boolean);
+    if (dates.length >= 2){
+      const span = (Math.max(...dates.map(d=>d.getTime())) - Math.min(...dates.map(d=>d.getTime()))) / 86400000;
+      if (span > 90) useMonth = true;
+    }
+  }
+
+  // Build date map
+  const dateMap = {};
+  rows.forEach(r => {
+    const d = parseRowDate(r);
+    if (!d || isNaN(d.getTime())) return;
+    const key = useMonth
+      ? d.getFullYear() + '-' + p2(d.getMonth() + 1)
+      : d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate());
+    dateMap[key] = (dateMap[key] || 0) + 1;
+  });
+
+  // Fill missing days for fixed-range views
+  if (!useMonth && selectedRange !== 'all' && selectedRange !== 'today'){
+    const today = startOfDay(new Date());
+    const days  = parseInt(selectedRange);
+    for (let i = 0; i < days; i++){
+      const d   = new Date(today);
+      d.setDate(d.getDate() - i);
+      const key = d.getFullYear() + '-' + p2(d.getMonth()+1) + '-' + p2(d.getDate());
+      if (!(key in dateMap)) dateMap[key] = 0;
+    }
+  }
+
+  const sortedKeys = Object.keys(dateMap).sort();
+  const counts     = sortedKeys.map(k => dateMap[k]);
+
+  // Format x-axis labels
+  const fmtLabel = k => {
+    const parts = k.split('-');
+    if (parts.length === 2){
+      return TH_MONTHS[parseInt(parts[1]) - 1] + ' \'' + String(parseInt(parts[0]) + 543).slice(-2);
+    }
+    return parts[2] + ' ' + TH_MONTHS[parseInt(parts[1]) - 1];
+  };
+  const labels = sortedKeys.map(fmtLabel);
+
+  // Update section title
+  const titleMap = {
+    today:'แนวโน้ม Orders วันนี้',
+    '7':'แนวโน้ม Orders 7 วัน',
+    '30':'แนวโน้ม Orders 30 วัน',
+    all: useMonth ? 'แนวโน้ม Orders รายเดือน' : 'แนวโน้ม Orders ทั้งหมด'
+  };
+  const titleText = titleMap[selectedRange] || 'แนวโน้ม Orders';
+  // Replace text node only (keep ::before pseudo-element via CSS)
+  titleEl.textContent = titleText;
+
+  if (chartTrend) chartTrend.destroy();
+
+  // Re-ensure canvas exists
+  if (!wrap.querySelector('canvas')){
+    wrap.innerHTML = '<canvas id="chartTrend"></canvas>';
+  }
+
+  if (sortedKeys.length === 0){
+    wrap.innerHTML = '<div class="empty-trend">ไม่มีข้อมูลในช่วงเวลานี้</div>';
+    return;
+  }
+
+  const todayKey = (d => d.getFullYear() + '-' + p2(d.getMonth()+1) + '-' + p2(d.getDate()))(new Date());
+
+  chartTrend = new Chart(document.getElementById('chartTrend'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label:           'Orders',
+        data:            counts,
+        backgroundColor: sortedKeys.map(k => k === todayKey ? 'rgba(22,163,74,0.75)' : 'rgba(37,99,176,0.65)'),
+        borderColor:     sortedKeys.map(k => k === todayKey ? '#16a34a' : '#2563b0'),
+        borderWidth:     1,
+        borderRadius:    3,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ' ' + ctx.parsed.y + ' รายการ' } }
+      },
+      scales: {
+        x: {
+          grid:  { display: false },
+          ticks: {
+            font:          { family:'IBM Plex Mono', size: sortedKeys.length > 20 ? 8.5 : 10 },
+            color:         '#64748b',
+            maxRotation:   sortedKeys.length > 15 ? 45 : 0,
+            autoSkip:      true,
+            maxTicksLimit: 20,
+          }
+        },
+        y: {
+          grid:        { color:'#e2e8f0' },
+          ticks:       { font:{ family:'IBM Plex Sans Thai', size:10 }, color:'#475569', stepSize:1, precision:0 },
+          beginAtZero: true,
+        }
+      }
+    }
+  });
+}
+
+// ── Customer Group Table ──────────────────────────────────────────────────────
+function renderGroupTable(rows){
   const grpData = {};
   GRP_ORDER.forEach(g => { grpData[g] = { count:0, tons:0, custMap:{} }; });
 
@@ -344,7 +636,7 @@ function renderGroupTable(rows) {
     if (!grpData[grp]) grpData[grp] = { count:0, tons:0, custMap:{} };
     grpData[grp].count += 1;
     grpData[grp].tons  += tons;
-    if (cust && cust !== '-') {
+    if (cust && cust !== '-'){
       if (!grpData[grp].custMap[cust]) grpData[grp].custMap[cust] = { count:0, tons:0 };
       grpData[grp].custMap[cust].count += 1;
       grpData[grp].custMap[cust].tons  += tons;
@@ -363,23 +655,19 @@ function renderGroupTable(rows) {
   tbody.innerHTML = '';
 
   allGroups.forEach((grp, gi) => {
-    const g  = grpData[grp];
-    const st = GRP_STYLE[grp] || DEFAULT_ST;
-    const pct  = grandTons > 0 ? (g.tons / grandTons * 100) : 0;
-    const barW = maxTons   > 0 ? (g.tons / maxTons   * 100) : 0;
+    const g   = grpData[grp];
+    const st  = GRP_STYLE[grp] || DEFAULT_ST;
+    const pct = grandTons > 0 ? (g.tons / grandTons * 100) : 0;
+    const barW = maxTons  > 0 ? (g.tons / maxTons   * 100) : 0;
 
-    const topCusts   = Object.entries(g.custMap)
-      .sort((a,b) => b[1].tons - a[1].tons)
-      .slice(0, 5);
+    const topCusts   = Object.entries(g.custMap).sort((a,b) => b[1].tons - a[1].tons).slice(0,5);
     const maxCT      = topCusts.length > 0 ? topCusts[0][1].tons : 1;
     const extraCount = Object.keys(g.custMap).length - topCusts.length;
-    const safeId     = 'cust-grp-' + gi; // use index to avoid special char issues
+    const safeId     = 'cg-' + gi;
 
-    // ── Group row ────────────────────────────────────────────────────────────
     const grpTr = document.createElement('tr');
     grpTr.className = 'grp-row';
-    grpTr.dataset.gid = safeId;
-    grpTr.onclick = () => toggleGroup(safeId);
+    grpTr.onclick   = () => toggleGroup(safeId);
     grpTr.innerHTML =
       '<td><span class="grp-badge" style="background:'+st.bg+';color:'+st.color+'">'+grp+'</span></td>' +
       '<td class="r">'+g.count.toLocaleString()+'</td>' +
@@ -393,55 +681,41 @@ function renderGroupTable(rows) {
       '<td style="text-align:center"><span class="chev" id="chev-'+safeId+'">▼</span></td>';
     tbody.appendChild(grpTr);
 
-    // ── Customer detail row (hidden by default) ───────────────────────────────
     const detTr = document.createElement('tr');
-    detTr.className = 'cust-detail';
-    detTr.id = safeId;
+    detTr.className     = 'cust-detail';
+    detTr.id            = safeId;
     detTr.style.display = 'none';
 
-    // Build inner table HTML
-    let innerHtml =
+    let inner =
       '<table class="inner-table">' +
-      '<tr class="inner-hdr">' +
-        '<td>ลูกค้า</td>' +
-        '<td class="r">รายการ</td>' +
-        '<td class="r">ตัน</td>' +
-        '<td class="bar-td">สัดส่วนในกลุ่ม</td>' +
-      '</tr>';
+      '<tr class="inner-hdr"><td>ลูกค้า</td><td class="r">รายการ</td><td class="r">ตัน</td><td class="bar-td">สัดส่วนในกลุ่ม</td></tr>';
 
-    if (topCusts.length === 0) {
-      innerHtml += '<tr class="inner-tr"><td colspan="4" style="color:var(--t3)">ไม่มีข้อมูลชื่อลูกค้า</td></tr>';
+    if (topCusts.length === 0){
+      inner += '<tr class="inner-tr"><td colspan="4" style="color:var(--t3)">ไม่มีข้อมูลชื่อลูกค้า</td></tr>';
     } else {
-      topCusts.forEach(function([cust, cv]) {
-        var cBarW = maxCT > 0 ? (cv.tons / maxCT * 100) : 0;
-        innerHtml +=
+      topCusts.forEach(([cust, cv]) => {
+        const cBarW = maxCT > 0 ? (cv.tons / maxCT * 100) : 0;
+        inner +=
           '<tr class="inner-tr">' +
-          '<td>'+cust+'</td>' +
-          '<td class="r">'+cv.count+'</td>' +
-          '<td class="r">'+cv.tons.toFixed(3)+'</td>' +
-          '<td class="bar-td">' +
-            '<div class="mini-bar-track">' +
-              '<div class="mini-bar-fill" style="width:'+cBarW.toFixed(1)+'%;background:'+st.bar+'"></div>' +
-            '</div>' +
-          '</td>' +
+          '<td>'+cust+'</td><td class="r">'+cv.count+'</td><td class="r">'+cv.tons.toFixed(3)+'</td>' +
+          '<td class="bar-td"><div class="mini-bar-track"><div class="mini-bar-fill" style="width:'+cBarW.toFixed(1)+'%;background:'+st.bar+'"></div></div></td>' +
           '</tr>';
       });
-      if (extraCount > 0) {
-        innerHtml += '<tr><td class="more-note" colspan="4">+ อีก '+extraCount+' ลูกค้า</td></tr>';
+      if (extraCount > 0){
+        inner += '<tr><td class="more-note" colspan="4">+ อีก '+extraCount+' ลูกค้า</td></tr>';
       }
     }
-    innerHtml += '</table>';
-
-    detTr.innerHTML = '<td colspan="5">'+innerHtml+'</td>';
+    inner += '</table>';
+    detTr.innerHTML = '<td colspan="5">'+inner+'</td>';
     tbody.appendChild(detTr);
   });
 }
 
-function toggleGroup(safeId) {
-  var row  = document.getElementById(safeId);
-  var chev = document.getElementById('chev-' + safeId);
+function toggleGroup(id){
+  const row  = document.getElementById(id);
+  const chev = document.getElementById('chev-' + id);
   if (!row) return;
-  var hidden = (row.style.display === 'none' || row.style.display === '');
+  const hidden = (row.style.display === 'none' || row.style.display === '');
   row.style.display = hidden ? 'table-row' : 'none';
   if (chev) chev.classList.toggle('open', hidden);
 }
