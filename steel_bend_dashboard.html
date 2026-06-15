@@ -298,13 +298,47 @@ function getDisplayStatus(row){
 function rowTons(row){ return parseFloat(row['Tons'] || row['tons'] || 0) || 0; }
 
 function parseRowDate(row){
-  const val = row['Date'] || row['date'] || row['Submitted_At'] || row['submitted_at'];
-  if (val == null || val === '') return null;
-  if (typeof val === 'number') return new Date((val - 25569) * 86400 * 1000);
-  const s = String(val).trim();
-  if (!s || s === '-') return null;
-  const d = new Date(s.includes('T') ? s : s.split('T')[0]);
-  return isNaN(d.getTime()) ? null : d;
+  const candidates = [row['Date'], row['date'], row['Submitted_At'], row['submitted_at']];
+  for (const val of candidates){
+    if (val == null || val === '' || val === '-') continue;
+
+    // Number → Excel serial
+    if (typeof val === 'number'){
+      const d = new Date((val - 25569) * 86400 * 1000);
+      if (!isNaN(d.getTime())) return d;
+      continue;
+    }
+
+    const s = String(val).trim();
+    if (!s || s === '-') continue;
+
+    // Numeric string → Excel serial
+    if (/^\d+(\.\d+)?$/.test(s)){
+      const d = new Date((parseFloat(s) - 25569) * 86400 * 1000);
+      if (!isNaN(d.getTime())) return d;
+      continue;
+    }
+
+    // ISO "YYYY-MM-DD..." → force local midnight to avoid UTC-shift
+    if (/^\d{4}-\d{2}-\d{2}/.test(s)){
+      const d = new Date(s.split('T')[0] + 'T00:00:00');
+      if (!isNaN(d.getTime())) return d;
+      continue;
+    }
+
+    // dd/mm/yyyy (Thai convention)
+    const dmy = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (dmy){
+      const d = new Date(+dmy[3], +dmy[2] - 1, +dmy[1]);
+      if (!isNaN(d.getTime())) return d;
+      continue;
+    }
+
+    // Fallback
+    const d = new Date(s);
+    if (!isNaN(d.getTime())) return d;
+  }
+  return null;
 }
 
 function startOfDay(d){ return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
