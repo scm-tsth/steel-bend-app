@@ -846,82 +846,113 @@ function showSapSummary() {
   const sapRows = allRows.filter(r => getStatus(r) === 'Sent' && !getSapStatus(r));
   if (sapRows.length === 0) { alert('ไม่มีรายการรอ SAP ขณะนี้'); return; }
 
-  const GRP_COLOR = { Project:'#7c3aed', Retail:'#2563b0', Direct:'#d97706', Export:'#16a34a' };
+  const GRP_COLOR   = { Project:'#7c3aed', Retail:'#2563b0', Direct:'#d97706', Export:'#16a34a' };
+  const PLANT_STYLE = { SCSC:{ bg:'#0369a1', label:'SCSC (Plant 0435)' }, NTS:{ bg:'#16a34a', label:'NTS (Plant 0431)' } };
+  const MONO = "'IBM Plex Mono',monospace";
 
-  // Build item > group > SO map
-  const itemMap = {};
+  // Build plant > item > group > SO map
+  const plantMap = {};
   sapRows.forEach(r => {
-    const item = String(r['Item Description'] || r['item_description'] || '-').trim();
-    const grp  = String(r['Customer Group']   || r['customer_group']   || '(ไม่ระบุ)').trim() || '(ไม่ระบุ)';
-    const so   = String(r['Sales Order No.']  || r['sales_order_no']   || '-').trim() || '-';
-    const tons = rowTons(r);
-    const pcs  = parseFloat(r['Pcs'] || r['pcs'] || 0) || 0;
+    const plant = rowPlant(r) || '(ไม่ระบุ)';
+    const item  = String(r['Item Description'] || r['item_description'] || '-').trim();
+    const grp   = String(r['Customer Group']   || r['customer_group']   || '(ไม่ระบุ)').trim() || '(ไม่ระบุ)';
+    const so    = String(r['Sales Order No.']  || r['sales_order_no']   || '-').trim() || '-';
+    const tons  = rowTons(r);
+    const pcs   = parseFloat(r['Pcs'] || r['pcs'] || 0) || 0;
 
-    if (!itemMap[item]) itemMap[item] = { tons:0, pcs:0, groups:{} };
-    itemMap[item].tons += tons;
-    itemMap[item].pcs  += pcs;
+    if (!plantMap[plant]) plantMap[plant] = { tons:0, pcs:0, count:0, items:{} };
+    plantMap[plant].tons += tons; plantMap[plant].pcs += pcs; plantMap[plant].count += 1;
 
-    if (!itemMap[item].groups[grp]) itemMap[item].groups[grp] = { tons:0, pcs:0, soMap:{} };
-    itemMap[item].groups[grp].tons += tons;
-    itemMap[item].groups[grp].pcs  += pcs;
+    const pm = plantMap[plant].items;
+    if (!pm[item]) pm[item] = { tons:0, pcs:0, groups:{} };
+    pm[item].tons += tons; pm[item].pcs += pcs;
 
-    if (!itemMap[item].groups[grp].soMap[so]) itemMap[item].groups[grp].soMap[so] = { tons:0, pcs:0, count:0 };
-    itemMap[item].groups[grp].soMap[so].tons  += tons;
-    itemMap[item].groups[grp].soMap[so].pcs   += pcs;
-    itemMap[item].groups[grp].soMap[so].count += 1;
+    if (!pm[item].groups[grp]) pm[item].groups[grp] = { tons:0, pcs:0, soMap:{} };
+    pm[item].groups[grp].tons += tons; pm[item].groups[grp].pcs += pcs;
+
+    if (!pm[item].groups[grp].soMap[so]) pm[item].groups[grp].soMap[so] = { tons:0, pcs:0, count:0 };
+    pm[item].groups[grp].soMap[so].tons  += tons;
+    pm[item].groups[grp].soMap[so].pcs   += pcs;
+    pm[item].groups[grp].soMap[so].count += 1;
   });
 
   let grandTons = 0, grandPcs = 0, grandCount = 0;
+  const td  = (val, style) => '<td style="padding:5px 10px;' + (style||'') + '">' + val + '</td>';
+  const tdR = (val, style) => td(val, 'text-align:right;font-family:' + MONO + ';' + (style||''));
+
   let tableHtml =
-    '<table style="width:100%;border-collapse:collapse;font-size:12px">' +
+    '<table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed">' +
+    '<colgroup><col/><col style="width:52px"/><col style="width:82px"/><col style="width:68px"/></colgroup>' +
     '<thead><tr style="background:#0f2a4a">' +
-      '<th style="padding:8px 10px;color:#fff;text-align:left;font-size:11px;font-weight:500;min-width:260px">สินค้า / แผนก / SO</th>' +
-      '<th style="padding:8px 10px;color:#fff;text-align:right;font-size:11px;font-weight:500;width:60px">รายการ</th>' +
-      '<th style="padding:8px 10px;color:#fff;text-align:right;font-size:11px;font-weight:500;width:90px">ตัน</th>' +
-      '<th style="padding:8px 10px;color:#fff;text-align:right;font-size:11px;font-weight:500;width:80px">เส้น</th>' +
+      '<th style="padding:8px 10px;color:#fff;text-align:left;font-size:11px;font-weight:500">Plant / สินค้า / แผนก / SO</th>' +
+      '<th style="padding:8px 10px;color:#fff;text-align:right;font-size:11px;font-weight:500">รายการ</th>' +
+      '<th style="padding:8px 10px;color:#fff;text-align:right;font-size:11px;font-weight:500">ตัน</th>' +
+      '<th style="padding:8px 10px;color:#fff;text-align:right;font-size:11px;font-weight:500">เส้น</th>' +
     '</tr></thead><tbody>';
 
-  Object.entries(itemMap).sort((a,b) => a[0].localeCompare(b[0])).forEach(([item, iv]) => {
-    const itemCount = Object.values(iv.groups)
-      .reduce((s, gv) => s + Object.values(gv.soMap).reduce((s2, sv) => s2 + sv.count, 0), 0);
-    grandTons += iv.tons; grandPcs += iv.pcs; grandCount += itemCount;
+  ['SCSC','NTS'].concat(Object.keys(plantMap).filter(p => p !== 'SCSC' && p !== 'NTS')).forEach(plant => {
+    const pv = plantMap[plant];
+    if (!pv) return;
+    grandTons += pv.tons; grandPcs += pv.pcs; grandCount += pv.count;
 
+    const ps     = PLANT_STYLE[plant] || { bg:'#475569', label: plant };
+    const pBadge = '<span style="background:' + ps.bg + ';color:#fff;border-radius:5px;padding:2px 9px;font-size:11px;font-weight:700;margin-right:8px">' + plant + '</span>';
+
+    // Plant row
     tableHtml +=
-      '<tr style="background:#1e3a5f">' +
-        '<td colspan="4" style="padding:8px 10px;color:#fff;font-size:12px;font-weight:600">' +
-          item +
-          '<span style="font-weight:400;opacity:.65;font-size:10px;margin-left:8px">' +
-            iv.tons.toFixed(3) + ' ตัน &nbsp;·&nbsp; ' + Math.round(iv.pcs).toLocaleString() + ' เส้น &nbsp;·&nbsp; ' + itemCount + ' รายการ' +
+      '<tr style="background:' + ps.bg + '">' +
+        '<td colspan="4" style="padding:9px 10px;color:#fff;font-size:13px;font-weight:700">' +
+          pBadge + ps.label +
+          '<span style="font-weight:400;opacity:.65;font-size:10px;margin-left:10px">' +
+            pv.tons.toFixed(3) + ' ตัน · ' + Math.round(pv.pcs).toLocaleString() + ' เส้น · ' + pv.count + ' รายการ' +
           '</span>' +
         '</td>' +
       '</tr>';
 
-    Object.entries(iv.groups).sort((a,b) => a[0].localeCompare(b[0])).forEach(([grp, gv]) => {
-      const color    = GRP_COLOR[grp] || '#64748b';
-      const grpCount = Object.values(gv.soMap).reduce((s, sv) => s + sv.count, 0);
+    Object.entries(pv.items).sort((a,b) => a[0].localeCompare(b[0])).forEach(([item, iv]) => {
+      const itemCount = Object.values(iv.groups)
+        .reduce((s, gv) => s + Object.values(gv.soMap).reduce((s2, sv) => s2 + sv.count, 0), 0);
 
+      // Item row
       tableHtml +=
-        '<tr style="background:#f1f5f9">' +
-          '<td style="padding:6px 10px 6px 22px;font-size:11px;font-weight:600">' +
-            '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + color + ';margin-right:6px;vertical-align:1px"></span>' +
-            grp +
+        '<tr style="background:#1e3a5f">' +
+          '<td style="padding:7px 10px 7px 18px;color:#fff;font-size:12px;font-weight:600;word-break:break-word">' +
+            item +
+            '<span style="font-weight:400;opacity:.6;font-size:10px;margin-left:6px">' + itemCount + ' รายการ</span>' +
           '</td>' +
-          '<td style="padding:6px 10px;text-align:right;font-size:11px;font-family:\'IBM Plex Mono\',monospace;color:#64748b">' + grpCount + '</td>' +
-          '<td style="padding:6px 10px;text-align:right;font-size:11px;font-family:\'IBM Plex Mono\',monospace;font-weight:600;color:#0f2a4a">' + gv.tons.toFixed(3) + '</td>' +
-          '<td style="padding:6px 10px;text-align:right;font-size:11px;font-family:\'IBM Plex Mono\',monospace;font-weight:600;color:#0f2a4a">' + Math.round(gv.pcs).toLocaleString() + '</td>' +
+          tdR(itemCount, 'color:#cbd5e1;font-size:11px') +
+          tdR(iv.tons.toFixed(3), 'color:#fff;font-weight:600;font-size:11px') +
+          tdR(Math.round(iv.pcs).toLocaleString(), 'color:#fff;font-weight:600;font-size:11px') +
         '</tr>';
 
-      Object.entries(gv.soMap).sort((a,b) => a[0].localeCompare(b[0])).forEach(([so, sv]) => {
+      Object.entries(iv.groups).sort((a,b) => a[0].localeCompare(b[0])).forEach(([grp, gv]) => {
+        const color    = GRP_COLOR[grp] || '#64748b';
+        const grpCount = Object.values(gv.soMap).reduce((s, sv) => s + sv.count, 0);
+
+        // Group row
         tableHtml +=
-          '<tr style="border-bottom:.5px solid #e2e8f0">' +
-            '<td style="padding:4px 10px 4px 38px;font-size:11px;color:#475569">' +
-              'SO: ' + (so === '-' ? '<span style="color:#94a3b8">(ไม่มี)</span>' : so) +
-              ' <span style="font-size:10px;color:#94a3b8;margin-left:4px">' + sv.count + ' รายการ</span>' +
+          '<tr style="background:#f1f5f9">' +
+            '<td style="padding:5px 10px 5px 28px;font-size:11px;font-weight:600">' +
+              '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:' + color + ';margin-right:6px;vertical-align:1px"></span>' +
+              grp +
             '</td>' +
-            '<td style="padding:4px 10px;text-align:right;font-size:11px;color:#94a3b8;font-family:\'IBM Plex Mono\',monospace">' + sv.count + '</td>' +
-            '<td style="padding:4px 10px;text-align:right;font-size:11px;font-family:\'IBM Plex Mono\',monospace;color:#475569">' + sv.tons.toFixed(3) + '</td>' +
-            '<td style="padding:4px 10px;text-align:right;font-size:11px;font-family:\'IBM Plex Mono\',monospace;color:#475569">' + Math.round(sv.pcs).toLocaleString() + '</td>' +
+            tdR(grpCount, 'color:#64748b;font-size:11px') +
+            tdR(gv.tons.toFixed(3), 'font-weight:600;color:#0f2a4a;font-size:11px') +
+            tdR(Math.round(gv.pcs).toLocaleString(), 'font-weight:600;color:#0f2a4a;font-size:11px') +
           '</tr>';
+
+        Object.entries(gv.soMap).sort((a,b) => a[0].localeCompare(b[0])).forEach(([so, sv]) => {
+          tableHtml +=
+            '<tr style="border-bottom:.5px solid #e2e8f0">' +
+              '<td style="padding:3px 10px 3px 42px;font-size:11px;color:#475569;word-break:break-all">' +
+                'SO: ' + (so === '-' ? '<span style="color:#94a3b8">(ไม่มี)</span>' : so) +
+                ' <span style="font-size:10px;color:#94a3b8">' + sv.count + ' รายการ</span>' +
+              '</td>' +
+              tdR(sv.count, 'color:#94a3b8;font-size:11px') +
+              tdR(sv.tons.toFixed(3), 'color:#475569;font-size:11px') +
+              tdR(Math.round(sv.pcs).toLocaleString(), 'color:#475569;font-size:11px') +
+            '</tr>';
+        });
       });
     });
   });
@@ -929,9 +960,9 @@ function showSapSummary() {
   tableHtml +=
     '<tr style="background:#0f2a4a">' +
       '<td style="padding:8px 10px;color:#fff;font-size:12px;font-weight:600">รวมทั้งหมด</td>' +
-      '<td style="padding:8px 10px;text-align:right;color:#fff;font-family:\'IBM Plex Mono\',monospace;font-weight:600">' + grandCount + '</td>' +
-      '<td style="padding:8px 10px;text-align:right;color:#fff;font-family:\'IBM Plex Mono\',monospace;font-weight:600">' + grandTons.toFixed(3) + '</td>' +
-      '<td style="padding:8px 10px;text-align:right;color:#fff;font-family:\'IBM Plex Mono\',monospace;font-weight:600">' + Math.round(grandPcs).toLocaleString() + '</td>' +
+      tdR(grandCount, 'color:#fff;font-weight:600') +
+      tdR(grandTons.toFixed(3), 'color:#fff;font-weight:600') +
+      tdR(Math.round(grandPcs).toLocaleString(), 'color:#fff;font-weight:600') +
     '</tr></tbody></table>';
 
   const overlay = document.createElement('div');
@@ -939,17 +970,17 @@ function showSapSummary() {
   overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
 
   overlay.innerHTML =
-    '<div style="background:#fff;border-radius:14px;width:min(740px,100%);max-height:82vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.3);font-family:\'IBM Plex Sans Thai\',sans-serif">' +
+    '<div style="background:#fff;border-radius:14px;width:min(560px,100%);max-height:88vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.3);font-family:\'IBM Plex Sans Thai\',sans-serif;overflow:hidden">' +
       '<div style="background:#0f2a4a;padding:1rem 1.25rem;border-radius:14px 14px 0 0;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">' +
         '<div>' +
           '<div style="color:#fff;font-size:14px;font-weight:600">สรุปรายการรอ SAP</div>' +
           '<div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:2px">' +
-            grandCount + ' รายการ &nbsp;·&nbsp; ' + grandTons.toFixed(3) + ' ตัน &nbsp;·&nbsp; ' + Math.round(grandPcs).toLocaleString() + ' เส้น' +
+            grandCount + ' รายการ · ' + grandTons.toFixed(3) + ' ตัน · ' + Math.round(grandPcs).toLocaleString() + ' เส้น' +
           '</div>' +
         '</div>' +
-        '<button id="_sapModalClose" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:15px;line-height:1">✕</button>' +
+        '<button id="_sapModalClose" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:15px;line-height:28px;flex-shrink:0">✕</button>' +
       '</div>' +
-      '<div style="overflow-y:auto;padding:1rem">' + tableHtml + '</div>' +
+      '<div style="overflow-y:auto;overflow-x:hidden">' + tableHtml + '</div>' +
     '</div>';
 
   document.body.appendChild(overlay);
