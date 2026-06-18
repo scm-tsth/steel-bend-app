@@ -39,13 +39,14 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
 .card{background:#fff;border:1px solid var(--br);border-radius:var(--ra);box-shadow:0 1px 3px rgba(0,0,0,.06)}
 
 /* KPI */
-.kpi-row{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:.85rem}
+.kpi-row{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:.85rem}
 .kpi-box{background:#fff;border:1px solid var(--br);border-radius:var(--ra);padding:.8rem 1rem;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.05)}
 .kpi-num{font-size:26px;font-weight:700;color:var(--bm);line-height:1.1;font-family:'IBM Plex Mono',monospace}
 .kpi-num.blue{color:var(--ba)}
 .kpi-num.amber{color:var(--am)}
 .kpi-num.green{color:var(--gr)}
 .kpi-num.slate{color:#64748b}
+.kpi-num.purple{color:#7c3aed}
 .kpi-label{font-size:11px;color:var(--t2);margin-top:4px}
 .kpi-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px;vertical-align:1px}
 
@@ -108,7 +109,8 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
 .err-box{background:var(--rl);border:1px solid #fca5a5;border-radius:var(--ra);padding:.75rem 1rem;font-size:13px;color:var(--rd);margin-bottom:.9rem}
 .empty-trend{display:flex;align-items:center;justify-content:center;height:100%;font-size:12px;color:var(--t3)}
 
-@media(max-width:1100px){.kpi-row{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:1200px){.kpi-row{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:800px){.kpi-row{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:960px){
   .kpi-row{grid-template-columns:repeat(2,1fr)}
   .main-grid{grid-template-columns:1fr}
@@ -132,7 +134,7 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
   </div>
   <div class="hdr-text">
     <h1>Dashboard — ระบบสั่งพับเหล็ก</h1>
-    <p>ภาพรวมการสั่งพับเหล็ก | SCM Team | Tata Steel Thailand</p>
+    <p>ภาพรวมการสั่งพับเหล็ก | SCM Demand Team | Tata Steel Thailand</p>
   </div>
   <span class="last-upd" id="lastUpd"></span>
   <button class="hdr-btn" onclick="loadData()">🔄 Refresh</button>
@@ -186,6 +188,10 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
     <div class="kpi-num slate" id="kpiCancel">—</div>
     <div class="kpi-label"><span class="kpi-dot" style="background:#64748b"></span>ยกเลิก</div>
   </div>
+  <div class="kpi-box">
+    <div class="kpi-num purple" id="kpiAvgDays">—</div>
+    <div class="kpi-label"><span class="kpi-dot" style="background:#7c3aed"></span>เฉลี่ยวันรอ (วัน)</div>
+  </div>
 </div>
 
 <!-- LOADING -->
@@ -210,7 +216,7 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
 
     <!-- Top 5 Products -->
     <div class="card chart-card">
-      <div class="sec-title">Top 5 สินค้า (ตันรวม)</div>
+      <div class="sec-title">Top 5 สินค้าที่สั่งบ่อย (จำนวนรายการ)</div>
       <div class="chart-wrap h260">
         <canvas id="chartTop5"></canvas>
       </div>
@@ -390,7 +396,7 @@ async function loadData(){
   document.getElementById('loadingBox').style.display = 'block';
   document.getElementById('mainGrid').style.display   = 'none';
   document.getElementById('errBox').style.display     = 'none';
-  ['kpiTotal','kpiTons','kpiWaiting','kpiBending','kpiDone','kpiCancel']
+  ['kpiTotal','kpiTons','kpiWaiting','kpiBending','kpiDone','kpiCancel','kpiAvgDays']
     .forEach(id => { document.getElementById(id).textContent = '—'; });
 
   try {
@@ -434,12 +440,27 @@ function renderKPI(rows){
   const done      = rows.filter(r => getDisplayStatus(r) === 'done').length;
   const cancelled = rows.filter(r => getDisplayStatus(r) === 'cancelled').length;
 
+  // เฉลี่ยวันรอ — นับเฉพาะ waiting + bending (ยังไม่เสร็จ)
+  const today = new Date();
+  const activeDays = [];
+  rows.forEach(r => {
+    const ds = getDisplayStatus(r);
+    if (ds === 'waiting' || ds === 'bending'){
+      const d = parseRowDate(r);
+      if (d){ const diff = Math.floor((today - d) / 86400000); if (diff >= 0) activeDays.push(diff); }
+    }
+  });
+  const avgDays = activeDays.length > 0
+    ? (activeDays.reduce((s,v) => s + v, 0) / activeDays.length).toFixed(1)
+    : '—';
+
   document.getElementById('kpiTotal').textContent   = rows.length.toLocaleString();
   document.getElementById('kpiTons').textContent    = totalTons.toFixed(3);
   document.getElementById('kpiWaiting').textContent = waiting.toLocaleString();
   document.getElementById('kpiBending').textContent = bending.toLocaleString();
   document.getElementById('kpiDone').textContent    = done.toLocaleString();
   document.getElementById('kpiCancel').textContent  = cancelled.toLocaleString();
+  document.getElementById('kpiAvgDays').textContent = avgDays;
 }
 
 // ── Status Donut ──────────────────────────────────────────────────────────────
@@ -489,13 +510,13 @@ function renderTop5(rows){
   });
 
   const top5 = Object.entries(map)
-    .sort((a,b) => b[1].tons - a[1].tons)
+    .sort((a,b) => b[1].count - a[1].count)   // sort by order count
     .slice(0,5)
     .reverse();
 
-  const labels   = top5.map(([nm]) => nm.length > 28 ? nm.slice(0,26)+'…' : nm);
-  const tonsData = top5.map(([,v]) => parseFloat(v.tons.toFixed(3)));
-  const opacity  = [0.38, 0.52, 0.66, 0.78, 0.90];
+  const labels    = top5.map(([nm]) => nm.length > 28 ? nm.slice(0,26)+'…' : nm);
+  const countData = top5.map(([,v]) => v.count);
+  const opacity   = [0.38, 0.52, 0.66, 0.78, 0.90];
 
   if (chartTop5) chartTop5.destroy();
   chartTop5 = new Chart(document.getElementById('chartTop5'), {
@@ -503,10 +524,10 @@ function renderTop5(rows){
     data: {
       labels,
       datasets: [{
-        label:           'ตันรวม',
-        data:            tonsData,
-        backgroundColor: opacity.map(o => `rgba(37,99,176,${o})`),
-        borderColor:     '#2563b0',
+        label:           'รายการ',
+        data:            countData,
+        backgroundColor: opacity.map(o => `rgba(124,58,237,${o})`),
+        borderColor:     '#7c3aed',
         borderWidth:     1,
         borderRadius:    4,
       }]
@@ -519,9 +540,10 @@ function renderTop5(rows){
         legend: { display: false },
         tooltip: {
           callbacks: {
+            label: ctx => ' ' + ctx.parsed.x + ' รายการ',
             afterLabel: ctx => {
               const entry = top5[ctx.dataIndex];
-              return entry ? ('  ' + entry[1].count + ' รายการ') : '';
+              return entry ? ('  ' + entry[1].tons.toFixed(3) + ' ตัน') : '';
             }
           }
         }
@@ -529,8 +551,8 @@ function renderTop5(rows){
       scales: {
         x: {
           grid:  { color:'#e2e8f0' },
-          ticks: { font:{ family:'IBM Plex Sans Thai', size:10 }, color:'#475569' },
-          title: { display:true, text:'ตัน', font:{size:10}, color:'#94a3b8' }
+          ticks: { font:{ family:'IBM Plex Sans Thai', size:10 }, color:'#475569', stepSize:1, precision:0 },
+          title: { display:true, text:'จำนวนรายการ', font:{size:10}, color:'#94a3b8' }
         },
         y: {
           grid:  { display:false },
