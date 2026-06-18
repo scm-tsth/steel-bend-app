@@ -945,25 +945,68 @@ function showSapSummary() {
     '</div>';
 
   const overlay = document.createElement('div');
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9999;pointer-events:none';
   overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
 
-  overlay.innerHTML =
-    '<div style="background:#fff;border-radius:14px;width:min(560px,100%);max-height:88vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.3);font-family:\'IBM Plex Sans Thai\',sans-serif;overflow:hidden">' +
-      '<div style="background:#0f2a4a;padding:1rem 1.25rem;border-radius:14px 14px 0 0;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">' +
-        '<div>' +
-          '<div style="color:#fff;font-size:14px;font-weight:600">สรุปรายการรอ SAP</div>' +
-          '<div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:2px">' +
-            grandCount + ' รายการ · ' + grandTons.toFixed(3) + ' ตัน · ' + Math.round(grandPcs).toLocaleString() + ' เส้น' +
-          '</div>' +
+  const modal = document.createElement('div');
+  modal.style.cssText =
+    'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);' +
+    'background:#fff;border-radius:14px;width:min(560px,96vw);max-height:88vh;' +
+    'display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.35);' +
+    'font-family:\'IBM Plex Sans Thai\',sans-serif;overflow:hidden;z-index:10000;pointer-events:auto';
+
+  modal.innerHTML =
+    '<div id="_sapModalHdr" style="background:#0f2a4a;padding:1rem 1.25rem;border-radius:14px 14px 0 0;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;cursor:grab;user-select:none">' +
+      '<div>' +
+        '<div style="color:#fff;font-size:14px;font-weight:600">สรุปรายการรอ SAP</div>' +
+        '<div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:2px">' +
+          grandCount + ' รายการ · ' + grandTons.toFixed(3) + ' ตัน · ' + Math.round(grandPcs).toLocaleString() + ' เส้น' +
         '</div>' +
-        '<button id="_sapModalClose" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:15px;line-height:28px;flex-shrink:0">✕</button>' +
       '</div>' +
-      '<div style="overflow-y:auto;overflow-x:hidden">' + rows + '</div>' +
-    '</div>';
+      '<button id="_sapModalClose" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:15px;line-height:28px;flex-shrink:0">✕</button>' +
+    '</div>' +
+    '<div style="overflow-y:auto;overflow-x:hidden">' + rows + '</div>';
 
   document.body.appendChild(overlay);
-  overlay.querySelector('#_sapModalClose').onclick = () => overlay.remove();
+  document.body.appendChild(modal);
+
+  modal.querySelector('#_sapModalClose').onclick = () => { overlay.remove(); modal.remove(); };
+  overlay.onclick = () => { overlay.remove(); modal.remove(); };
+
+  // ── Drag logic ────────────────────────────────────────────────────────────
+  const hdr = modal.querySelector('#_sapModalHdr');
+  let dragging = false, ox = 0, oy = 0;
+
+  hdr.addEventListener('mousedown', e => {
+    if (e.button !== 0) return;
+    dragging = true;
+    const r = modal.getBoundingClientRect();
+    // switch from transform-based centering to absolute px
+    modal.style.transform = 'none';
+    modal.style.left = r.left + 'px';
+    modal.style.top  = r.top  + 'px';
+    ox = e.clientX - r.left;
+    oy = e.clientY - r.top;
+    hdr.style.cursor = 'grabbing';
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    let nx = e.clientX - ox;
+    let ny = e.clientY - oy;
+    // keep within viewport
+    nx = Math.max(0, Math.min(nx, window.innerWidth  - modal.offsetWidth));
+    ny = Math.max(0, Math.min(ny, window.innerHeight - modal.offsetHeight));
+    modal.style.left = nx + 'px';
+    modal.style.top  = ny + 'px';
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (!dragging) return;
+    dragging = false;
+    hdr.style.cursor = 'grab';
+  });
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
