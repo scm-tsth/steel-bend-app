@@ -58,6 +58,9 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
 .mark-spin{display:none;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
 .mark-btn.loading .mark-spin{display:inline-block}
 .mark-btn.loading .mark-label{display:none}
+.sap-done-btn{height:36px;padding:0 18px;background:#2563b0;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;font-family:'IBM Plex Sans Thai',sans-serif;cursor:pointer;white-space:nowrap;transition:background .15s;display:inline-flex;align-items:center;gap:7px}
+.sap-done-btn:hover:not(:disabled){background:#1d4ed8}
+.sap-done-btn:disabled{background:var(--t3);cursor:not-allowed}
 
 .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
 table{width:100%;border-collapse:collapse;font-size:12px;min-width:960px}
@@ -175,6 +178,7 @@ tbody td.cb-td input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent
     <div class="fg" style="margin-left:auto">
       <div class="fg-label" style="visibility:hidden">-</div>
       <div style="display:flex;gap:8px">
+        <button class="icon-btn" onclick="showSapSummary()" style="border-color:#2563b0;color:#2563b0">📋 สรุปรอ SAP</button>
         <button class="icon-btn" onclick="printOrders()" style="border-color:#d97706;color:#d97706">🖨️ พิมพ์ใบสรุป</button>
       </div>
     </div>
@@ -213,6 +217,7 @@ tbody td.cb-td input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent
     <span class="mark-label">✅ Mark as Sent</span>
     <span class="mark-spin"></span>
   </button>
+  <button class="sap-done-btn" id="sapDoneBtn" onclick="markSapDoneBatch()" disabled>✓ SAP Done</button>
 </div>
 
 <!-- TABLE -->
@@ -654,14 +659,17 @@ function renderTable(rows) {
 
   const tbody = document.getElementById('tableBody');
   tbody.innerHTML = rows.map(r => {
-    const id        = rowId(r);
-    const isPending = getStatus(r) === 'Pending';
-    const isSelected = id && selectedIds.has(id);
-    const emailShort = String(r['Submitter_email'] || r['submitter_email'] || '-').split('@')[0];
+    const id           = rowId(r);
+    const isPending    = getStatus(r) === 'Pending';
+    const isSapPending = getStatus(r) === 'Sent' && !getSapStatus(r);
+    const isSelectable = (isPending || isSapPending) && id;
+    const isSelected   = id && selectedIds.has(id);
+    const emailShort   = String(r['Submitter_email'] || r['submitter_email'] || '-').split('@')[0];
+    const cbAccent     = isSapPending ? '#2563b0' : 'var(--bm)';
 
     return '<tr' + (isSelected ? ' class="selected"' : '') + '>' +
-      '<td class="cb-td">' + (isPending && id
-        ? '<input type="checkbox" data-id="' + id + '"' + (isSelected ? ' checked' : '') + ' onchange="toggleRow(\'' + id + '\',this.checked)"/>'
+      '<td class="cb-td">' + (isSelectable
+        ? '<input type="checkbox" data-id="' + id + '" style="accent-color:' + cbAccent + '"' + (isSelected ? ' checked' : '') + ' onchange="toggleRow(\'' + id + '\',this.checked)"/>'
         : '') + '</td>' +
       '<td class="mono" style="font-size:11px">' + (id || '-') + '</td>' +
       '<td class="mono">' + excelDateToStr(r['Date'] || r['date']) + '</td>' +
@@ -692,9 +700,11 @@ function toggleRow(id, checked) {
 }
 
 function setSelectAll(checked) {
-  const pendingInView = filteredRows.filter(r => getStatus(r) === 'Pending' && rowId(r));
-  if (checked) pendingInView.forEach(r => selectedIds.add(rowId(r)));
-  else         pendingInView.forEach(r => selectedIds.delete(rowId(r)));
+  const selectableInView = filteredRows.filter(r =>
+    (getStatus(r) === 'Pending' || (getStatus(r) === 'Sent' && !getSapStatus(r))) && rowId(r)
+  );
+  if (checked) selectableInView.forEach(r => selectedIds.add(rowId(r)));
+  else         selectableInView.forEach(r => selectedIds.delete(rowId(r)));
 
   document.querySelectorAll('tbody input[type=checkbox][data-id]').forEach(cb => {
     cb.checked = selectedIds.has(cb.dataset.id);
@@ -706,8 +716,10 @@ function setSelectAll(checked) {
 }
 
 function updateSelCount() {
-  const n = selectedIds.size;
+  const n    = selectedIds.size;
   const rows = allRows.filter(r => selectedIds.has(rowId(r)));
+  const pendingRows = rows.filter(r => getStatus(r) === 'Pending');
+  const sapRows     = rows.filter(r => getStatus(r) === 'Sent' && !getSapStatus(r));
   const tons = rows.reduce((s, r) => s + rowTons(r), 0);
   const scsc = rows.filter(r => rowPlant(r) === 'SCSC').length;
   const nts  = rows.filter(r => rowPlant(r) === 'NTS').length;
@@ -718,12 +730,17 @@ function updateSelCount() {
     if (scsc) parts.push('SCSC ' + scsc);
     if (nts)  parts.push('NTS ' + nts);
     info += ' — ' + parts.join(', ') + ' — ' + tons.toFixed(3) + ' ตัน';
+    if (pendingRows.length) info += ' &nbsp;<span style="color:#d97706;font-size:11px">(Pending ' + pendingRows.length + ')</span>';
+    if (sapRows.length)     info += ' <span style="color:#2563b0;font-size:11px">(รอ SAP ' + sapRows.length + ')</span>';
   }
   document.getElementById('selInfo').innerHTML = info;
-  document.getElementById('markBtn').disabled  = n === 0;
+  document.getElementById('markBtn').disabled    = pendingRows.length === 0;
+  document.getElementById('sapDoneBtn').disabled = sapRows.length === 0;
 
-  const pendingInView = filteredRows.filter(r => getStatus(r) === 'Pending' && rowId(r));
-  const allSelected   = pendingInView.length > 0 && pendingInView.every(r => selectedIds.has(rowId(r)));
+  const selectableInView = filteredRows.filter(r =>
+    (getStatus(r) === 'Pending' || (getStatus(r) === 'Sent' && !getSapStatus(r))) && rowId(r)
+  );
+  const allSelected = selectableInView.length > 0 && selectableInView.every(r => selectedIds.has(rowId(r)));
   document.getElementById('selectAll').checked = allSelected;
   document.getElementById('hdrCb').checked     = allSelected;
 }
@@ -778,6 +795,165 @@ async function markAsSent() {
     btn.classList.remove('loading');
     updateSelCount();
   }
+}
+
+// ── Batch SAP Done ────────────────────────────────────────────────────────────
+async function markSapDoneBatch() {
+  const sapRows = allRows.filter(r => selectedIds.has(rowId(r)) && getStatus(r) === 'Sent' && !getSapStatus(r));
+  if (sapRows.length === 0) return;
+
+  const ids  = sapRows.map(r => rowId(r));
+  const scsc = sapRows.filter(r => rowPlant(r) === 'SCSC').length;
+  const nts  = sapRows.filter(r => rowPlant(r) === 'NTS').length;
+  const tons = sapRows.reduce((s, r) => s + rowTons(r), 0).toFixed(3);
+
+  let msg = 'ยืนยัน SAP Done สำหรับ ' + ids.length + ' รายการ?\n\n';
+  if (scsc) msg += '• SCSC: ' + scsc + ' รายการ\n';
+  if (nts)  msg += '• NTS: ' + nts + ' รายการ\n';
+  msg += '• น้ำหนักรวม: ' + tons + ' ตัน';
+  if (!confirm(msg)) return;
+
+  const btn = document.getElementById('sapDoneBtn');
+  btn.disabled    = true;
+  btn.textContent = '⏳ กำลังบันทึก...';
+  document.getElementById('errBox').style.display = 'none';
+  document.getElementById('okBox').style.display  = 'none';
+
+  try {
+    const res = await fetch(SAP_DONE_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ order_ids: ids })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    document.getElementById('okBox').textContent =
+      '✅ SAP Done สำเร็จ ' + ids.length + ' รายการ (SCSC: ' + scsc + ', NTS: ' + nts + ')';
+    document.getElementById('okBox').style.display = 'block';
+    selectedIds.clear();
+    await fetchData();
+  } catch(e) {
+    document.getElementById('errBox').textContent = 'SAP Done ไม่สำเร็จ: ' + e.message;
+    document.getElementById('errBox').style.display = 'block';
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = '✓ SAP Done';
+    updateSelCount();
+  }
+}
+
+// ── SAP Summary Modal ─────────────────────────────────────────────────────────
+function showSapSummary() {
+  const sapRows = allRows.filter(r => getStatus(r) === 'Sent' && !getSapStatus(r));
+  if (sapRows.length === 0) { alert('ไม่มีรายการรอ SAP ขณะนี้'); return; }
+
+  const GRP_COLOR = { Project:'#7c3aed', Retail:'#2563b0', Direct:'#d97706', Export:'#16a34a' };
+
+  // Build item > group > SO map
+  const itemMap = {};
+  sapRows.forEach(r => {
+    const item = String(r['Item Description'] || r['item_description'] || '-').trim();
+    const grp  = String(r['Customer Group']   || r['customer_group']   || '(ไม่ระบุ)').trim() || '(ไม่ระบุ)';
+    const so   = String(r['Sales Order No.']  || r['sales_order_no']   || '-').trim() || '-';
+    const tons = rowTons(r);
+    const pcs  = parseFloat(r['Pcs'] || r['pcs'] || 0) || 0;
+
+    if (!itemMap[item]) itemMap[item] = { tons:0, pcs:0, groups:{} };
+    itemMap[item].tons += tons;
+    itemMap[item].pcs  += pcs;
+
+    if (!itemMap[item].groups[grp]) itemMap[item].groups[grp] = { tons:0, pcs:0, soMap:{} };
+    itemMap[item].groups[grp].tons += tons;
+    itemMap[item].groups[grp].pcs  += pcs;
+
+    if (!itemMap[item].groups[grp].soMap[so]) itemMap[item].groups[grp].soMap[so] = { tons:0, pcs:0, count:0 };
+    itemMap[item].groups[grp].soMap[so].tons  += tons;
+    itemMap[item].groups[grp].soMap[so].pcs   += pcs;
+    itemMap[item].groups[grp].soMap[so].count += 1;
+  });
+
+  let grandTons = 0, grandPcs = 0, grandCount = 0;
+  let tableHtml =
+    '<table style="width:100%;border-collapse:collapse;font-size:12px">' +
+    '<thead><tr style="background:#0f2a4a">' +
+      '<th style="padding:8px 10px;color:#fff;text-align:left;font-size:11px;font-weight:500;min-width:260px">สินค้า / แผนก / SO</th>' +
+      '<th style="padding:8px 10px;color:#fff;text-align:right;font-size:11px;font-weight:500;width:60px">รายการ</th>' +
+      '<th style="padding:8px 10px;color:#fff;text-align:right;font-size:11px;font-weight:500;width:90px">ตัน</th>' +
+      '<th style="padding:8px 10px;color:#fff;text-align:right;font-size:11px;font-weight:500;width:80px">เส้น</th>' +
+    '</tr></thead><tbody>';
+
+  Object.entries(itemMap).sort((a,b) => a[0].localeCompare(b[0])).forEach(([item, iv]) => {
+    const itemCount = Object.values(iv.groups)
+      .reduce((s, gv) => s + Object.values(gv.soMap).reduce((s2, sv) => s2 + sv.count, 0), 0);
+    grandTons += iv.tons; grandPcs += iv.pcs; grandCount += itemCount;
+
+    tableHtml +=
+      '<tr style="background:#1e3a5f">' +
+        '<td colspan="4" style="padding:8px 10px;color:#fff;font-size:12px;font-weight:600">' +
+          item +
+          '<span style="font-weight:400;opacity:.65;font-size:10px;margin-left:8px">' +
+            iv.tons.toFixed(3) + ' ตัน &nbsp;·&nbsp; ' + Math.round(iv.pcs).toLocaleString() + ' เส้น &nbsp;·&nbsp; ' + itemCount + ' รายการ' +
+          '</span>' +
+        '</td>' +
+      '</tr>';
+
+    Object.entries(iv.groups).sort((a,b) => a[0].localeCompare(b[0])).forEach(([grp, gv]) => {
+      const color    = GRP_COLOR[grp] || '#64748b';
+      const grpCount = Object.values(gv.soMap).reduce((s, sv) => s + sv.count, 0);
+
+      tableHtml +=
+        '<tr style="background:#f1f5f9">' +
+          '<td style="padding:6px 10px 6px 22px;font-size:11px;font-weight:600">' +
+            '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + color + ';margin-right:6px;vertical-align:1px"></span>' +
+            grp +
+          '</td>' +
+          '<td style="padding:6px 10px;text-align:right;font-size:11px;font-family:\'IBM Plex Mono\',monospace;color:#64748b">' + grpCount + '</td>' +
+          '<td style="padding:6px 10px;text-align:right;font-size:11px;font-family:\'IBM Plex Mono\',monospace;font-weight:600;color:#0f2a4a">' + gv.tons.toFixed(3) + '</td>' +
+          '<td style="padding:6px 10px;text-align:right;font-size:11px;font-family:\'IBM Plex Mono\',monospace;font-weight:600;color:#0f2a4a">' + Math.round(gv.pcs).toLocaleString() + '</td>' +
+        '</tr>';
+
+      Object.entries(gv.soMap).sort((a,b) => a[0].localeCompare(b[0])).forEach(([so, sv]) => {
+        tableHtml +=
+          '<tr style="border-bottom:.5px solid #e2e8f0">' +
+            '<td style="padding:4px 10px 4px 38px;font-size:11px;color:#475569">' +
+              'SO: ' + (so === '-' ? '<span style="color:#94a3b8">(ไม่มี)</span>' : so) +
+              ' <span style="font-size:10px;color:#94a3b8;margin-left:4px">' + sv.count + ' รายการ</span>' +
+            '</td>' +
+            '<td style="padding:4px 10px;text-align:right;font-size:11px;color:#94a3b8;font-family:\'IBM Plex Mono\',monospace">' + sv.count + '</td>' +
+            '<td style="padding:4px 10px;text-align:right;font-size:11px;font-family:\'IBM Plex Mono\',monospace;color:#475569">' + sv.tons.toFixed(3) + '</td>' +
+            '<td style="padding:4px 10px;text-align:right;font-size:11px;font-family:\'IBM Plex Mono\',monospace;color:#475569">' + Math.round(sv.pcs).toLocaleString() + '</td>' +
+          '</tr>';
+      });
+    });
+  });
+
+  tableHtml +=
+    '<tr style="background:#0f2a4a">' +
+      '<td style="padding:8px 10px;color:#fff;font-size:12px;font-weight:600">รวมทั้งหมด</td>' +
+      '<td style="padding:8px 10px;text-align:right;color:#fff;font-family:\'IBM Plex Mono\',monospace;font-weight:600">' + grandCount + '</td>' +
+      '<td style="padding:8px 10px;text-align:right;color:#fff;font-family:\'IBM Plex Mono\',monospace;font-weight:600">' + grandTons.toFixed(3) + '</td>' +
+      '<td style="padding:8px 10px;text-align:right;color:#fff;font-family:\'IBM Plex Mono\',monospace;font-weight:600">' + Math.round(grandPcs).toLocaleString() + '</td>' +
+    '</tr></tbody></table>';
+
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem';
+  overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
+
+  overlay.innerHTML =
+    '<div style="background:#fff;border-radius:14px;width:min(740px,100%);max-height:82vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.3);font-family:\'IBM Plex Sans Thai\',sans-serif">' +
+      '<div style="background:#0f2a4a;padding:1rem 1.25rem;border-radius:14px 14px 0 0;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">' +
+        '<div>' +
+          '<div style="color:#fff;font-size:14px;font-weight:600">สรุปรายการรอ SAP</div>' +
+          '<div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:2px">' +
+            grandCount + ' รายการ &nbsp;·&nbsp; ' + grandTons.toFixed(3) + ' ตัน &nbsp;·&nbsp; ' + Math.round(grandPcs).toLocaleString() + ' เส้น' +
+          '</div>' +
+        '</div>' +
+        '<button id="_sapModalClose" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:15px;line-height:1">✕</button>' +
+      '</div>' +
+      '<div style="overflow-y:auto;padding:1rem">' + tableHtml + '</div>' +
+    '</div>';
+
+  document.body.appendChild(overlay);
+  overlay.querySelector('#_sapModalClose').onclick = () => overlay.remove();
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
