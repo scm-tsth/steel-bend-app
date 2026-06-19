@@ -178,7 +178,7 @@ tbody td.cb-td input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent
     <div class="fg" style="margin-left:auto">
       <div class="fg-label" style="visibility:hidden">-</div>
       <div style="display:flex;gap:8px">
-        <button class="icon-btn" onclick="showSapSummary()" style="border-color:#2563b0;color:#2563b0">📋 สรุปรอ SAP</button>
+        <button class="icon-btn" onclick="showSapSummary()" style="border-color:#d97706;color:#d97706;font-weight:600">📋 ค้างพับ SAP</button>
         <button class="icon-btn" onclick="printOrders()" style="border-color:#d97706;color:#d97706">🖨️ พิมพ์ใบสรุป</button>
       </div>
     </div>
@@ -843,135 +843,190 @@ async function markSapDoneBatch() {
 
 // ── SAP Summary Modal ─────────────────────────────────────────────────────────
 function showSapSummary() {
-  const sapRows = allRows.filter(r => getStatus(r) === 'Sent' && !getSapStatus(r));
-  if (sapRows.length === 0) { alert('ไม่มีรายการรอ SAP ขณะนี้'); return; }
+  const pendingRows = allRows.filter(r => getStatus(r) === 'Pending');
+  const bendingRows = allRows.filter(r => getStatus(r) === 'Sent' && !getSapStatus(r));
 
-  const GRP_COLOR   = { Project:'#7c3aed', Retail:'#2563b0', Direct:'#d97706', Export:'#16a34a' };
-  const PLANT_STYLE = { SCSC:{ bg:'#0369a1', label:'SCSC (Plant 0435)' }, NTS:{ bg:'#16a34a', label:'NTS (Plant 0431)' } };
-  const MONO = "'IBM Plex Mono',monospace";
+  if (pendingRows.length === 0 && bendingRows.length === 0) {
+    alert('ไม่มีรายการค้างดำเนินการ');
+    return;
+  }
 
-  // Build plant > item > group > SO map
-  const plantMap = {};
-  sapRows.forEach(r => {
-    const plant = rowPlant(r) || '(ไม่ระบุ)';
-    const item  = String(r['Item Description'] || r['item_description'] || '-').trim();
-    const grp   = String(r['Customer Group']   || r['customer_group']   || '(ไม่ระบุ)').trim() || '(ไม่ระบุ)';
-    const so    = String(r['Sales Order No.']  || r['sales_order_no']   || '-').trim() || '-';
-    const tons  = rowTons(r);
-    const pcs   = parseFloat(r['Pcs'] || r['pcs'] || 0) || 0;
+  // Auto-filter main table to Sent + SAP-pending so user can see bending rows
+  setView('sent');
+  setSap('pending');
 
-    if (!plantMap[plant]) plantMap[plant] = { tons:0, pcs:0, count:0, items:{} };
-    plantMap[plant].tons += tons; plantMap[plant].pcs += pcs; plantMap[plant].count += 1;
+  const GRP_COLOR = { Project:'#7c3aed', Retail:'#2563b0', Direct:'#d97706', Export:'#16a34a' };
 
-    const pm = plantMap[plant].items;
-    if (!pm[item]) pm[item] = { tons:0, pcs:0, groups:{} };
-    pm[item].tons += tons; pm[item].pcs += pcs;
+  // Build plant > item > group > SO map from a row array
+  function buildPlantMap(rows) {
+    const m = {};
+    rows.forEach(r => {
+      const plant = rowPlant(r) || '(ไม่ระบุ)';
+      const item  = String(r['Item Description'] || r['item_description'] || '-').trim();
+      const grp   = String(r['Customer Group']   || r['customer_group']   || '(ไม่ระบุ)').trim() || '(ไม่ระบุ)';
+      const so    = String(r['Sales Order No.']  || r['sales_order_no']   || '-').trim() || '-';
+      const tons  = rowTons(r);
+      const pcs   = parseFloat(r['Pcs'] || r['pcs'] || 0) || 0;
 
-    if (!pm[item].groups[grp]) pm[item].groups[grp] = { tons:0, pcs:0, soMap:{} };
-    pm[item].groups[grp].tons += tons; pm[item].groups[grp].pcs += pcs;
+      if (!m[plant]) m[plant] = { tons:0, pcs:0, count:0, items:{} };
+      m[plant].tons += tons; m[plant].pcs += pcs; m[plant].count += 1;
 
-    if (!pm[item].groups[grp].soMap[so]) pm[item].groups[grp].soMap[so] = { tons:0, pcs:0, count:0 };
-    pm[item].groups[grp].soMap[so].tons  += tons;
-    pm[item].groups[grp].soMap[so].pcs   += pcs;
-    pm[item].groups[grp].soMap[so].count += 1;
-  });
+      const pi = m[plant].items;
+      if (!pi[item]) pi[item] = { tons:0, pcs:0, groups:{} };
+      pi[item].tons += tons; pi[item].pcs += pcs;
 
-  let grandTons = 0, grandPcs = 0, grandCount = 0;
+      if (!pi[item].groups[grp]) pi[item].groups[grp] = { tons:0, pcs:0, soMap:{} };
+      pi[item].groups[grp].tons += tons; pi[item].groups[grp].pcs += pcs;
 
-  // helper: inline badge showing tons / pcs / count
+      if (!pi[item].groups[grp].soMap[so]) pi[item].groups[grp].soMap[so] = { tons:0, pcs:0, count:0 };
+      pi[item].groups[grp].soMap[so].tons  += tons;
+      pi[item].groups[grp].soMap[so].pcs   += pcs;
+      pi[item].groups[grp].soMap[so].count += 1;
+    });
+    return m;
+  }
+
   const badge = (tons, pcs, count, style) =>
-    '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:10px;' + (style||'') + '">' +
+    '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:10px;white-space:nowrap;' + (style||'') + '">' +
       tons.toFixed(3) + ' ต&nbsp;&nbsp;' + Math.round(pcs).toLocaleString() + ' เส้น&nbsp;&nbsp;' + count + ' รายการ' +
     '</span>';
 
-  let rows = '';
+  // Build one section's HTML from plantMap + color scheme
+  function buildSection(plantMap, itemBg, totalBg) {
+    let html = '';
+    let sectionTons = 0, sectionPcs = 0, sectionCount = 0;
 
-  ['SCSC','NTS'].concat(Object.keys(plantMap).filter(p => p !== 'SCSC' && p !== 'NTS')).forEach(plant => {
-    const pv = plantMap[plant];
-    if (!pv) return;
-    grandTons += pv.tons; grandPcs += pv.pcs; grandCount += pv.count;
+    const PLANT_STYLE = {
+      SCSC: { bg:'#0369a1', label:'SCSC (Plant 0435)' },
+      NTS:  { bg:'#16a34a', label:'NTS (Plant 0431)'  },
+    };
 
-    const ps = PLANT_STYLE[plant] || { bg:'#475569', label: plant };
+    ['SCSC','NTS'].concat(Object.keys(plantMap).filter(p => p !== 'SCSC' && p !== 'NTS')).forEach(plant => {
+      const pv = plantMap[plant];
+      if (!pv) return;
+      sectionTons += pv.tons; sectionPcs += pv.pcs; sectionCount += pv.count;
 
-    // ── Plant header ─────────────────────────────────────────────────────────
-    rows +=
-      '<div style="background:' + ps.bg + ';padding:9px 14px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">' +
-        '<span style="background:rgba(255,255,255,.2);color:#fff;border-radius:5px;padding:2px 9px;font-size:11px;font-weight:700">' + plant + '</span>' +
-        '<span style="color:#fff;font-size:12px;font-weight:700">' + ps.label + '</span>' +
-        badge(pv.tons, pv.pcs, pv.count, 'color:rgba(255,255,255,.7);margin-left:4px') +
-      '</div>';
-
-    Object.entries(pv.items).sort((a,b) => a[0].localeCompare(b[0])).forEach(([item, iv]) => {
-      const itemCount = Object.values(iv.groups)
-        .reduce((s, gv) => s + Object.values(gv.soMap).reduce((s2, sv) => s2 + sv.count, 0), 0);
-
-      // ── Item row ───────────────────────────────────────────────────────────
-      rows +=
-        '<div style="background:#1e3a5f;padding:7px 14px 7px 24px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">' +
-          '<span style="color:#fff;font-size:12px;font-weight:600;flex:1;min-width:0;word-break:break-word">' + item + '</span>' +
-          badge(iv.tons, iv.pcs, itemCount, 'color:rgba(255,255,255,.6)') +
+      const ps = PLANT_STYLE[plant] || { bg:'#475569', label: plant };
+      html +=
+        '<div style="background:' + ps.bg + ';padding:9px 14px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">' +
+          '<span style="background:rgba(255,255,255,.2);color:#fff;border-radius:5px;padding:2px 9px;font-size:11px;font-weight:700">' + plant + '</span>' +
+          '<span style="color:#fff;font-size:12px;font-weight:700">' + ps.label + '</span>' +
+          badge(pv.tons, pv.pcs, pv.count, 'color:rgba(255,255,255,.7);margin-left:4px') +
         '</div>';
 
-      Object.entries(iv.groups).sort((a,b) => a[0].localeCompare(b[0])).forEach(([grp, gv]) => {
-        const color    = GRP_COLOR[grp] || '#64748b';
-        const grpCount = Object.values(gv.soMap).reduce((s, sv) => s + sv.count, 0);
+      Object.entries(pv.items).sort((a,b) => a[0].localeCompare(b[0])).forEach(([item, iv]) => {
+        const itemCount = Object.values(iv.groups)
+          .reduce((s,gv) => s + Object.values(gv.soMap).reduce((s2,sv) => s2 + sv.count, 0), 0);
 
-        // ── Group row ──────────────────────────────────────────────────────
-        rows +=
-          '<div style="background:#f1f5f9;padding:6px 14px 6px 36px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-bottom:.5px solid #e2e8f0">' +
-            '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + color + ';flex-shrink:0"></span>' +
-            '<span style="font-size:12px;font-weight:600;color:#1e293b;flex:1;min-width:0">' + grp + '</span>' +
-            badge(gv.tons, gv.pcs, grpCount, 'color:#475569') +
+        html +=
+          '<div style="background:' + itemBg + ';padding:7px 14px 7px 24px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">' +
+            '<span style="color:#fff;font-size:12px;font-weight:600;flex:1;min-width:0;word-break:break-word">' + item + '</span>' +
+            badge(iv.tons, iv.pcs, itemCount, 'color:rgba(255,255,255,.6)') +
           '</div>';
 
-        Object.entries(gv.soMap).sort((a,b) => a[0].localeCompare(b[0])).forEach(([so, sv]) => {
-          rows +=
-            '<div style="background:#fff;padding:4px 14px 4px 52px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-bottom:.5px solid #f1f5f9">' +
-              '<span style="font-size:11px;color:#64748b;flex:1;min-width:0">SO: ' +
-                (so === '-' ? '<span style="color:#94a3b8">(ไม่มี)</span>' : '<strong>' + so + '</strong>') +
-              '</span>' +
-              badge(sv.tons, sv.pcs, sv.count, 'color:#94a3b8') +
+        Object.entries(iv.groups).sort((a,b) => a[0].localeCompare(b[0])).forEach(([grp, gv]) => {
+          const color    = GRP_COLOR[grp] || '#64748b';
+          const grpCount = Object.values(gv.soMap).reduce((s,sv) => s + sv.count, 0);
+
+          html +=
+            '<div style="background:#f1f5f9;padding:6px 14px 6px 36px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-bottom:.5px solid #e2e8f0">' +
+              '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + color + ';flex-shrink:0"></span>' +
+              '<span style="font-size:12px;font-weight:600;color:#1e293b;flex:1;min-width:0">' + grp + '</span>' +
+              badge(gv.tons, gv.pcs, grpCount, 'color:#475569') +
             '</div>';
+
+          Object.entries(gv.soMap).sort((a,b) => a[0].localeCompare(b[0])).forEach(([so, sv]) => {
+            html +=
+              '<div style="background:#fff;padding:4px 14px 4px 52px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-bottom:.5px solid #f1f5f9">' +
+                '<span style="font-size:11px;color:#64748b;flex:1;min-width:0">SO: ' +
+                  (so === '-' ? '<span style="color:#94a3b8">(ไม่มี)</span>' : '<strong>' + so + '</strong>') +
+                '</span>' +
+                badge(sv.tons, sv.pcs, sv.count, 'color:#94a3b8') +
+              '</div>';
+          });
         });
       });
     });
-  });
 
-  // ── Grand total footer ────────────────────────────────────────────────────
-  rows +=
-    '<div style="background:#0f2a4a;padding:9px 14px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">' +
-      '<span style="color:#fff;font-size:12px;font-weight:700;flex:1">รวมทั้งหมด</span>' +
-      badge(grandTons, grandPcs, grandCount, 'color:rgba(255,255,255,.85);font-weight:700') +
-    '</div>';
+    // Section footer
+    html +=
+      '<div style="background:' + totalBg + ';padding:8px 14px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">' +
+        '<span style="color:#fff;font-size:11px;font-weight:700;flex:1">รวม</span>' +
+        badge(sectionTons, sectionPcs, sectionCount, 'color:rgba(255,255,255,.85);font-weight:700') +
+      '</div>';
 
+    return html;
+  }
+
+  // ── Build content ─────────────────────────────────────────────────────────
+  let content = '';
+  let totalCount = 0, totalTons = 0, totalPcs = 0;
+
+  if (pendingRows.length > 0) {
+    const pm = buildPlantMap(pendingRows);
+    totalCount += pendingRows.length;
+    pendingRows.forEach(r => { totalTons += rowTons(r); totalPcs += parseFloat(r['Pcs']||r['pcs']||0)||0; });
+
+    // Pending section header
+    content +=
+      '<div style="background:#92400e;padding:8px 14px;display:flex;align-items:center;gap:8px">' +
+        '<span style="font-size:13px">🟡</span>' +
+        '<span style="color:#fff;font-size:12px;font-weight:700">สรุป Pending</span>' +
+        '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:10px;color:rgba(255,255,255,.7);margin-left:4px">' +
+          pendingRows.length + ' รายการ' +
+        '</span>' +
+      '</div>';
+    content += buildSection(pm, '#78350f', '#92400e');
+  }
+
+  if (bendingRows.length > 0) {
+    const bm = buildPlantMap(bendingRows);
+    totalCount += bendingRows.length;
+    bendingRows.forEach(r => { totalTons += rowTons(r); totalPcs += parseFloat(r['Pcs']||r['pcs']||0)||0; });
+
+    // Bending section header
+    content +=
+      '<div style="background:#1e40af;padding:8px 14px;display:flex;align-items:center;gap:8px;' +
+        (pendingRows.length > 0 ? 'margin-top:4px' : '') + '">' +
+        '<span style="font-size:13px">🔵</span>' +
+        '<span style="color:#fff;font-size:12px;font-weight:700">สรุป ค้างพับ</span>' +
+        '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:10px;color:rgba(255,255,255,.7);margin-left:4px">' +
+          bendingRows.length + ' รายการ' +
+        '</span>' +
+      '</div>';
+    content += buildSection(bm, '#1e3a5f', '#1e40af');
+  }
+
+  // ── Modal ─────────────────────────────────────────────────────────────────
   const overlay = document.createElement('div');
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9999;pointer-events:none';
-  overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
 
   const modal = document.createElement('div');
   modal.style.cssText =
     'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);' +
-    'background:#fff;border-radius:14px;width:min(560px,96vw);max-height:88vh;' +
+    'background:#fff;border-radius:14px;width:min(580px,96vw);max-height:88vh;' +
     'display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.35);' +
     'font-family:\'IBM Plex Sans Thai\',sans-serif;overflow:hidden;z-index:10000;pointer-events:auto';
 
   modal.innerHTML =
     '<div id="_sapModalHdr" style="background:#0f2a4a;padding:1rem 1.25rem;border-radius:14px 14px 0 0;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;cursor:grab;user-select:none">' +
       '<div>' +
-        '<div style="color:#fff;font-size:14px;font-weight:600">สรุปรายการรอ SAP</div>' +
-        '<div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:2px">' +
-          grandCount + ' รายการ · ' + grandTons.toFixed(3) + ' ตัน · ' + Math.round(grandPcs).toLocaleString() + ' เส้น' +
+        '<div style="color:#fff;font-size:14px;font-weight:700">📋 ค้างพับ SAP</div>' +
+        '<div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px;display:flex;gap:12px">' +
+          (pendingRows.length > 0 ? '<span>🟡 Pending: <strong style="color:#fbbf24">' + pendingRows.length + ' รายการ</strong></span>' : '') +
+          (bendingRows.length > 0 ? '<span>🔵 ค้างพับ: <strong style="color:#93c5fd">' + bendingRows.length + ' รายการ</strong></span>' : '') +
         '</div>' +
       '</div>' +
       '<button id="_sapModalClose" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:15px;line-height:28px;flex-shrink:0">✕</button>' +
     '</div>' +
-    '<div style="overflow-y:auto;overflow-x:hidden">' + rows + '</div>';
+    '<div style="overflow-y:auto;overflow-x:hidden">' + content + '</div>';
 
   document.body.appendChild(overlay);
   document.body.appendChild(modal);
 
-  modal.querySelector('#_sapModalClose').onclick = () => { overlay.remove(); modal.remove(); };
-  overlay.onclick = () => { overlay.remove(); modal.remove(); };
+  const closeAll = () => { overlay.remove(); modal.remove(); };
+  modal.querySelector('#_sapModalClose').onclick = closeAll;
+  overlay.onclick = closeAll;
 
   // ── Drag logic ────────────────────────────────────────────────────────────
   const hdr = modal.querySelector('#_sapModalHdr');
@@ -981,7 +1036,6 @@ function showSapSummary() {
     if (e.button !== 0) return;
     dragging = true;
     const r = modal.getBoundingClientRect();
-    // switch from transform-based centering to absolute px
     modal.style.transform = 'none';
     modal.style.left = r.left + 'px';
     modal.style.top  = r.top  + 'px';
@@ -993,11 +1047,8 @@ function showSapSummary() {
 
   document.addEventListener('mousemove', e => {
     if (!dragging) return;
-    let nx = e.clientX - ox;
-    let ny = e.clientY - oy;
-    // keep within viewport
-    nx = Math.max(0, Math.min(nx, window.innerWidth  - modal.offsetWidth));
-    ny = Math.max(0, Math.min(ny, window.innerHeight - modal.offsetHeight));
+    let nx = Math.max(0, Math.min(e.clientX - ox, window.innerWidth  - modal.offsetWidth));
+    let ny = Math.max(0, Math.min(e.clientY - oy, window.innerHeight - modal.offsetHeight));
     modal.style.left = nx + 'px';
     modal.style.top  = ny + 'px';
   });
