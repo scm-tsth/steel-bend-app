@@ -368,17 +368,29 @@ function getProdName(r) {
 }
   function printOrders() {
   if (currentPlant) { doPrintOrders(currentPlant); return; }
+
+  // Count Pending rows per plant for display
+  const pendingAll  = allRows.filter(r => getStatus(r) === 'Pending');
+  const scscCount   = pendingAll.filter(r => rowPlant(r) === 'SCSC').length;
+  const ntsCount    = pendingAll.filter(r => rowPlant(r) === 'NTS').length;
+
   const overlay = document.createElement('div');
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9998;display:flex;align-items:center;justify-content:center';
   const box = document.createElement('div');
-  box.style.cssText = 'background:#fff;border-radius:14px;padding:1.75rem 1.5rem;width:260px;box-shadow:0 20px 60px rgba(0,0,0,.25);text-align:center;font-family:"IBM Plex Sans Thai",sans-serif';
+  box.style.cssText = 'background:#fff;border-radius:14px;padding:1.75rem 1.5rem;width:280px;box-shadow:0 20px 60px rgba(0,0,0,.25);text-align:center;font-family:"IBM Plex Sans Thai",sans-serif';
   box.innerHTML = `
     <div style="font-size:20px;margin-bottom:.5rem">🖨️</div>
     <div style="font-size:14px;font-weight:600;color:#0f2a4a;margin-bottom:.35rem">พิมพ์ใบสรุป</div>
     <div style="font-size:12px;color:#475569;margin-bottom:1.25rem">เลือกโรงงานที่ต้องการพิมพ์</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:.75rem">
-      <button id="_pSCSC" style="height:44px;background:#0369a1;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer">SCSC</button>
-      <button id="_pNTS"  style="height:44px;background:#16a34a;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer">NTS</button>
+      <button id="_pSCSC" style="height:56px;background:#0369a1;color:#fff;border:none;border-radius:10px;font-family:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px">
+        <span style="font-size:15px;font-weight:700">SCSC</span>
+        <span style="font-size:11px;opacity:.8">${scscCount} รายการ</span>
+      </button>
+      <button id="_pNTS"  style="height:56px;background:#16a34a;color:#fff;border:none;border-radius:10px;font-family:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px">
+        <span style="font-size:15px;font-weight:700">NTS</span>
+        <span style="font-size:11px;opacity:.8">${ntsCount} รายการ</span>
+      </button>
     </div>
     <button id="_pCancel" style="width:100%;height:34px;background:#f1f5f9;color:#475569;border:none;border-radius:8px;font-size:12px;font-family:inherit;cursor:pointer">ยกเลิก</button>`;
   overlay.appendChild(box);
