@@ -367,6 +367,8 @@ function getProdName(r) {
   return PROD_MAP[sp]||PROD_MAP[fp]||parseProdName(desc)||desc||'-';
 }
   function printOrders() {
+  setView('pending');
+
   if (currentPlant) { doPrintOrders(currentPlant); return; }
 
   // Count Pending rows per plant for display
