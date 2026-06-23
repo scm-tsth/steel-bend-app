@@ -324,8 +324,7 @@ function parseDateTime(value){
 }
 
 function canCancel(row){
-  const deadline=parseDateTime(cancelDeadlineValue(row));
-  return isPending(row) && rowOrderId(row) && rowEmail(row)===currentUserEmail() && deadline && Date.now()<deadline.getTime();
+  return isPending(row) && rowOrderId(row) && rowEmail(row)===currentUserEmail();
 }
 
 function receiveDateValue(row){
