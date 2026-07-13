@@ -82,6 +82,9 @@ tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t
 @keyframes spin{to{transform:rotate(360deg)}}
 .err-box{background:var(--rl);border:1px solid #fca5a5;border-radius:var(--ra);padding:.75rem 1rem;font-size:13px;color:var(--rd);margin-bottom:.9rem}
 .count-label{font-size:12px;color:var(--t2);margin-bottom:.5rem}
+.my-pending-pill{display:none;align-items:center;gap:7px;background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.4);border-radius:20px;padding:5px 14px;white-space:nowrap}
+.my-pending-pill .pill-num{font-size:17px;font-weight:700;color:#fbbf24;line-height:1}
+.my-pending-pill .pill-lbl{font-size:11px;color:rgba(255,255,255,.75);line-height:1.2}
 </style>
 </head>
 <body>
@@ -110,6 +113,10 @@ tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t
     <p>ติดตามสถานะรายการสั่งพับเหล็ก</p>
   </div>
   <span id="lastUpd" style="font-size:11px;color:rgba(255,255,255,.45);white-space:nowrap"></span>
+  <div id="myPendingPill" class="my-pending-pill">
+    <span>⏳</span>
+    <div><span class="pill-num" id="myPendingCount">0</span><div class="pill-lbl">รายการรอดำเนินการ</div></div>
+  </div>
   <button class="home-btn" onclick="fetchData()">🔄 Refresh</button>
   <a class="home-btn" href="index.html">← กลับหน้าหลัก</a>
 </div>
@@ -491,6 +498,20 @@ if(fItem){
 if(fStatus) rows=rows.filter(r=>getDisplayStatus(r)===fStatus);
 
   renderTable(rows);
+  updateMyPendingPill();
+}
+
+function updateMyPendingPill(){
+  const me=currentUserEmail();
+  const pill=document.getElementById('myPendingPill');
+  if(!me||!allRows.length){pill.style.display='none';return;}
+  const n=allRows.filter(r=>rowEmail(r)===me&&isPending(r)).length;
+  if(n>0){
+    document.getElementById('myPendingCount').textContent=n;
+    pill.style.display='flex';
+  }else{
+    pill.style.display='none';
+  }
 }
 
 function renderTable(rows){
