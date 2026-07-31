@@ -90,6 +90,10 @@ tbody td.cb-td input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent
 .spin{display:inline-block;width:18px;height:18px;border:2px solid var(--br);border-top-color:var(--bm);border-radius:50%;animation:spin .7s linear infinite;vertical-align:-4px;margin-right:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .err-box{background:var(--rl);border:1px solid #fca5a5;border-radius:var(--ra);padding:.75rem 1rem;font-size:13px;color:var(--rd);margin-bottom:.9rem}
+.admin-pill{display:none;align-items:center;gap:8px;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.35);border-radius:20px;padding:5px 14px;white-space:nowrap}
+.admin-pill .pill-total{font-size:16px;font-weight:700;color:#fbbf24;line-height:1}
+.admin-pill .pill-split{font-size:10px;color:rgba(255,255,255,.6);margin-top:2px}
+.admin-pill .pill-lbl{font-size:10px;color:rgba(255,255,255,.45)}
 .ok-box{background:var(--gl);border:1px solid #86efac;border-radius:var(--ra);padding:.75rem 1rem;font-size:13px;color:#15803d;margin-bottom:.9rem}
 .warn-box{background:var(--al);border:1px solid #fcd34d;border-radius:var(--ra);padding:.65rem 1rem;font-size:12px;color:#92400e;margin-bottom:.9rem}
 .fg{display:flex;flex-direction:column;gap:6px}
@@ -122,6 +126,13 @@ tbody td.cb-td input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent
   </div>
   <span class="admin-badge">ADMIN</span>
   <span id="lastUpd" style="font-size:11px;color:rgba(255,255,255,.45);white-space:nowrap"></span>
+  <div id="adminPill" class="admin-pill">
+    <span style="font-size:15px">⏳</span>
+    <div>
+      <div><span class="pill-total" id="pillTotal">0</span><span class="pill-lbl"> ค้างพับ</span></div>
+      <div class="pill-split"><span id="pillSCSC" style="color:#93c5fd">0 SCSC</span><span style="color:rgba(255,255,255,.3)"> / </span><span id="pillNTS" style="color:#86efac">0 NTS</span></div>
+    </div>
+  </div>
   <button class="home-btn" onclick="fetchData()">🔄 Refresh</button>
   <a class="home-btn" href="index.html">← หน้าหลัก</a>
 </div>
@@ -214,7 +225,7 @@ tbody td.cb-td input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent
   </label>
   <span class="sel-info" id="selInfo">เลือก <strong>0</strong> รายการ</span>
   <button class="mark-btn" id="markBtn" onclick="markAsSent()" disabled>
-    <span class="mark-label">✅ Mark as Sent</span>
+    <span class="mark-label">✅ สั่งพับแล้ว</span>
     <span class="mark-spin"></span>
   </button>
   <button class="sap-done-btn" id="sapDoneBtn" onclick="markSapDoneBatch()" disabled>✓ SAP Done</button>
@@ -657,6 +668,19 @@ function applyFilter() {
 
   renderTable(rows);
   updateSelCount();
+  updateAdminPill();
+}
+
+function updateAdminPill(){
+  const pill=document.getElementById('adminPill');
+  if(!allRows.length){pill.style.display='none';return;}
+  const pending=allRows.filter(r=>getStatus(r)==='Pending');
+  const scsc=pending.filter(r=>rowPlant(r)==='SCSC').length;
+  const nts=pending.filter(r=>rowPlant(r)==='NTS').length;
+  document.getElementById('pillTotal').textContent=pending.length;
+  document.getElementById('pillSCSC').textContent=scsc+' SCSC';
+  document.getElementById('pillNTS').textContent=nts+' NTS';
+  pill.style.display=pending.length>0?'flex':'none';
 }
 
 // ── Render ────────────────────────────────────────────────────────────────────
