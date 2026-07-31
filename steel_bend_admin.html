@@ -332,8 +332,8 @@ function sapBadge(row) {
   const done = getSapStatus(row);
   const id = rowId(row);
   if (done) return '<span style="color:#16a34a;font-size:12px;font-weight:600">&#10003; Done</span>';
-  if (!id)  return '<span style="color:#94a3b8;font-size:12px">รอ SAP</span>';
-  return `<button onclick="markSapDone('${id}')" style="background:none;border:1px solid #cbd5e1;border-radius:6px;padding:2px 8px;font-size:11px;color:#94a3b8;cursor:pointer;font-family:'IBM Plex Sans Thai',sans-serif" onmouseover="this.style.borderColor='#16a34a';this.style.color='#16a34a'" onmouseout="this.style.borderColor='#cbd5e1';this.style.color='#94a3b8'">รอ SAP ✎</button>`;
+  if (!id)  return '<span style="color:#94a3b8;font-size:12px">ค้างพับ SAP</span>';
+  return `<button onclick="markSapDone('${id}')" style="background:none;border:1px solid #cbd5e1;border-radius:6px;padding:2px 8px;font-size:11px;color:#94a3b8;cursor:pointer;font-family:'IBM Plex Sans Thai',sans-serif" onmouseover="this.style.borderColor='#16a34a';this.style.color='#16a34a'" onmouseout="this.style.borderColor='#cbd5e1';this.style.color='#94a3b8'">ค้างพับ SAP ✎</button>`;
 }
 
 function rowId(row) { return row['OrderID'] || row['order_id'] || ''; }
@@ -353,7 +353,7 @@ function deliveryDateVal(row) {
 
 function statusBadge(row) {
   const s = getStatus(row);
-  if (s === 'Pending')   return '<span class="badge pending">&#8987; รอ</span>';
+  if (s === 'Pending')   return '<span class="badge pending">⏳ รอสั่งพับ</span>';
   if (s === 'Error')     return '<span class="badge error">&#9888; Error</span>';
   if (s === 'Cancelled') return '<span class="badge cancelled">ยกเลิก</span>';
   return '<span class="badge done">&#10003; Sent</span>';
