@@ -122,7 +122,7 @@ tbody td.cb-td input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent
   </div>
   <div class="hdr-text">
     <h1>Admin Panel — ระบบสั่งพับเหล็ก</h1>
-    <p>จัดการรายการสั่งพับ และ Mark as Sent</p>
+    <p>จัดการรายการสั่งพับ และยืนยันส่งโรงงาน</p>
   </div>
   <span class="admin-badge">ADMIN</span>
   <span id="lastUpd" style="font-size:11px;color:rgba(255,255,255,.45);white-space:nowrap"></span>
@@ -159,7 +159,7 @@ tbody td.cb-td input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent
     <div class="fg">
       <div class="fg-label">สถานะ Workflow</div>
       <div class="view-toggle">
-        <button class="active" id="viewPending" onclick="setView('pending')">⏳ Pending</button>
+        <button class="active" id="viewPending" onclick="setView('pending')">⏳ รอสั่งพับ</button>
         <button id="viewSent" onclick="setView('sent')">✅ Sent</button>
         <button id="viewAll" onclick="setView('all')">ทั้งหมด</button>
       </div>
@@ -201,15 +201,15 @@ tbody td.cb-td input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent
 <div class="stats-row" id="statsRow" style="display:none">
   <div class="stat-box">
     <div class="stat-num amber" id="statPending">0</div>
-    <div class="stat-label">Pending ทั้งหมด</div>
+    <div class="stat-label">รอสั่งพับทั้งหมด</div>
   </div>
   <div class="stat-box">
     <div class="stat-num blue" id="statSCSC">0</div>
-    <div class="stat-label">SCSC Pending</div>
+    <div class="stat-label">SCSC รอสั่งพับ</div>
   </div>
   <div class="stat-box">
     <div class="stat-num green" id="statNTS">0</div>
-    <div class="stat-label">NTS Pending</div>
+    <div class="stat-label">NTS รอสั่งพับ</div>
   </div>
   <div class="stat-box">
     <div class="stat-num" id="statTons">0</div>
