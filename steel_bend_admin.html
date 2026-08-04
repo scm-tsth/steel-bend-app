@@ -630,7 +630,7 @@ function setSap(val){
   applyFilter();
 }
 function applyFilter() {
-  let rows = [...allRows];
+    let rows = [...allRows].filter(r => getStatus(r) !== 'Cancelled');
 
   if (currentView === 'pending') rows = rows.filter(r => getStatus(r) === 'Pending');
   if (currentView === 'sent')    rows = rows.filter(r => getStatus(r) === 'Sent');
