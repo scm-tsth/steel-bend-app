@@ -375,16 +375,19 @@ function getProdName(r) {
   var sp=r['PROD_ID_SP']||r['prod_id_sp']||'';
   var fp=r['PROD_ID_FP']||r['prod_id_fp']||'';
   var desc=String(r['Item Description']||r['item_description']||'').trim();
-    return PROD_MAP[sp]||PROD_MAP[fp]||parseProdName(desc)||desc||'-';
+   return PROD_MAP[sp]||PROD_MAP[fp]||parseProdName(desc)||desc||'-';
 }
+// เรียงลำดับสินค้า: RB ก่อน DB → เกรด → ขนาด → ความยาว
+// รองรับทั้ง "RB SR24 12 mm. 10 m." และ "SR24 RB12/10"
 function prodSortKey(name) {
   var s = String(name || '').toUpperCase();
-  var type = s.indexOf('RB') === 0 ? 0 : 1;
+  var type = /(^|\s)RB(\s|\d)/.test(s) ? 0 : 1;
   var grade = /SD40\(NT\)/.test(s) ? 3
             : /SD40\(S\)/.test(s)  ? 2
             : /SD50/.test(s)       ? 1
             : 0;
-  var m = s.match(/(\d+(?:\.\d+)?)\s*MM\.?\s*(\d+(?:\.\d+)?)\s*M\./);
+  var m = s.match(/(\d+(?:\.\d+)?)\s*MM\.?\s*(\d+(?:\.\d+)?)\s*M\./)
+       || s.match(/[DR]B\s*(\d+)\s*\/\s*(\d+)/);
   return [type, grade, m ? parseFloat(m[1]) : 999, m ? parseFloat(m[2]) : 999];
 }
 function cmpProdName(a, b) {
@@ -454,7 +457,7 @@ var totalPcs  = rows.reduce(function(s,r){ return s+(parseFloat(r['Pcs']||r['pcs
     sumMap[name].tons += rowTons(r);
     sumMap[name].pcs  += parseFloat(r['Pcs']||r['pcs']||0)||0;
   });
-    var sumEntries = Object.entries(sumMap).sort(function(a,b){ return cmpProdName(a[0], b[0]); });
+      var sumEntries = Object.entries(sumMap).sort(function(a,b){ return cmpProdName(a[0], b[0]); });
 
   var sumHtml = '';
   sumEntries.forEach(function(e, i){
@@ -661,7 +664,9 @@ function applyFilter() {
   rows.sort((a, b) => {
     const pa = rowPlant(a) === 'SCSC' ? 0 : 1;
     const pb = rowPlant(b) === 'SCSC' ? 0 : 1;
-    if (pa !== pb) return pa - pb;
+        if (pa !== pb) return pa - pb;
+    const pc = byProdOrder(a, b);
+    if (pc !== 0) return pc;
     const da = String(a['Date'] || a['date'] || '');
     const db = String(b['Date'] || b['date'] || '');
     return da.localeCompare(db);
@@ -968,7 +973,7 @@ function showSapSummary() {
           badge(pv.tons, pv.pcs, pv.count, 'color:rgba(255,255,255,.7);margin-left:4px') +
         '</div>';
 
-      Object.entries(pv.items).sort((a,b) => a[0].localeCompare(b[0])).forEach(([item, iv]) => {
+            Object.entries(pv.items).sort((a,b) => cmpProdName(a[0], b[0])).forEach(([item, iv]) => {
         const itemCount = Object.values(iv.groups)
           .reduce((s,gv) => s + Object.values(gv.soMap).reduce((s2,sv) => s2 + sv.count, 0), 0);
 
