@@ -375,8 +375,24 @@ function getProdName(r) {
   var sp=r['PROD_ID_SP']||r['prod_id_sp']||'';
   var fp=r['PROD_ID_FP']||r['prod_id_fp']||'';
   var desc=String(r['Item Description']||r['item_description']||'').trim();
-  return PROD_MAP[sp]||PROD_MAP[fp]||parseProdName(desc)||desc||'-';
+    return PROD_MAP[sp]||PROD_MAP[fp]||parseProdName(desc)||desc||'-';
 }
+function prodSortKey(name) {
+  var s = String(name || '').toUpperCase();
+  var type = s.indexOf('RB') === 0 ? 0 : 1;
+  var grade = /SD40\(NT\)/.test(s) ? 3
+            : /SD40\(S\)/.test(s)  ? 2
+            : /SD50/.test(s)       ? 1
+            : 0;
+  var m = s.match(/(\d+(?:\.\d+)?)\s*MM\.?\s*(\d+(?:\.\d+)?)\s*M\./);
+  return [type, grade, m ? parseFloat(m[1]) : 999, m ? parseFloat(m[2]) : 999];
+}
+function cmpProdName(a, b) {
+  var ka = prodSortKey(a), kb = prodSortKey(b);
+  for (var i = 0; i < 4; i++) if (ka[i] !== kb[i]) return ka[i] - kb[i];
+  return 0;
+}
+function byProdOrder(a, b) { return cmpProdName(getProdName(a), getProdName(b)); }
   function printOrders() {
   setView('pending');
 
@@ -425,7 +441,7 @@ function getProdName(r) {
   var todayStr = pad2(now.getDate())+'/'+pad2(now.getMonth()+1)+'/'+now.getFullYear();
   var timeStr  = pad2(now.getHours())+':'+pad2(now.getMinutes());
 
-  rows.sort(function(a,b){ return String(a['Date']||'').localeCompare(String(b['Date']||'')); });
+   rows.sort(byProdOrder);
 
 var totalTons = rows.reduce(function(s,r){ return s+rowTons(r); },0).toFixed(3);
 var totalPcs  = rows.reduce(function(s,r){ return s+(parseFloat(r['Pcs']||r['pcs']||0)||0); },0);
@@ -438,7 +454,7 @@ var totalPcs  = rows.reduce(function(s,r){ return s+(parseFloat(r['Pcs']||r['pcs
     sumMap[name].tons += rowTons(r);
     sumMap[name].pcs  += parseFloat(r['Pcs']||r['pcs']||0)||0;
   });
-  var sumEntries = Object.entries(sumMap).sort(function(a,b){ return a[0].localeCompare(b[0]); });
+    var sumEntries = Object.entries(sumMap).sort(function(a,b){ return cmpProdName(a[0], b[0]); });
 
   var sumHtml = '';
   sumEntries.forEach(function(e, i){
