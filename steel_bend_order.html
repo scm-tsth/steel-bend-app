@@ -110,6 +110,7 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:linear-gradient(135d
 .submit-dock{margin-top:.75rem}
 .submit-dock .submit-btn{margin-top:0;box-shadow:0 8px 20px rgba(26,61,107,.2)}
 .master-status{padding:5px 8px;border-radius:7px;background:rgba(241,245,249,.75);width:max-content;max-width:100%}
+.master-status:empty{display:none}
 
 /* Industrial page backdrop */
 @media (max-width:768px){
@@ -172,7 +173,7 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:linear-gradient(135d
       <button class="pill" data-grp="Direct">Direct</button>
       <button class="pill" data-grp="Export">Export</button>
     </div>
-    <div class="master-status" id="salesMasterStatus">กำลังเตรียมข้อมูล Customer และ Sales...</div>
+    <div class="master-status" id="salesMasterStatus"></div>
   </div>
 </div>
 
@@ -225,7 +226,7 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:linear-gradient(135d
 <div class="success-screen" id="successView">
   <div class="s-icon">✅</div>
   <h2>ส่งรายการสำเร็จแล้วครับ!</h2>
-  <p>ระบบได้รับรายการของคุณแล้ว<br/>กรุณาตรวจสอบอีเมลยืนยันที่ <strong id="confirmEmail"></strong></p>
+  <p>ระบบได้รับรายการของคุณแล้ว<br/>สามารถติดตามสถานะได้ที่เมนู Tracking</p>
   <button class="new-btn" onclick="window.location.href='index.html'">← กลับหน้าหลัก</button>
 </div>
 </div>
@@ -407,7 +408,7 @@ function applySalesMaster(payload){
 }
 async function loadSalesMaster(){
   if(!SALES_MASTER_URL){
-    setSalesMasterStatus('ข้อมูลสำรองในระบบ · รอเชื่อม SharePoint');
+    setSalesMasterStatus('');
     return;
   }
   try{
@@ -422,7 +423,7 @@ async function loadSalesMaster(){
     if(!applySalesMaster(payload))throw new Error('ไม่พบข้อมูลที่ใช้งาน');
   }catch(error){
     console.warn('Sales master fallback:',error);
-    setSalesMasterStatus('ใช้ข้อมูลสำรอง · SharePoint ติดต่อไม่ได้');
+    setSalesMasterStatus('');
   }
 }
 function matOpts(p){const l=p==='SCSC'?MAT_SCSC:p==='NTS'?MAT_NTS:[];return '<option value="">-- เลือกสินค้า --</option>'+l.map(m=>`<option>${m}</option>`).join('');}
@@ -802,7 +803,6 @@ async function doSubmit(){
 
   btnText.textContent='✅ ยืนยันและส่งข้อมูล';
   document.getElementById('confirmView').classList.remove('show');
-  document.getElementById('confirmEmail').textContent=email;
   document.getElementById('successView').classList.add('show');
   setWorkflowStep(3);
   window.scrollTo(0,0);
