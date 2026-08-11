@@ -9,11 +9,11 @@
 :root{--bd:#0f2a4a;--bm:#1a3d6b;--ba:#2563b0;--bl:#dbeafe;--gr:#16a34a;--gl:#dcfce7;--rd:#dc2626;--rl:#fee2e2;--br:#e2e8f0;--tx:#0f172a;--t2:#475569;--t3:#94a3b8;--ra:14px}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'IBM Plex Sans Thai',sans-serif;background:#07182b;color:var(--tx);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem 1rem;position:relative;isolation:isolate;overflow-x:hidden}
-body::before{content:'';position:fixed;inset:-5%;z-index:-2;background:linear-gradient(90deg,rgba(3,15,31,.36),rgba(3,15,31,.17) 48%,rgba(3,15,31,.3)),url('assets/steel-factory-night.png') center/cover no-repeat;transform:scale(1.04);animation:factoryDrift 24s ease-in-out infinite alternate;will-change:transform}
+body::before{content:'';position:fixed;inset:-5%;z-index:-2;background:linear-gradient(90deg,rgba(3,15,31,.36),rgba(3,15,31,.17) 48%,rgba(3,15,31,.3)),url('assets/steel-factory-night.png') center/cover no-repeat;transform:scale(1.02)}
 body::after{content:'';position:fixed;inset:0;z-index:-1;background:radial-gradient(circle at 76% 58%,rgba(245,158,11,.08),transparent 34%),linear-gradient(180deg,rgba(4,17,34,.08),rgba(4,17,34,.28));pointer-events:none}
-.wrap{max-width:420px;width:100%;animation:pageEnter .7s cubic-bezier(.2,.8,.2,1) both}
+.wrap{max-width:420px;width:100%}
 .hdr{text-align:center;margin-bottom:2rem}
-.logo{width:64px;height:64px;background:var(--bd);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;box-shadow:0 8px 28px rgba(2,12,27,.35);animation:logoFloat 4.5s ease-in-out infinite}
+.logo{width:64px;height:64px;background:var(--bd);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;box-shadow:0 8px 28px rgba(2,12,27,.35)}
 .logo svg{width:38px;height:38px}
 .hdr h1{font-size:20px;font-weight:600;color:#fff;margin-bottom:.35rem;text-shadow:0 2px 12px rgba(0,0,0,.45)}
 .hdr p{font-size:13px;color:rgba(255,255,255,.78);text-shadow:0 1px 8px rgba(0,0,0,.5)}
@@ -59,17 +59,6 @@ body::after{content:'';position:fixed;inset:0;z-index:-1;background:radial-gradi
 .signout:hover{color:var(--rd)}
 .footer{text-align:center;margin-top:1.5rem;font-size:11px;color:rgba(255,255,255,.72);text-shadow:0 1px 8px rgba(0,0,0,.6)}
 
-/* Motion polish */
-@keyframes factoryDrift{from{transform:scale(1.04) translate3d(-.6%,0,0)}to{transform:scale(1.1) translate3d(.7%,-.5%,0)}}
-@keyframes pageEnter{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
-@keyframes logoFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
-@keyframes cardEnter{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
-.menu-view.show .menu-card{animation:cardEnter .45s cubic-bezier(.2,.8,.2,1) both}
-.menu-view.show .menu-card:nth-child(2){animation-delay:.06s}
-.menu-view.show .menu-card:nth-child(3){animation-delay:.12s}
-.menu-view.show .menu-card:nth-child(4){animation-delay:.18s}
-@media (max-width:600px){body::before{animation-duration:30s;background-position:62% center}}
-@media (prefers-reduced-motion:reduce){body::before,.wrap,.logo,.menu-view.show .menu-card{animation:none!important}.menu-card{transition:none}}
 </style>
 </head>
 <body>
