@@ -120,21 +120,20 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:linear-gradient(135d
 
 /* Industrial page backdrop */
 @media (max-width:768px){body{background-attachment:scroll;background-position:62% center}}
+
+/* Official Tata Steel Thailand brand mark */
+.brand-mark{position:relative;width:150px;height:44px;overflow:hidden;background:#fff;border-radius:8px;flex:0 0 auto;box-shadow:0 2px 8px rgba(0,0,0,.14)}
+.brand-mark img{position:absolute;width:160px;height:auto;max-width:none;left:-5px;top:-35px;display:block}
+@media (max-width:768px){.brand-mark{width:128px;height:38px}.brand-mark img{width:138px;left:-5px;top:-30px}}
 </style>
+<script defer src="assets/tata-steel-brand.js"></script>
 </head>
 <body>
 <div class="page">
 
 <!-- HEADER -->
 <div class="hdr">
-  <div class="hdr-icon">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-      <rect x="3" y="3" width="7.5" height="7.5" rx="1.5" fill="rgba(255,255,255,0.85)"/>
-      <rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5" fill="rgba(255,255,255,0.45)"/>
-      <rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5" fill="rgba(255,255,255,0.45)"/>
-      <rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5" fill="rgba(255,255,255,0.85)"/>
-    </svg>
-  </div>
+  <div class="brand-mark"><img data-tata-logo alt="Tata Steel Thailand"/></div>
   <div class="hdr-text">
     <h1>Dashboard — ระบบสั่งพับเหล็ก</h1>
     <p>ภาพรวมการสั่งพับเหล็ก | SCM Demand Team | Tata Steel Thailand</p>
