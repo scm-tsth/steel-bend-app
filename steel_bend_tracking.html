@@ -57,6 +57,9 @@ table{width:100%;border-collapse:collapse;font-size:11px;min-width:0}
   body{padding:.75rem .5rem 2rem}
   .hdr{align-items:flex-start;flex-wrap:wrap}
   .home-btn{width:100%;justify-content:center}
+  .search-wrap{flex-wrap:wrap}
+  .email-wrap{flex:1 1 100%}
+  .load-btn,.all-btn{flex:1;justify-content:center}
   table{min-width:900px}
   .card{padding:.85rem}
 }
@@ -134,6 +137,7 @@ tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t
         <span class="email-domain">@tatasteelthailand.com</span>
       </div>
       <button class="load-btn" id="searchBtn" onclick="loadByEmail()">🔍 ค้นหา</button>
+      <button class="all-btn" onclick="loadMyOrders()">👤 ของฉัน</button>
       <button class="all-btn" onclick="loadAll()">ทั้งหมด</button>
     </div>
   </div>
@@ -466,6 +470,17 @@ function loadByEmail(){
   currentEmail=document.getElementById('emailInput').value.trim().toLowerCase();
   fetchData();
 }
+function loadMyOrders(){
+  const savedUser=String(localStorage.getItem('steel_user')||'').trim().toLowerCase();
+  if(!savedUser){
+    loadAll();
+    return;
+  }
+  const username=savedUser.includes('@')?savedUser.split('@')[0]:savedUser;
+  currentEmail=fullEmail(savedUser);
+  document.getElementById('emailInput').value=username;
+  fetchData();
+}
 function loadAll(){
   currentEmail='';
   document.getElementById('emailInput').value='';
@@ -481,9 +496,12 @@ function applyFilter(){
   let rows=[...allRows];
 
   if(currentEmail){
+    const query=currentEmail.toLowerCase();
+    const exactEmail=query.includes('@')?fullEmail(query):'';
     rows=rows.filter(r=>{
+      if(exactEmail) return rowEmail(r)===exactEmail;
       const em=(r['Submitter_email']||r['submitter_email']||'').toLowerCase();
-      return em.includes(currentEmail)||em.startsWith(currentEmail);
+      return em.includes(query)||em.startsWith(query);
     });
   }
  if(fGrp) rows=rows.filter(r=>(r['Customer Group']||r['customer_group']||'')==fGrp);
@@ -582,7 +600,7 @@ document.getElementById('statsRow').style.display='grid';
     </tr>`;
   }).join('');
 }
-  loadAll();
+  loadMyOrders();
 </script>
 </body>
 </html>
