@@ -21,7 +21,7 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:linear-gradient(135d
 .card{background:#fff;border:1px solid var(--br);border-radius:var(--ra);padding:1.1rem 1.2rem;margin-bottom:.9rem;box-shadow:0 1px 3px rgba(0,0,0,.06)}
 .field label{display:block;font-size:11px;font-weight:500;color:var(--t2);text-transform:uppercase;letter-spacing:.45px;margin-bottom:4px}
 .search-wrap{display:flex;gap:8px;align-items:center}
-.email-wrap{display:flex;align-items:center;border:1px solid var(--br);border-radius:8px;overflow:hidden;flex:1;transition:border .15s,box-shadow .15s}
+.email-wrap{display:flex;align-items:center;border:1px solid var(--br);border-radius:8px;overflow:hidden;flex:0 1 390px;max-width:390px;min-width:280px;transition:border .15s,box-shadow .15s}
 .email-wrap:focus-within{border-color:var(--ba);box-shadow:0 0 0 3px rgba(37,99,176,.1)}
 .email-wrap input{border:none;flex:1;height:36px;padding:0 10px;font-size:13px;font-family:'IBM Plex Sans Thai',sans-serif;outline:none;background:#fff;color:var(--tx)}
 .email-domain{background:var(--sl);padding:0 9px;height:36px;display:flex;align-items:center;font-size:12px;color:var(--t2);border-left:1px solid var(--br);white-space:nowrap;font-family:'IBM Plex Mono',monospace}
@@ -58,7 +58,7 @@ table{width:100%;border-collapse:collapse;font-size:11px;min-width:0}
   .hdr{align-items:flex-start;flex-wrap:wrap}
   .home-btn{width:100%;justify-content:center}
   .search-wrap{flex-wrap:wrap}
-  .email-wrap{flex:1 1 100%}
+  .email-wrap{flex:1 1 100%;max-width:none;min-width:0}
   .load-btn,.all-btn{flex:1;justify-content:center}
   table{min-width:900px}
   .card{padding:.85rem}
@@ -137,7 +137,7 @@ tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t
         <span class="email-domain">@tatasteelthailand.com</span>
       </div>
       <button class="load-btn" id="searchBtn" onclick="loadByEmail()">🔍 ค้นหา</button>
-      <button class="all-btn" onclick="loadMyOrders()">👤 ของฉัน</button>
+      <button class="all-btn" onclick="loadMyOrders()">👤 รายการของฉัน</button>
       <button class="all-btn" onclick="loadAll()">ทั้งหมด</button>
     </div>
   </div>
