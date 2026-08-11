@@ -387,8 +387,7 @@ function matOpts(p){const l=p==='SCSC'?MAT_SCSC:p==='NTS'?MAT_NTS:[];return '<op
 
 function getSales(cust){
   if(cust&&SALES_MAP[cust])return SALES_MAP[cust];
-  const all=(DEPARTMENT_SALES[grp]||[]).filter(Boolean);
-  return all.length?all.join(' / '):grp;
+  return grp;
 }
 
 function refreshCust(id){
