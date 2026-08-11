@@ -53,10 +53,6 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:linear-gradient(135d
 .confirm-screen{display:none}
 .confirm-screen.show{display:block}
 .confirm-hdr{background:var(--al);border:1px solid #fde68a;border-radius:var(--ra);padding:.7rem 1rem;margin-bottom:.85rem;font-size:13px;color:#92400e;font-weight:500}
-.cutoff-box{background:#f8fafc;border:1px solid var(--br);border-radius:var(--ra);padding:.65rem .75rem;margin-top:.55rem;font-size:12px;color:var(--t2);line-height:1.55}
-.cutoff-box strong{color:var(--bd);font-weight:600}
-.cutoff-note{font-size:11px;color:var(--t2);line-height:1.5;margin-top:2px}
-.cutoff-note.after{color:#92400e}
 .ctable{width:100%;border-collapse:collapse;font-size:12px;margin:.4rem 0}
 .ctable td{padding:.32rem .55rem;border:.5px solid var(--br);vertical-align:top;line-height:1.5}
 .ctable td:first-child{font-weight:500;color:var(--t2);width:110px;white-space:nowrap;background:var(--sl)}
@@ -125,7 +121,6 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:linear-gradient(135d
   <div class="field" style="margin-bottom:.8rem">
     <label>วันที่สั่ง <span class="req">*</span></label>
     <input type="date" id="oDate"/>
-    <div class="cutoff-box" id="cutoffInfo" aria-live="polite"></div>
   </div>
   <div class="field">
     <label>แผนก <span class="req">*</span></label>
@@ -183,7 +178,7 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:linear-gradient(135d
 <div class="success-screen" id="successView">
   <div class="s-icon">✅</div>
   <h2>ส่งรายการสำเร็จแล้วครับ!</h2>
-  <p>ระบบได้รับรายการของคุณแล้ว<br/>กรุณาตรวจสอบอีเมลยืนยันที่ <strong id="confirmEmail"></strong><br/>รายการจะถูกดำเนินการในรอบตัดยอด <strong id="confirmCutoff">10:00 น.</strong></p>
+  <p>ระบบได้รับรายการของคุณแล้ว<br/>กรุณาตรวจสอบอีเมลยืนยันที่ <strong id="confirmEmail"></strong></p>
   <button class="new-btn" onclick="window.location.href='index.html'">← กลับหน้าหลัก</button>
 </div>
 </div>
@@ -289,18 +284,10 @@ function getCutoffWindow(now=new Date()){
     atIso:`${cutoffDate}T${CUTOFF_TIME}:00+07:00`,
     submittedAt:`${submitDate} ${pad2(parts.hour)}:${pad2(parts.minute)}:${pad2(parts.second)}`,
     afterCutoff,
-    label,
-    note:afterCutoff?'เลยเวลา 10:00 แล้ว รายการที่ส่งตอนนี้จะเข้ารอบวันถัดไป':'รายการที่ส่งตอนนี้จะเข้ารอบตัดยอดวันนี้'
+    label
   };
 }
 function cutoffBatchId(plant,cutoff){return `${plant}-${cutoff.dateCompact}-1000`;}
-function updateCutoffInfo(){
-  const el=document.getElementById('cutoffInfo');
-  if(!el)return;
-  const cutoff=getCutoffWindow();
-  el.innerHTML=`<strong>รอบตัดยอดถัดไป: ${cutoff.label}</strong><div class="cutoff-note${cutoff.afterCutoff?' after':''}">${cutoff.note}</div>`;
-}
-
 function setPill(btn,val){grp=val;document.querySelectorAll('.pill').forEach(b=>b.classList.remove('on'));btn.classList.add('on');items.forEach(id=>refreshCust(id));}
 function today(){return bkkDateText();}
 document.getElementById('oDate').value=today();
@@ -494,10 +481,8 @@ function showConfirm(){
     if(!gv('ton-'+id)||parseFloat(gv('ton-'+id))<=0){toast(`รายการที่ ${i+1}: กรุณากรอกจำนวน Tons`,'error');return;}
   }
   const email=eu+'@tatasteelthailand.com';
-  const cutoff=getCutoffWindow();
   let html=`<div class="card"><table class="ctable">
     <tr><td>วันที่สั่ง</td><td>${gv('oDate')}</td></tr>
-    <tr><td>รอบตัดยอด</td><td>${cutoff.label}<div class="cutoff-note${cutoff.afterCutoff?' after':''}">${cutoff.note}</div></td></tr>
     <tr><td>แผนก</td><td>${grp}</td></tr>
     <tr><td>อีเมลผู้สั่งพับ</td><td>${email}</td></tr>
     <tr><td>หมายเหตุ</td><td>${gv('remark')||'-'}</td></tr>
@@ -627,7 +612,6 @@ async function doSubmit(){
   btnText.textContent='✅ ยืนยันและส่งข้อมูล';
   document.getElementById('confirmView').classList.remove('show');
   document.getElementById('confirmEmail').textContent=email;
-  document.getElementById('confirmCutoff').textContent=cutoff.label;
   document.getElementById('successView').classList.add('show');
   window.scrollTo(0,0);
 }
@@ -638,7 +622,6 @@ function resetAll(){
   document.getElementById('oDate').value=today();
   document.getElementById('uEmailUser').value='';
   document.getElementById('remark').value='';
-  updateCutoffInfo();
   document.querySelectorAll('.pill').forEach((b,i)=>b.classList.toggle('on',i===0));
   grp='Project';
   document.getElementById('successView').classList.remove('show');
@@ -650,8 +633,6 @@ function resetAll(){
 document.querySelectorAll('.pill[data-grp]').forEach(btn=>{
   btn.addEventListener('click',function(){setPill(this,this.dataset.grp);});
 });
-updateCutoffInfo();
-setInterval(updateCutoffInfo,60000);
 addItem();
 const savedUser=localStorage.getItem('steel_user');
 if(savedUser) document.getElementById('uEmailUser').value=savedUser;
