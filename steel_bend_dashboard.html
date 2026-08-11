@@ -9,7 +9,7 @@
 <style>
 :root{--bd:#0f2a4a;--bm:#1a3d6b;--ba:#2563b0;--bl:#dbeafe;--sl:#f1f5f9;--gr:#16a34a;--gl:#dcfce7;--rd:#dc2626;--rl:#fee2e2;--am:#d97706;--al:#fef3c7;--tx:#0f172a;--t2:#475569;--t3:#94a3b8;--br:#e2e8f0;--ra:10px}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--tx);min-height:100vh;padding:1.25rem 1rem 3rem}
+body{font-family:'IBM Plex Sans Thai',sans-serif;background:linear-gradient(135deg,rgba(232,240,248,.84),rgba(238,242,247,.92)),url('assets/bg-dashboard-factory-aerial.png') center top/cover fixed no-repeat;color:var(--tx);min-height:100vh;padding:1.25rem 1rem 3rem}
 .page{max-width:1440px;margin:0 auto}
 
 /* Header */
@@ -117,6 +117,12 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
   body{padding:.75rem .5rem 2rem}
 }
 @media(max-width:480px){.kpi-row{grid-template-columns:repeat(2,1fr)}}
+
+/* Industrial page backdrop */
+@keyframes innerPageEnter{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.page{animation:innerPageEnter .45s cubic-bezier(.2,.8,.2,1) both}
+@media (max-width:768px){body{background-attachment:scroll;background-position:62% center}}
+@media (prefers-reduced-motion:reduce){.page{animation:none!important}}
 </style>
 </head>
 <body>
