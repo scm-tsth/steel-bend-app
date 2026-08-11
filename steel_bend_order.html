@@ -90,8 +90,40 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:linear-gradient(135d
 .home-btn{height:30px;padding:0 11px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.1);color:#fff;border-radius:8px;font-size:12px;font-weight:500;font-family:'IBM Plex Sans Thai',sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;flex-shrink:0}
 .home-btn:hover{background:rgba(255,255,255,.18)}
 
+/* Modern workflow UI — static, no decorative motion */
+.page{max-width:720px}
+.workflow-steps{display:grid;grid-template-columns:repeat(3,1fr);background:rgba(255,255,255,.96);border:1px solid rgba(226,232,240,.95);border-radius:12px;padding:8px;margin:-.35rem 0 1rem;box-shadow:0 8px 24px rgba(15,42,74,.08)}
+.workflow-step{display:flex;align-items:center;justify-content:center;gap:7px;color:var(--t3);font-size:11px;font-weight:500;padding:6px 4px;border-radius:8px}
+.workflow-step .step-no{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--sl);color:var(--t2);font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600}
+.workflow-step.active{background:var(--bl);color:var(--bm)}
+.workflow-step.active .step-no{background:var(--bm);color:#fff}
+.card{border-color:rgba(203,213,225,.85);box-shadow:0 8px 24px rgba(15,42,74,.07)}
+.item-card{background:#fff;border-color:#cbd5e1;border-left:4px solid var(--ba);box-shadow:0 3px 12px rgba(15,42,74,.055)}
+.order-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:.75rem;padding:10px 12px;border:1px solid #bfdbfe;border-radius:10px;background:#eff6ff}
+.order-summary-label{font-size:11px;color:var(--t2)}
+.order-summary-value{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:var(--bm);text-align:right}
+.clear-customer{position:absolute;right:5px;top:5px;width:25px;height:25px;border:0;border-radius:6px;background:var(--sl);color:var(--t2);font-size:15px;line-height:1;cursor:pointer}
+.clear-customer:hover{background:var(--rl);color:var(--rd)}
+.ac-wrap>input[type="text"]{padding-right:36px}
+.field.invalid input,.field.invalid select{border-color:var(--rd);box-shadow:0 0 0 3px rgba(220,38,38,.08)}
+.field-error{margin-top:4px;font-size:10px;line-height:1.35;color:var(--rd);font-weight:500}
+.submit-dock{margin-top:.75rem}
+.submit-dock .submit-btn{margin-top:0;box-shadow:0 8px 20px rgba(26,61,107,.2)}
+.master-status{padding:5px 8px;border-radius:7px;background:rgba(241,245,249,.75);width:max-content;max-width:100%}
+
 /* Industrial page backdrop */
-@media (max-width:768px){body{background-attachment:scroll;background-position:62% center}}
+@media (max-width:768px){
+  body{background-attachment:scroll;background-position:62% center;padding:.75rem .65rem 5.5rem}
+  .hdr{border-radius:10px;margin-bottom:.8rem}
+  .workflow-steps{position:sticky;top:6px;z-index:90;margin-bottom:.8rem}
+  .workflow-step{font-size:10px;gap:4px}
+  .workflow-step .step-no{width:20px;height:20px}
+  .card{padding:1rem;border-radius:10px}
+  .row2{grid-template-columns:1fr}
+  .submit-dock{position:sticky;bottom:8px;z-index:80;padding:7px;background:rgba(255,255,255,.96);border:1px solid var(--br);border-radius:12px;box-shadow:0 10px 30px rgba(15,42,74,.18)}
+  .submit-dock .submit-btn{box-shadow:none}
+}
+@media (max-width:390px){.workflow-step span:last-child{display:none}}
 </style>
 </head>
 <body>
@@ -118,6 +150,12 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:linear-gradient(135d
   <a class="home-btn" href="index.html">← กลับหน้าหลัก</a>
 </div>
 
+<div class="workflow-steps" id="workflowSteps" aria-label="ขั้นตอนการสั่งพับ">
+  <div class="workflow-step active" data-step="1"><span class="step-no">1</span><span>กรอกข้อมูล</span></div>
+  <div class="workflow-step" data-step="2"><span class="step-no">2</span><span>ตรวจสอบ</span></div>
+  <div class="workflow-step" data-step="3"><span class="step-no">3</span><span>ส่งสำเร็จ</span></div>
+</div>
+
 <!-- FORM -->
 <div id="formView">
 <div class="card">
@@ -142,6 +180,10 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:linear-gradient(135d
   <div class="ctitle"><span class="sdot">2</span><h2>รายการสินค้าที่สั่งพับ</h2></div>
   <div id="itemList"></div>
   <button class="add-btn" id="addBtn" onclick="addItem()">+ เพิ่มรายการ (สูงสุด 5 รายการ)</button>
+  <div class="order-summary" aria-live="polite">
+    <div class="order-summary-label">สรุปรายการก่อนส่ง</div>
+    <div class="order-summary-value" id="orderSummary">1 รายการ · 0.000 ตัน</div>
+  </div>
 </div>
 
 <div class="card">
@@ -163,7 +205,7 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:linear-gradient(135d
   </div>
 </div>
 
-<button class="submit-btn" onclick="showConfirm()">ยืนยันการสั่งพับเหล็ก →</button>
+<div class="submit-dock"><button class="submit-btn" onclick="showConfirm()">ตรวจสอบรายการก่อนส่ง →</button></div>
 </div>
 
 <!-- CONFIRM -->
@@ -441,6 +483,14 @@ function acSelect(id,val){
   document.getElementById('ac-list-'+id).classList.remove('open');
   updateSalesFromVal(id,val);
 }
+function clearCustomer(id){
+  const input=document.getElementById('cust-'+id);
+  const value=document.getElementById('cust-val-'+id);
+  if(input)input.value='';
+  if(value)value.value='';
+  acClose(id);
+  updateSalesFromVal(id,'');
+}
 function acKey(e,id){
   const list=document.getElementById('ac-list-'+id);
   const items=list.querySelectorAll('.ac-item');
@@ -460,7 +510,7 @@ function makeItem(id,idx){
       <select id="mat-${id}" onchange="calcPcs(${id})"><option value="">-- เลือกสินค้า --</option></select></div>
     <div class="row2" style="margin-bottom:.7rem">
       <div class="field"><label>จำนวน (Tons) <span class="req">*</span></label>
-        <input type="number" id="ton-${id}" placeholder="0.000" step="0.001" min="0" oninput="calcPcs(${id})"/></div>
+        <input type="number" id="ton-${id}" placeholder="0.000" step="0.001" min="0" oninput="calcPcs(${id});updateOrderSummary()"/></div>
       <div class="field"><label>PCS (เส้น)</label>
   <input type="number" id="pcs-${id}" placeholder="อัตโนมัติ" min="0"/>
   <div id="pcs-warn-${id}" style="display:none;font-size:11px;color:#dc2626;margin-top:3px;font-weight:500">⚠️ น้ำหนักไม่เต็มเส้น</div></div>
@@ -474,6 +524,7 @@ function makeItem(id,idx){
             oninput="acFilter(${id})" onfocus="acOpen(${id})" onblur="setTimeout(()=>acClose(${id}),200)"
             onkeydown="acKey(event,${id})"/>
           <input type="hidden" id="cust-val-${id}"/>
+          <button type="button" class="clear-customer" onclick="clearCustomer(${id})" aria-label="ล้างชื่อลูกค้า" title="ล้างชื่อลูกค้า">×</button>
           <div class="ac-list" id="ac-list-${id}"></div>
         </div>
       </div>
@@ -500,6 +551,7 @@ function addItem(){
   const d=document.createElement('div');d.innerHTML=makeItem(id,items.length);
   document.getElementById('itemList').appendChild(d.firstChild);
   if(items.length>=5)document.getElementById('addBtn').style.display='none';
+  updateOrderSummary();
   return id;
 }
 function copyItem(sourceId){
@@ -524,7 +576,8 @@ function copyItem(sourceId){
   document.getElementById('term-'+id).value=values.term;
   document.getElementById('rdate-'+id).value=values.rdate;
   calcPcs(id);
-  document.getElementById('item-'+id).scrollIntoView({behavior:'smooth',block:'center'});
+  updateOrderSummary();
+  document.getElementById('item-'+id).scrollIntoView({block:'center'});
   toast('คัดลอกรายการแล้ว','success');
 }
 function removeItem(id){
@@ -533,6 +586,7 @@ function removeItem(id){
   document.getElementById('item-'+id)?.remove();
   items.forEach((i,x)=>{const t=document.getElementById('itag-'+i);if(t)t.textContent=`รายการที่ ${x+1}`;});
   document.getElementById('addBtn').style.display='flex';
+  updateOrderSummary();
 }
 function onPlant(id){
   const p=document.getElementById('plant-'+id).value;
@@ -563,6 +617,40 @@ function calcPcs(id){
   }
 }
 function gv(id){const el=document.getElementById(id);return el?el.value.trim():'';}
+function setWorkflowStep(step){
+  document.querySelectorAll('.workflow-step').forEach(el=>el.classList.toggle('active',Number(el.dataset.step)===step));
+}
+function updateOrderSummary(){
+  const total=items.reduce((sum,id)=>sum+(parseFloat(gv('ton-'+id))||0),0);
+  const count=items.length;
+  const el=document.getElementById('orderSummary');
+  if(el)el.textContent=count+' รายการ · '+total.toLocaleString('en-US',{minimumFractionDigits:3,maximumFractionDigits:3})+' ตัน';
+}
+function clearValidation(){
+  document.querySelectorAll('.field.invalid').forEach(field=>field.classList.remove('invalid'));
+  document.querySelectorAll('.field-error').forEach(el=>el.remove());
+}
+function clearFieldError(element){
+  const field=element?.closest?.('.field');
+  if(!field)return;
+  field.classList.remove('invalid');
+  field.querySelector('.field-error')?.remove();
+}
+function failField(id,message){
+  const element=document.getElementById(id);
+  const field=element?.closest('.field');
+  if(field){
+    field.classList.add('invalid');
+    const error=document.createElement('div');
+    error.className='field-error';
+    error.textContent=message;
+    field.appendChild(error);
+    field.scrollIntoView({block:'center'});
+  }
+  element?.focus();
+  toast(message,'error');
+  return false;
+}
 function toast(msg,type=''){
   const t=document.getElementById('toast');
   t.textContent=msg;t.className='toast '+(type||'');
@@ -570,16 +658,17 @@ function toast(msg,type=''){
 }
 
 function showConfirm(){
+  clearValidation();
   const eu=gv('uEmailUser');
-  if(!eu){toast('กรุณากรอกชื่ออีเมลผู้สั่งพับ','error');return;}
-  if(!gv('oDate')){toast('กรุณาระบุวันที่สั่ง','error');return;}
+  if(!gv('oDate'))return failField('oDate','กรุณาระบุวันที่สั่ง');
   if(items.length===0){toast('กรุณาเพิ่มรายการสินค้า','error');return;}
   for(let i=0;i<items.length;i++){
     const id=items[i];
-    if(!gv('plant-'+id)){toast(`รายการที่ ${i+1}: กรุณาเลือก Plant`,'error');return;}
-    if(!gv('mat-'+id)){toast(`รายการที่ ${i+1}: กรุณาเลือกสินค้า`,'error');return;}
-    if(!gv('ton-'+id)||parseFloat(gv('ton-'+id))<=0){toast(`รายการที่ ${i+1}: กรุณากรอกจำนวน Tons`,'error');return;}
+    if(!gv('plant-'+id))return failField('plant-'+id,`รายการที่ ${i+1}: กรุณาเลือก Plant`);
+    if(!gv('mat-'+id))return failField('mat-'+id,`รายการที่ ${i+1}: กรุณาเลือกสินค้า`);
+    if(!gv('ton-'+id)||parseFloat(gv('ton-'+id))<=0)return failField('ton-'+id,`รายการที่ ${i+1}: กรุณากรอกจำนวน Tons`);
   }
+  if(!eu)return failField('uEmailUser','กรุณากรอกชื่ออีเมลผู้สั่งพับ');
   const email=eu+'@tatasteelthailand.com';
   let html=`<div class="card"><table class="ctable">
     <tr><td>วันที่สั่ง</td><td>${gv('oDate')}</td></tr>
@@ -603,6 +692,7 @@ function showConfirm(){
   document.getElementById('confirmContent').innerHTML=html;
   document.getElementById('formView').style.display='none';
   document.getElementById('confirmView').classList.add('show');
+  setWorkflowStep(2);
   window.scrollTo(0,0);
 }
 function backToForm(){
@@ -613,6 +703,7 @@ function backToForm(){
   }
   document.getElementById('confirmView').classList.remove('show');
   document.getElementById('formView').style.display='block';
+  setWorkflowStep(1);
 }
 function ensureOrderId(id){
   if(!submitState[id]) submitState[id]={status:'pending',error:'',orderId:''};
@@ -713,6 +804,7 @@ async function doSubmit(){
   document.getElementById('confirmView').classList.remove('show');
   document.getElementById('confirmEmail').textContent=email;
   document.getElementById('successView').classList.add('show');
+  setWorkflowStep(3);
   window.scrollTo(0,0);
 }
 function resetAll(){
@@ -727,13 +819,18 @@ function resetAll(){
   document.getElementById('successView').classList.remove('show');
   document.getElementById('confirmView').classList.remove('show');
   document.getElementById('formView').style.display='block';
-  addItem();window.scrollTo(0,0);
+  setWorkflowStep(1);
+  addItem();updateOrderSummary();window.scrollTo(0,0);
 }
 // Pill click handler
 document.querySelectorAll('.pill[data-grp]').forEach(btn=>{
   btn.addEventListener('click',function(){setPill(this,this.dataset.grp);});
 });
+document.addEventListener('input',event=>clearFieldError(event.target));
+document.addEventListener('change',event=>clearFieldError(event.target));
+setWorkflowStep(1);
 addItem();
+updateOrderSummary();
 loadSalesMaster();
 const savedUser=localStorage.getItem('steel_user');
 if(savedUser) document.getElementById('uEmailUser').value=savedUser;
