@@ -35,6 +35,9 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:linear-gradient(135d
 .item-card{background:var(--sl);border:1px solid var(--br);border-radius:var(--ra);padding:.85rem .95rem;margin-bottom:.7rem}
 .item-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:.7rem}
 .item-tag{font-size:11px;font-weight:600;color:var(--ba);background:var(--bl);padding:2px 8px;border-radius:10px}
+.item-actions{display:flex;align-items:center;gap:4px}
+.copy-btn{background:#fff;border:1px solid var(--br);cursor:pointer;color:var(--bm);padding:3px 8px;border-radius:6px;font-size:11px;font-family:'IBM Plex Sans Thai',sans-serif;line-height:1.4}
+.copy-btn:hover{border-color:var(--ba);background:var(--bl)}
 .rm-btn{background:none;border:none;cursor:pointer;color:var(--t3);padding:3px 5px;border-radius:5px;font-size:13px;line-height:1;transition:all .15s}
 .rm-btn:hover{color:var(--rd);background:var(--rl)}
 .ac-wrap{position:relative}
@@ -79,6 +82,11 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:linear-gradient(135d
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .toast.error{background:var(--rd)}
 .toast.success{background:var(--gr)}
+.submit-results{margin-top:.75rem;display:grid;gap:6px}
+.submit-result{padding:8px 10px;border-radius:8px;border:1px solid var(--br);background:#fff;font-size:12px;line-height:1.45}
+.submit-result.sending{background:var(--bl);border-color:#93c5fd;color:var(--bm)}
+.submit-result.success{background:var(--gl);border-color:#86efac;color:#166534}
+.submit-result.error{background:var(--rl);border-color:#fca5a5;color:#991b1b}
 .home-btn{height:30px;padding:0 11px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.1);color:#fff;border-radius:8px;font-size:12px;font-weight:500;font-family:'IBM Plex Sans Thai',sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;flex-shrink:0}
 .home-btn:hover{background:rgba(255,255,255,.18)}
 
@@ -238,6 +246,7 @@ const PROD_MAP={
 };
 
 let grp='Project',items=[],iid=0;
+let submitState={};
 const BKK_TIME_ZONE='Asia/Bangkok';
 const CUTOFF_HOUR=10;
 const CUTOFF_MINUTE=0;
@@ -357,7 +366,7 @@ function acKey(e,id){
 }
 function makeItem(id,idx){
   return `<div class="item-card" id="item-${id}">
-    <div class="item-hdr"><span class="item-tag" id="itag-${id}">รายการที่ ${idx}</span><button class="rm-btn" onclick="removeItem(${id})">✕</button></div>
+    <div class="item-hdr"><span class="item-tag" id="itag-${id}">รายการที่ ${idx}</span><div class="item-actions"><button class="copy-btn" type="button" onclick="copyItem(${id})">⧉ คัดลอก</button><button class="rm-btn" type="button" onclick="removeItem(${id})">✕</button></div></div>
     <div class="field" style="margin-bottom:.7rem"><label>PLANT <span class="req">*</span></label>
       <select id="plant-${id}" onchange="onPlant(${id})"><option value="">-- เลือก --</option><option>SCSC</option><option>NTS</option></select></div>
     <div class="field" style="margin-bottom:.7rem"><label>สินค้า <span class="req">*</span></label>
@@ -399,14 +408,41 @@ function makeItem(id,idx){
   </div>`;
 }
 function addItem(){
-  if(items.length>=5){toast('เพิ่มได้สูงสุด 5 รายการ','error');return;}
+  if(items.length>=5){toast('เพิ่มได้สูงสุด 5 รายการ','error');return null;}
   const id=++iid;items.push(id);
   const d=document.createElement('div');d.innerHTML=makeItem(id,items.length);
   document.getElementById('itemList').appendChild(d.firstChild);
   if(items.length>=5)document.getElementById('addBtn').style.display='none';
+  return id;
+}
+function copyItem(sourceId){
+  if(items.length>=5){toast('เพิ่มได้สูงสุด 5 รายการ','error');return;}
+  const values={
+    plant:gv('plant-'+sourceId),mat:gv('mat-'+sourceId),ton:gv('ton-'+sourceId),
+    pcs:gv('pcs-'+sourceId),so:gv('so-'+sourceId),cust:gv('cust-val-'+sourceId),
+    sales:gv('sales-val-'+sourceId),term:gv('term-'+sourceId),rdate:gv('rdate-'+sourceId)
+  };
+  const id=addItem();
+  if(!id)return;
+  document.getElementById('plant-'+id).value=values.plant;
+  onPlant(id);
+  document.getElementById('mat-'+id).value=values.mat;
+  document.getElementById('ton-'+id).value=values.ton;
+  document.getElementById('pcs-'+id).value=values.pcs;
+  document.getElementById('so-'+id).value=values.so;
+  document.getElementById('cust-'+id).value=values.cust;
+  document.getElementById('cust-val-'+id).value=values.cust;
+  document.getElementById('sales-val-'+id).value=values.sales||grp;
+  document.getElementById('sales-disp-'+id).textContent='👤 '+(values.sales||grp);
+  document.getElementById('term-'+id).value=values.term;
+  document.getElementById('rdate-'+id).value=values.rdate;
+  calcPcs(id);
+  document.getElementById('item-'+id).scrollIntoView({behavior:'smooth',block:'center'});
+  toast('คัดลอกรายการแล้ว','success');
 }
 function removeItem(id){
   items=items.filter(i=>i!==id);
+  delete submitState[id];
   document.getElementById('item-'+id)?.remove();
   items.forEach((i,x)=>{const t=document.getElementById('itag-'+i);if(t)t.textContent=`รายการที่ ${x+1}`;});
   document.getElementById('addBtn').style.display='flex';
@@ -485,85 +521,118 @@ function showConfirm(){
   window.scrollTo(0,0);
 }
 function backToForm(){
+  const sentCount=Object.values(submitState).filter(s=>s.status==='success').length;
+  if(sentCount){
+    toast('มี '+sentCount+' รายการส่งสำเร็จแล้ว กรุณา Retry เฉพาะรายการที่เหลือ','error');
+    return;
+  }
   document.getElementById('confirmView').classList.remove('show');
   document.getElementById('formView').style.display='block';
+}
+function ensureOrderId(id){
+  if(!submitState[id]) submitState[id]={status:'pending',error:'',orderId:''};
+  if(!submitState[id].orderId){
+    const plant=gv('plant-'+id);
+    submitState[id].orderId='SB-'+plant+'-'+gv('oDate').replaceAll('-','')+'-'+Date.now()+'-'+id;
+  }
+  return submitState[id].orderId;
+}
+function escapeHtml(value){
+  return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+function renderSubmitResults(){
+  let box=document.getElementById('submitResults');
+  if(!box){
+    box=document.createElement('div');
+    box.id='submitResults';
+    box.className='submit-results';
+    document.getElementById('confirmContent').appendChild(box);
+  }
+  box.innerHTML=items.filter(id=>submitState[id]).map((id,idx)=>{
+    const state=submitState[id];
+    const label=state.status==='success'?'✅ ส่งสำเร็จ':state.status==='sending'?'⏳ กำลังส่ง':'⚠️ ส่งไม่สำเร็จ';
+    const detail=state.status==='error'&&state.error?' — '+escapeHtml(state.error.slice(0,140)):'';
+    return `<div class="submit-result ${state.status}"><strong>รายการที่ ${idx+1}</strong>: ${label}${detail}</div>`;
+  }).join('');
+}
+function buildPayload(id,email,remark,cutoff){
+  const mat=gv('mat-'+id);
+  const plant=gv('plant-'+id);
+  const prod=PROD_MAP[mat]||{};
+  const batchId=cutoffBatchId(plant,cutoff);
+  const orderId=ensureOrderId(id);
+  return {
+    OrderID:orderId,order_id:orderId,date:gv('oDate'),plant:plant,item_description:mat,
+    customer_group:grp,tons:parseFloat(gv('ton-'+id))||0,pcs:parseFloat(gv('pcs-'+id))||0,
+    sales_order_no:gv('so-'+id)||'',customer_name:gv('cust-val-'+id)||'',
+    sales_person:gv('sales-val-'+id)||grp,incoterms:gv('term-'+id)||'EXW',
+    order_remark:remark,unit_weight:UW[mat]||0,prod_id_sp:prod.sp||'',prod_id_fp:prod.fp||'',
+    PROD_ID_SP:prod.sp||'',PROD_ID_FP:prod.fp||'',submitter_email:email,
+    submitted_at:cutoff.submittedAt,Submitted_At:cutoff.submittedAt,cutoff_date:cutoff.date,
+    Cutoff_Date:cutoff.date,cutoff_time:cutoff.time,Cutoff_Time:cutoff.time,cutoff_at:cutoff.at,
+    Cutoff_At:cutoff.at,cutoff_at_iso:cutoff.atIso,Cutoff_At_ISO:cutoff.atIso,
+    cutoff_batch_id:batchId,Cutoff_Batch_ID:batchId,cancel_deadline_at:cutoff.atIso,
+    Cancel_Deadline_At:cutoff.atIso,status_text:'Pending',Status_Text:'Pending',remark:remark,
+    Delivery_Date:gv('rdate-'+id)||'',receive_date:gv('rdate-'+id)||'',request_date:gv('rdate-'+id)||''
+  };
+}
+async function submitOne(id,email,remark,cutoff){
+  submitState[id]=submitState[id]||{status:'pending',error:'',orderId:''};
+  submitState[id].status='sending';
+  submitState[id].error='';
+  ensureOrderId(id);
+  renderSubmitResults();
+  const res=await fetch(FLOW_URL,{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(buildPayload(id,email,remark,cutoff))
+  });
+  const text=await res.text();
+  let data={};
+  try{data=text?JSON.parse(text):{};}catch(_){data={};}
+  if(!res.ok||data.success===false) throw new Error(data.message||text||('HTTP '+res.status));
+  return data;
 }
 async function doSubmit(){
   const eu=gv('uEmailUser');
   const email=eu+'@tatasteelthailand.com';
   const btn=document.getElementById('confirmBtn');
-  btn.classList.add('loading');btn.disabled=true;
+  const btnText=btn.querySelector('.btn-text');
   const remark=gv('remark');
   const cutoff=getCutoffWindow();
-  const promises=items.map(id=>{
-    const mat=gv('mat-'+id);
-    const plant=gv('plant-'+id);
-    const prod=PROD_MAP[mat]||{};
-    const batchId=cutoffBatchId(plant,cutoff);
-    const orderId='SB-'+plant+'-'+gv('oDate').replaceAll('-','')+'-'+Date.now()+'-'+id;
-const payload = {
-  OrderID: orderId,
-  order_id: orderId,
-  date: gv('oDate'),
-  plant: plant,
-  item_description: mat,
-  customer_group: grp,
-  tons: parseFloat(gv('ton-'+id)) || 0,
-  pcs: parseFloat(gv('pcs-'+id)) || 0,
-  sales_order_no: gv('so-'+id) || '',
-  customer_name: gv('cust-val-'+id) || '',
-  sales_person: gv('sales-val-'+id) || grp,
-  incoterms: gv('term-'+id) || 'EXW',
-  order_remark: remark,
-  unit_weight: UW[mat] || 0,
-  prod_id_sp: prod.sp || '',
-  prod_id_fp: prod.fp || '',
-  PROD_ID_SP: prod.sp || '',
-  PROD_ID_FP: prod.fp || '',
-  submitter_email: email,
-  submitted_at: cutoff.submittedAt,
-  Submitted_At: cutoff.submittedAt,
-  cutoff_date: cutoff.date,
-  Cutoff_Date: cutoff.date,
-  cutoff_time: cutoff.time,
-  Cutoff_Time: cutoff.time,
-  cutoff_at: cutoff.at,
-  Cutoff_At: cutoff.at,
-  cutoff_at_iso: cutoff.atIso,
-  Cutoff_At_ISO: cutoff.atIso,
-  cutoff_batch_id: batchId,
-  Cutoff_Batch_ID: batchId,
-  cancel_deadline_at: cutoff.atIso,
-  Cancel_Deadline_At: cutoff.atIso,
-  status_text: 'Pending',
-  Status_Text: 'Pending',
-  remark: remark,
-  Delivery_Date: gv('rdate-'+id) || '',
-  receive_date: gv('rdate-'+id) || '',
-  request_date: gv('rdate-'+id) || ''
-};
-   console.log("Sending payload:", payload);
-return fetch(FLOW_URL,{
-  method:'POST',
-  headers:{'Content-Type':'application/json'},
-  body:JSON.stringify(payload)
-});
+  const targets=items.filter(id=>submitState[id]?.status!=='success');
+  if(!targets.length)return;
+  btn.classList.add('loading');btn.disabled=true;
+
+  const results=await Promise.allSettled(targets.map(id=>submitOne(id,email,remark,cutoff)));
+  results.forEach((result,idx)=>{
+    const id=targets[idx];
+    if(result.status==='fulfilled'){
+      submitState[id].status='success';
+      submitState[id].error='';
+    }else{
+      submitState[id].status='error';
+      submitState[id].error=result.reason?.message||'ไม่สามารถเชื่อมต่อระบบปลายทาง';
+    }
   });
-  try{
-    await Promise.all(promises);
-    btn.classList.remove('loading');btn.disabled=false;
-    document.getElementById('confirmView').classList.remove('show');
-    document.getElementById('confirmEmail').textContent=email;
-    document.getElementById('confirmCutoff').textContent=cutoff.label;
-    document.getElementById('successView').classList.add('show');
-    window.scrollTo(0,0);
-  }catch(e){
-    btn.classList.remove('loading');btn.disabled=false;
-    toast('เกิดข้อผิดพลาด กรุณาลองใหม่','error');
+  btn.classList.remove('loading');btn.disabled=false;
+  renderSubmitResults();
+
+  const failed=items.filter(id=>submitState[id]?.status!=='success');
+  if(failed.length){
+    btnText.textContent='🔄 ลองส่งรายการที่ไม่สำเร็จอีกครั้ง';
+    toast('ส่งสำเร็จ '+(items.length-failed.length)+' รายการ — ยังไม่สำเร็จ '+failed.length+' รายการ','error');
+    return;
   }
+
+  btnText.textContent='✅ ยืนยันและส่งข้อมูล';
+  document.getElementById('confirmView').classList.remove('show');
+  document.getElementById('confirmEmail').textContent=email;
+  document.getElementById('confirmCutoff').textContent=cutoff.label;
+  document.getElementById('successView').classList.add('show');
+  window.scrollTo(0,0);
 }
 function resetAll(){
-  items=[];iid=0;
+  items=[];iid=0;submitState={};
   document.getElementById('itemList').innerHTML='';
   document.getElementById('addBtn').style.display='flex';
   document.getElementById('oDate').value=today();
