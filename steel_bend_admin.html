@@ -809,18 +809,20 @@ function updateSelCount() {
 
 // ── Mark as Sent ──────────────────────────────────────────────────────────────
 async function markAsSent() {
-  if (selectedIds.size === 0) return;
+  const pendingRows = allRows.filter(r => selectedIds.has(rowId(r)) && getStatus(r) === 'Pending');
+  if (pendingRows.length === 0) return;
 
-  const ids  = [...selectedIds];
-  const rows = allRows.filter(r => ids.includes(rowId(r)));
-  const scsc = rows.filter(r => rowPlant(r) === 'SCSC').length;
-  const nts  = rows.filter(r => rowPlant(r) === 'NTS').length;
-  const tons = rows.reduce((s, r) => s + rowTons(r), 0).toFixed(3);
+  const ids  = pendingRows.map(r => rowId(r));
+  const skipped = selectedIds.size - ids.length;
+  const scsc = pendingRows.filter(r => rowPlant(r) === 'SCSC').length;
+  const nts  = pendingRows.filter(r => rowPlant(r) === 'NTS').length;
+  const tons = pendingRows.reduce((s, r) => s + rowTons(r), 0).toFixed(3);
 
-  let msg = 'ยืนยัน Mark as Sent สำหรับ ' + ids.length + ' รายการ?\n\n';
+  let msg = 'ยืนยัน Mark as Sent สำหรับ ' + ids.length + ' รายการ Pending?\n\n';
   if (scsc) msg += '• SCSC: ' + scsc + ' รายการ\n';
   if (nts)  msg += '• NTS: ' + nts + ' รายการ\n';
   msg += '• น้ำหนักรวม: ' + tons + ' ตัน';
+  if (skipped > 0) msg += '\n\nระบบจะข้าม ' + skipped + ' รายการที่ไม่ใช่ Pending';
 
   if (!confirm(msg)) return;
 
@@ -844,11 +846,12 @@ async function markAsSent() {
       throw new Error(data.message || text || 'HTTP ' + res.status);
 
     document.getElementById('okBox').textContent =
-      'Mark as Sent สำเร็จ ' + ids.length + ' รายการ (SCSC: ' + scsc + ', NTS: ' + nts + ')';
+      'Mark as Sent สำเร็จ ' + ids.length + ' รายการ (SCSC: ' + scsc + ', NTS: ' + nts + ')' +
+      (skipped > 0 ? ' — ข้าม ' + skipped + ' รายการที่สถานะไม่ตรง' : '');
     document.getElementById('okBox').style.display = 'block';
-    selectedIds.clear();
-     await new Promise(r => setTimeout(r, 8000));
-     await fetchData();
+    ids.forEach(id => selectedIds.delete(id));
+    await new Promise(r => setTimeout(r, 8000));
+    await fetchData();
   } catch(e) {
     document.getElementById('errBox').textContent = 'Mark as Sent ไม่สำเร็จ: ' + e.message;
     document.getElementById('errBox').style.display = 'block';
@@ -858,13 +861,13 @@ async function markAsSent() {
     updateSelCount();
   }
 }
-
 // ── Batch SAP Done ────────────────────────────────────────────────────────────
 async function markSapDoneBatch() {
   const sapRows = allRows.filter(r => selectedIds.has(rowId(r)) && getStatus(r) === 'Sent' && !getSapStatus(r));
   if (sapRows.length === 0) return;
 
   const ids  = sapRows.map(r => rowId(r));
+  const skipped = selectedIds.size - ids.length;
   const scsc = sapRows.filter(r => rowPlant(r) === 'SCSC').length;
   const nts  = sapRows.filter(r => rowPlant(r) === 'NTS').length;
   const tons = sapRows.reduce((s, r) => s + rowTons(r), 0).toFixed(3);
@@ -873,6 +876,7 @@ async function markSapDoneBatch() {
   if (scsc) msg += '• SCSC: ' + scsc + ' รายการ\n';
   if (nts)  msg += '• NTS: ' + nts + ' รายการ\n';
   msg += '• น้ำหนักรวม: ' + tons + ' ตัน';
+  if (skipped > 0) msg += '\n\nระบบจะข้าม ' + skipped + ' รายการที่ยังไม่พร้อมสำหรับ SAP Done';
   if (!confirm(msg)) return;
 
   const btn = document.getElementById('sapDoneBtn');
@@ -891,7 +895,7 @@ async function markSapDoneBatch() {
     document.getElementById('okBox').textContent =
       '✅ SAP Done สำเร็จ ' + ids.length + ' รายการ (SCSC: ' + scsc + ', NTS: ' + nts + ')';
     document.getElementById('okBox').style.display = 'block';
-    selectedIds.clear();
+    ids.forEach(id => selectedIds.delete(id));
     await fetchData();
   } catch(e) {
     document.getElementById('errBox').textContent = 'SAP Done ไม่สำเร็จ: ' + e.message;
