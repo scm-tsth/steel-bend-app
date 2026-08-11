@@ -134,6 +134,7 @@ tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t
         <span class="email-domain">@tatasteelthailand.com</span>
       </div>
       <button class="load-btn" id="searchBtn" onclick="loadByEmail()">🔍 ค้นหา</button>
+      <button class="all-btn" onclick="loadMyOrders()">👤 ของฉัน</button>
       <button class="all-btn" onclick="loadAll()">ทั้งหมด</button>
     </div>
   </div>
@@ -466,6 +467,17 @@ function loadByEmail(){
   currentEmail=document.getElementById('emailInput').value.trim().toLowerCase();
   fetchData();
 }
+function loadMyOrders(){
+  const savedUser=String(localStorage.getItem('steel_user')||'').trim().toLowerCase();
+  if(!savedUser){
+    loadAll();
+    return;
+  }
+  const username=savedUser.includes('@')?savedUser.split('@')[0]:savedUser;
+  currentEmail=username;
+  document.getElementById('emailInput').value=username;
+  fetchData();
+}
 function loadAll(){
   currentEmail='';
   document.getElementById('emailInput').value='';
@@ -582,7 +594,7 @@ document.getElementById('statsRow').style.display='grid';
     </tr>`;
   }).join('');
 }
-  loadAll();
+  loadMyOrders();
 </script>
 </body>
 </html>
