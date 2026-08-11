@@ -474,7 +474,7 @@ function loadMyOrders(){
     return;
   }
   const username=savedUser.includes('@')?savedUser.split('@')[0]:savedUser;
-  currentEmail=username;
+  currentEmail=fullEmail(savedUser);
   document.getElementById('emailInput').value=username;
   fetchData();
 }
@@ -493,9 +493,12 @@ function applyFilter(){
   let rows=[...allRows];
 
   if(currentEmail){
+    const query=currentEmail.toLowerCase();
+    const exactEmail=query.includes('@')?fullEmail(query):'';
     rows=rows.filter(r=>{
+      if(exactEmail) return rowEmail(r)===exactEmail;
       const em=(r['Submitter_email']||r['submitter_email']||'').toLowerCase();
-      return em.includes(currentEmail)||em.startsWith(currentEmail);
+      return em.includes(query)||em.startsWith(query);
     });
   }
  if(fGrp) rows=rows.filter(r=>(r['Customer Group']||r['customer_group']||'')==fGrp);
