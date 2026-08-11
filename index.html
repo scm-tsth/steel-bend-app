@@ -60,8 +60,9 @@ body::after{content:'';position:fixed;inset:0;z-index:-1;background:radial-gradi
 
 
 /* Official Tata Steel Thailand brand mark */
-.brand-mark{position:relative;width:150px;height:44px;overflow:hidden;background:#fff;border-radius:8px;flex:0 0 auto;box-shadow:0 2px 8px rgba(0,0,0,.14)}
-.brand-mark img{position:absolute;width:160px;height:auto;max-width:none;left:-5px;top:-35px;display:block}
+.brand-mark{position:relative;width:150px;height:44px;overflow:hidden;background:transparent;border-radius:0;flex:0 0 auto;box-shadow:none}
+.brand-mark img{position:absolute;width:160px;height:auto;max-width:none;left:-5px;top:-35px;display:block;filter:invert(1) grayscale(1) contrast(12);mix-blend-mode:screen}
+.wrap>.hdr>.brand-mark{margin:0 auto 1rem}
 @media (max-width:768px){.brand-mark{width:128px;height:38px}.brand-mark img{width:138px;left:-5px;top:-30px}}
 </style>
 <script defer src="assets/tata-steel-brand.js"></script>
