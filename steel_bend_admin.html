@@ -257,10 +257,8 @@ tbody td.cb-td input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent
           <th>PCS</th>
           <th>ลูกค้า</th>
           <th>Sales</th>
-          <th>Sales Order</th>
           <th class="order-note-col">หมายเหตุจากผู้สั่ง</th>
           <th>วันรับสินค้า</th>
-          <th>รอบ Cutoff</th>
           <th>ผู้สั่งพับ</th>
           <th>Workflow</th>
           <th>SAP</th>
@@ -760,10 +758,8 @@ function renderTable(rows) {
       '<td class="mono">' + (r['Pcs'] || r['pcs'] || '-') + '</td>' +
       '<td style="font-size:11px">' + (r['Customer Name'] || r['customer_name'] || '-') + '</td>' +
       '<td style="font-size:11px">' + (r['Sales Person'] || r['sales_person'] || '-') + '</td>' +
-      '<td class="mono" style="font-size:11px">' + (r['Sales Order No.'] || r['sales_order_no'] || r['SalesOrderNo'] || '-') + '</td>' +
       '<td class="order-note-col order-note-cell"' + (showOrderNote ? '' : ' style="display:none"') + '><span class="order-note-text" title="' + escapeHtml(remark) + '">' + (remark ? escapeHtml(remark) : '-') + '</span></td>' +
       '<td class="mono" style="font-size:11px">' + excelDateToStr(deliveryDateVal(r)) + '</td>' +
-      '<td class="mono" style="font-size:11px">' + cutoffDisplay(r) + '</td>' +
       '<td class="mono" style="font-size:11px">' + emailShort + '</td>' +
       '<td>' + statusBadge(r) + '</td>' +
       '<td style="text-align:center">' + sapBadge(r) + '</td>' +
