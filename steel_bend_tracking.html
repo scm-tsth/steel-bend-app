@@ -392,6 +392,25 @@ function statusSortOrder(row){
   return 4;
 }
 
+function orderCreatedValue(row){
+  return row['Created_At_ISO'] ?? row['created_at_iso']
+    ?? row['Created_At'] ?? row['created_at'] ?? row['Created At']
+    ?? row['Submitted_At'] ?? row['submitted_at'] ?? row['Submitted At']
+    ?? row['Timestamp'] ?? row['timestamp']
+    ?? row['Date'] ?? row['date'] ?? '';
+}
+
+function orderCreatedTime(row){
+  const date=parseDateTime(orderCreatedValue(row));
+  return date?date.getTime():0;
+}
+
+function compareNewestFirst(a,b){
+  const timeDiff=orderCreatedTime(b)-orderCreatedTime(a);
+  if(timeDiff) return timeDiff;
+  return String(rowOrderId(b)).localeCompare(String(rowOrderId(a)),undefined,{numeric:true,sensitivity:'base'});
+}
+
 function cancelAction(row,idx){
   if(!canCancel(row)) return '-';
   return `<button class="cancel-btn" onclick="cancelOrder(${idx})">ยกเลิก</button>`;
@@ -527,15 +546,13 @@ function updateMyPendingPill(){
 }
 
 function renderTable(rows){
+  const showingAllStatuses=document.getElementById('fStatus').value==='';
 
   rows.sort((a,b)=>{
-    const aDone=statusSortOrder(a);
-    const bDone=statusSortOrder(b);
+    if(showingAllStatuses) return compareNewestFirst(a,b);
 
-    if(aDone!==bDone){
-      return aDone-bDone;
-    }
-
+    const statusDiff=statusSortOrder(a)-statusSortOrder(b);
+    if(statusDiff) return statusDiff;
     return 0;
   });
   const waiting=rows.filter(r=>getDisplayStatus(r)==='waiting');
