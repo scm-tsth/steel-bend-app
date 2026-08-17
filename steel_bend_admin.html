@@ -75,6 +75,8 @@ tbody td{padding:.5rem .65rem;vertical-align:middle;line-height:1.4}
 tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t2)}
 tbody td.cb-td{text-align:center;padding:.5rem .4rem}
 tbody td.cb-td input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--bm)}
+.order-note-cell{min-width:180px;max-width:260px;white-space:normal;overflow-wrap:anywhere;font-size:11px;color:#78350f;background:#fffbeb}
+.order-note-text{display:block;line-height:1.45}
 
 .badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500;white-space:nowrap}
 .badge.pending{background:var(--al);color:#92400e}
@@ -256,6 +258,7 @@ tbody td.cb-td input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent
           <th>ลูกค้า</th>
           <th>Sales</th>
           <th>Sales Order</th>
+          <th class="order-note-col">หมายเหตุจากผู้สั่ง</th>
           <th>วันรับสินค้า</th>
           <th>รอบ Cutoff</th>
           <th>ผู้สั่งพับ</th>
@@ -708,8 +711,22 @@ function updateAdminPill(){
 }
 
 // ── Render ────────────────────────────────────────────────────────────────────
+function orderRemark(row) {
+  return String(row['Order Remark'] ?? row['Order_Remark'] ?? row['order_remark'] ?? row['Remark'] ?? row['remark'] ?? '').trim();
+}
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, ch => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  })[ch]);
+}
+
 function renderTable(rows) {
   document.getElementById('countLabel').textContent = 'แสดง ' + rows.length + ' รายการ';
+  const showOrderNote = rows.some(r => orderRemark(r));
+  document.querySelectorAll('.order-note-col').forEach(el => {
+    el.style.display = showOrderNote ? '' : 'none';
+  });
 
   if (rows.length === 0) {
     document.getElementById('tableCard').style.display = 'none';
@@ -728,6 +745,7 @@ function renderTable(rows) {
     const isSelected   = id && selectedIds.has(id);
     const emailShort   = String(r['Submitter_email'] || r['submitter_email'] || '-').split('@')[0];
     const cbAccent     = isSapPending ? '#2563b0' : 'var(--bm)';
+    const remark       = orderRemark(r);
 
     return '<tr' + (isSelected ? ' class="selected"' : '') + '>' +
       '<td class="cb-td">' + (isSelectable
@@ -743,6 +761,7 @@ function renderTable(rows) {
       '<td style="font-size:11px">' + (r['Customer Name'] || r['customer_name'] || '-') + '</td>' +
       '<td style="font-size:11px">' + (r['Sales Person'] || r['sales_person'] || '-') + '</td>' +
       '<td class="mono" style="font-size:11px">' + (r['Sales Order No.'] || r['sales_order_no'] || r['SalesOrderNo'] || '-') + '</td>' +
+      '<td class="order-note-col order-note-cell"' + (showOrderNote ? '' : ' style="display:none"') + '><span class="order-note-text" title="' + escapeHtml(remark) + '">' + (remark ? escapeHtml(remark) : '-') + '</span></td>' +
       '<td class="mono" style="font-size:11px">' + excelDateToStr(deliveryDateVal(r)) + '</td>' +
       '<td class="mono" style="font-size:11px">' + cutoffDisplay(r) + '</td>' +
       '<td class="mono" style="font-size:11px">' + emailShort + '</td>' +
