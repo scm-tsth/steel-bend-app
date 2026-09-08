@@ -1,48 +1,1068 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="th">
+<script src="product_map.js"></script>
+<script src="security.js"></script>
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="robots" content="noindex,nofollow,noarchive">
-  <meta name="referrer" content="no-referrer">
-  <title>ระบบอยู่ระหว่างปรับปรุง</title>
-  <style>
-    :root{color-scheme:light}
-    *{box-sizing:border-box}
-    body{
-      margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;
-      font-family:"Segoe UI",Tahoma,sans-serif;color:#102a43;
-      background:
-        radial-gradient(circle at 18% 18%,rgba(43,139,205,.17),transparent 34%),
-        radial-gradient(circle at 82% 82%,rgba(15,42,74,.14),transparent 36%),
-        linear-gradient(145deg,#f7fbff,#e7eef6);
-    }
-    main{
-      width:min(620px,100%);padding:44px 34px;text-align:center;background:rgba(255,255,255,.96);
-      border:1px solid #d8e2ec;border-radius:22px;box-shadow:0 24px 60px rgba(15,42,74,.16);
-    }
-    .brand{font-size:14px;font-weight:800;letter-spacing:.15em;color:#1685c4;margin-bottom:30px}
-    .icon{
-      width:76px;height:76px;margin:0 auto 22px;display:grid;place-items:center;border-radius:22px;
-      background:#e4f2fb;color:#126da3;font-size:34px;
-    }
-    h1{margin:0 0 12px;font-size:clamp(25px,5vw,36px);line-height:1.25}
-    p{margin:0;color:#52677c;font-size:17px;line-height:1.75}
-    .time{
-      display:inline-flex;margin-top:24px;padding:11px 18px;border-radius:999px;
-      background:#0f2a4a;color:white;font-size:15px;font-weight:700;
-    }
-    .note{margin-top:22px;font-size:13px;color:#8292a3}
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin — ระบบสั่งพับเหล็ก</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--bd:#0f2a4a;--bm:#1a3d6b;--ba:#2563b0;--bl:#dbeafe;--sl:#f1f5f9;--gr:#16a34a;--gl:#dcfce7;--rd:#dc2626;--rl:#fee2e2;--am:#d97706;--al:#fef3c7;--tx:#0f172a;--t2:#475569;--t3:#94a3b8;--br:#e2e8f0;--ra:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--tx);min-height:100vh;padding:1.25rem 1rem 3rem}
+.page{max-width:1440px;margin:0 auto}
+
+.hdr{background:var(--bd);border-radius:12px;padding:.9rem 1.25rem;margin-bottom:1.1rem;display:flex;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(15,42,74,.15)}
+.hdr-icon{width:34px;height:34px;background:rgba(255,255,255,.13);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.hdr-icon svg{width:22px;height:22px}
+.hdr-text{flex:1}
+.hdr-text h1{color:#fff;font-size:15px;font-weight:600}
+.hdr-text p{color:rgba(255,255,255,.5);font-size:11px;margin-top:1px}
+.admin-badge{background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.4);color:#fde68a;border-radius:6px;padding:2px 10px;font-size:11px;font-weight:600;white-space:nowrap;letter-spacing:.3px}
+.home-btn{height:34px;padding:0 12px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.1);color:#fff;border-radius:8px;font-size:12px;font-weight:500;font-family:'IBM Plex Sans Thai',sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;margin-left:6px}
+.home-btn:hover{background:rgba(255,255,255,.18)}
+
+.card{background:#fff;border:1px solid var(--br);border-radius:var(--ra);padding:1rem 1.2rem;margin-bottom:.9rem;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+
+.filter-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.filter-label{font-size:12px;font-weight:500;color:var(--t2);white-space:nowrap}
+.pill{height:30px;padding:0 14px;border:1.5px solid var(--br);background:#fff;color:var(--t2);border-radius:20px;font-size:12px;font-weight:500;font-family:'IBM Plex Sans Thai',sans-serif;cursor:pointer;white-space:nowrap;transition:all .15s}
+.pill:hover{border-color:var(--bm);color:var(--bm)}
+.pill.active{border-color:var(--bm);background:var(--bm);color:#fff}
+.pill.scsc.active{border-color:#0369a1;background:#0369a1;color:#fff}
+.pill.nts.active{border-color:var(--gr);background:var(--gr);color:#fff}
+.sep{color:var(--br);font-size:18px;user-select:none}
+.view-toggle{display:flex;border:1.5px solid var(--br);border-radius:8px;overflow:hidden}
+.view-toggle button{height:30px;padding:0 13px;border:none;background:#fff;color:var(--t2);font-size:12px;font-family:'IBM Plex Sans Thai',sans-serif;cursor:pointer;white-space:nowrap;transition:all .15s;border-right:1px solid var(--br)}
+.view-toggle button:last-child{border-right:none}
+.view-toggle button.active{background:var(--bd);color:#fff}
+.icon-btn{height:30px;padding:0 12px;border:1.5px solid var(--br);background:#fff;color:var(--t2);border-radius:8px;font-size:12px;font-family:'IBM Plex Sans Thai',sans-serif;cursor:pointer;white-space:nowrap;transition:all .15s;display:inline-flex;align-items:center;gap:5px}
+.icon-btn:hover{border-color:var(--bm);color:var(--bm)}
+
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:.9rem}
+.stat-box{background:#fff;border:1px solid var(--br);border-radius:var(--ra);padding:.75rem 1rem;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.stat-num{font-size:22px;font-weight:600;color:var(--bm)}
+.stat-num.amber{color:var(--am)}
+.stat-num.blue{color:var(--ba)}
+.stat-num.green{color:var(--gr)}
+.stat-label{font-size:11px;color:var(--t2);margin-top:2px}
+
+.action-bar{background:#fff;border:1px solid var(--br);border-radius:var(--ra);padding:.7rem 1.2rem;margin-bottom:.9rem;display:flex;align-items:center;gap:12px;box-shadow:0 1px 3px rgba(0,0,0,.06);flex-wrap:wrap}
+.cb-wrap{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--tx);cursor:pointer;user-select:none;white-space:nowrap}
+.cb-wrap input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--bm)}
+.sel-info{font-size:12px;color:var(--t2);flex:1}
+.sel-info strong{color:var(--bm)}
+.mark-btn{height:36px;padding:0 20px;background:var(--gr);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;font-family:'IBM Plex Sans Thai',sans-serif;cursor:pointer;white-space:nowrap;transition:background .15s;display:inline-flex;align-items:center;gap:7px}
+.mark-btn:hover:not(:disabled){background:#15803d}
+.mark-btn:disabled{background:var(--t3);cursor:not-allowed}
+.mark-spin{display:none;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+.mark-btn.loading .mark-spin{display:inline-block}
+.mark-btn.loading .mark-label{display:none}
+.sap-done-btn{height:36px;padding:0 18px;background:#2563b0;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;font-family:'IBM Plex Sans Thai',sans-serif;cursor:pointer;white-space:nowrap;transition:background .15s;display:inline-flex;align-items:center;gap:7px}
+.sap-done-btn:hover:not(:disabled){background:#1d4ed8}
+.sap-done-btn:disabled{background:var(--t3);cursor:not-allowed}
+
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:960px}
+thead th{background:var(--bd);color:#fff;padding:.5rem .65rem;text-align:left;font-weight:500;font-size:11px;letter-spacing:.3px;white-space:nowrap}
+thead th:first-child{border-radius:8px 0 0 0}
+thead th:last-child{border-radius:0 8px 0 0}
+thead th.cb-th{width:38px;text-align:center;padding:.5rem .4rem}
+tbody tr{border-bottom:.5px solid var(--br);transition:background .1s}
+tbody tr:hover{background:#f8fafc}
+tbody tr.selected{background:#eff6ff}
+tbody td{padding:.5rem .65rem;vertical-align:middle;line-height:1.4}
+tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t2)}
+tbody td.cb-td{text-align:center;padding:.5rem .4rem}
+tbody td.cb-td input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--bm)}
+
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500;white-space:nowrap}
+.badge.pending{background:var(--al);color:#92400e}
+.badge.done{background:var(--gl);color:#15803d}
+.badge.error{background:var(--rl);color:var(--rd)}
+.badge.cancelled{background:var(--sl);color:var(--t2)}
+.badge.scsc{background:#e0f2fe;color:#0369a1;font-weight:600}
+.badge.nts{background:var(--gl);color:#15803d;font-weight:600}
+
+.count-label{font-size:12px;color:var(--t2);margin-bottom:.5rem}
+.empty{text-align:center;padding:2.5rem 1rem;color:var(--t3);font-size:13px}
+.loading-box{text-align:center;padding:2rem 1rem;color:var(--t2);font-size:13px}
+.spin{display:inline-block;width:18px;height:18px;border:2px solid var(--br);border-top-color:var(--bm);border-radius:50%;animation:spin .7s linear infinite;vertical-align:-4px;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.err-box{background:var(--rl);border:1px solid #fca5a5;border-radius:var(--ra);padding:.75rem 1rem;font-size:13px;color:var(--rd);margin-bottom:.9rem}
+.admin-pill{display:none;align-items:center;gap:8px;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.35);border-radius:20px;padding:5px 14px;white-space:nowrap}
+.admin-pill .pill-total{font-size:16px;font-weight:700;color:#fbbf24;line-height:1}
+.admin-pill .pill-split{font-size:10px;color:rgba(255,255,255,.6);margin-top:2px}
+.admin-pill .pill-lbl{font-size:10px;color:rgba(255,255,255,.45)}
+.ok-box{background:var(--gl);border:1px solid #86efac;border-radius:var(--ra);padding:.75rem 1rem;font-size:13px;color:#15803d;margin-bottom:.9rem}
+.warn-box{background:var(--al);border:1px solid #fcd34d;border-radius:var(--ra);padding:.65rem 1rem;font-size:12px;color:#92400e;margin-bottom:.9rem}
+.fg{display:flex;flex-direction:column;gap:6px}
+.fg-label{font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;white-space:nowrap}
+.fg-sep{width:1px;background:var(--br);margin:0 20px;align-self:stretch}
+.filter-grid{display:flex;align-items:stretch;flex-wrap:wrap;row-gap:14px}
+@media(max-width:900px){
+  body{padding:.75rem .5rem 2rem}
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  table{min-width:1300px}
+  .hdr{flex-wrap:wrap}
+}
+</style>
 </head>
 <body>
-  <main>
-    <div class="brand">TATA STEEL (THAILAND)</div>
-    <div class="icon" aria-hidden="true">🛠</div>
-    <h1>ระบบอยู่ระหว่างปรับปรุงชั่วคราว</h1>
-    <p>ขณะนี้ทีมงานกำลังปรับปรุงระบบ<br>เพื่อเพิ่มความปลอดภัยและประสิทธิภาพในการใช้งาน</p>
-    <div class="time">อัปเดตสถานะอีกครั้ง เวลา 16:00 น.</div>
-    <div class="note">ขออภัยในความไม่สะดวก</div>
-  </main>
+<div class="page">
+
+<div class="hdr">
+  <div class="hdr-icon">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="3" y="3" width="18" height="18" rx="2.5" stroke="rgba(255,255,255,0.8)" stroke-width="1.5" fill="none"/>
+      <path d="M7 8h10M7 12h6M7 16h8" stroke="rgba(255,255,255,0.7)" stroke-width="1.4" stroke-linecap="round"/>
+      <circle cx="18.5" cy="17.5" r="4" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.8)" stroke-width="1.3"/>
+      <path d="M17 17.5l1.2 1.2 2-2" stroke="rgba(255,255,255,0.95)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <div class="hdr-text">
+    <h1>Admin Panel — ระบบสั่งพับเหล็ก</h1>
+    <p>จัดการรายการสั่งพับ และยืนยันส่งโรงงาน</p>
+  </div>
+  <span class="admin-badge">ADMIN</span>
+  <span id="lastUpd" style="font-size:11px;color:rgba(255,255,255,.45);white-space:nowrap"></span>
+  <div id="adminPill" class="admin-pill">
+    <span style="font-size:15px">⏳</span>
+    <div>
+      <div><span class="pill-total" id="pillTotal">0</span><span class="pill-lbl"> ค้างพับ</span></div>
+      <div class="pill-split"><span id="pillSCSC" style="color:#93c5fd">0 SCSC</span><span style="color:rgba(255,255,255,.3)"> / </span><span id="pillNTS" style="color:#86efac">0 NTS</span></div>
+    </div>
+  </div>
+  <button class="home-btn" onclick="fetchData()">🔄 Refresh</button>
+  <a class="home-btn" href="index.html">← หน้าหลัก</a>
+</div>
+
+<div id="warnBox" class="warn-box" style="display:none"></div>
+<div id="errBox" class="err-box" style="display:none"></div>
+<div id="okBox" class="ok-box" style="display:none"></div>
+
+<!-- FILTER -->
+<div class="card" style="padding:1.1rem 1.5rem">
+  <div class="filter-grid">
+
+    <div class="fg">
+      <div class="fg-label">โรงงาน</div>
+      <div style="display:flex;gap:5px">
+        <button class="pill active" id="pillAll"  onclick="setPlant('')">ทั้งหมด</button>
+        <button class="pill scsc"   id="pillSCSC" onclick="setPlant('SCSC')">SCSC</button>
+        <button class="pill nts"    id="pillNTS"  onclick="setPlant('NTS')">NTS</button>
+      </div>
+    </div>
+
+    <div class="fg-sep"></div>
+
+    <div class="fg">
+      <div class="fg-label">สถานะ Workflow</div>
+      <div class="view-toggle">
+        <button class="active" id="viewPending" onclick="setView('pending')">⏳ รอสั่งพับ</button>
+        <button id="viewSent" onclick="setView('sent')">✅ Sent</button>
+        <button id="viewAll" onclick="setView('all')">ทั้งหมด</button>
+      </div>
+    </div>
+
+    <div class="fg-sep"></div>
+
+    <div class="fg">
+      <div class="fg-label">SAP</div>
+      <div class="view-toggle">
+        <button class="active" id="sapAll"  onclick="setSap('')">ทั้งหมด</button>
+        <button                id="sapDone" onclick="setSap('done')">✓ Done</button>
+        <button                id="sapWait" onclick="setSap('pending')">— รอ</button>
+      </div>
+    </div>
+       <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--br);display:flex;align-items:center;gap:10px">
+      <span style="font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;white-space:nowrap">🔍 ค้นหาสินค้า</span>
+      <input type="text" id="fItem"
+        placeholder="พิมพ์เพื่อกรอง เช่น DB12, RB25, SD40..."
+        oninput="setItem(this.value)"
+        style="height:32px;padding:0 10px;font-size:12px;font-family:'IBM Plex Sans Thai',sans-serif;border:1.5px solid var(--br);border-radius:8px;background:#fff;color:var(--tx);outline:none;width:260px;transition:border .15s"
+        onfocus="this.style.borderColor='#2563b0'"
+        onblur="this.style.borderColor='var(--br)'"/>
+      <span id="fItemHint" style="font-size:11px;color:var(--t2)"></span>
+    </div>
+
+    <div class="fg" style="margin-left:auto">
+      <div class="fg-label" style="visibility:hidden">-</div>
+      <div style="display:flex;gap:8px">
+        <button class="icon-btn" onclick="showSapSummary()" style="border-color:#d97706;color:#d97706;font-weight:600">📋 ค้างพับ SAP</button>
+        <button class="icon-btn" onclick="printOrders()" style="border-color:#d97706;color:#d97706">🖨️ พิมพ์ใบสรุป</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-row" id="statsRow" style="display:none">
+  <div class="stat-box">
+    <div class="stat-num amber" id="statPending">0</div>
+    <div class="stat-label">รอสั่งพับทั้งหมด</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-num blue" id="statSCSC">0</div>
+    <div class="stat-label">SCSC รอสั่งพับ</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-num green" id="statNTS">0</div>
+    <div class="stat-label">NTS รอสั่งพับ</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-num" id="statTons">0</div>
+    <div class="stat-label">Tons รวม (Pending)</div>
+  </div>
+</div>
+
+<!-- ACTION BAR -->
+<div class="action-bar" id="actionBar" style="display:none">
+  <label class="cb-wrap">
+    <input type="checkbox" id="selectAll" onchange="setSelectAll(this.checked)"/>
+    เลือกทั้งหมด
+  </label>
+  <span class="sel-info" id="selInfo">เลือก <strong>0</strong> รายการ</span>
+  <button class="mark-btn" id="markBtn" onclick="markAsSent()" disabled>
+    <span class="mark-label">✅ สั่งพับแล้ว</span>
+    <span class="mark-spin"></span>
+  </button>
+  <button class="sap-done-btn" id="sapDoneBtn" onclick="markSapDoneBatch()" disabled>✓ SAP Done</button>
+</div>
+
+<!-- TABLE -->
+<div class="card" id="tableCard" style="display:none">
+  <div class="count-label" id="countLabel"></div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="cb-th">
+            <input type="checkbox" id="hdrCb"
+              style="width:15px;height:15px;cursor:pointer;accent-color:rgba(255,255,255,.8)"
+              onchange="setSelectAll(this.checked)"/>
+          </th>
+          <th>Order ID</th>
+          <th>วันที่สั่ง</th>
+          <th>Plant</th>
+          <th>แผนก</th>
+          <th>สินค้า</th>
+          <th>Tons</th>
+          <th>PCS</th>
+          <th>ลูกค้า</th>
+          <th>Sales</th>
+          <th>Sales Order</th>
+          <th>วันรับสินค้า</th>
+          <th>รอบ Cutoff</th>
+          <th>ผู้สั่งพับ</th>
+          <th>Workflow</th>
+          <th>SAP</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div id="loadingBox" class="loading-box" style="display:none">
+  <span class="spin"></span>กำลังโหลดข้อมูล...
+</div>
+<div id="emptyBox" class="card empty" style="display:none">ไม่พบรายการที่ตรงกับเงื่อนไข</div>
+
+</div>
+<script>
+const steelSession=SteelSecurity.requireSession({roles:['admin','scm']});
+// ── URLs ─────────────────────────────────────────────────────────────────────
+const FLOW_URL = 'https://defaultc49eedf2bcd84a848b29b3e5f61a3d.03.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/dd06128deabc40d8ba6a54df6e6327bd/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=J_ZPZCb4OzwlGSQ3GXc27pDL8NKs_VmWYqzVdg-pe0w';
+const MARK_SENT_URL = 'https://defaultc49eedf2bcd84a848b29b3e5f61a3d.03.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/1e4a17125d7840b888494c29add2d889/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=aAVPqqnU7rOm3gDmVUVI441GlvPjZ4xD4p0-rrG5wbA';
+const SAP_DONE_URL = 'https://defaultc49eedf2bcd84a848b29b3e5f61a3d.03.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/217b6c25991e459c92da5a57416d0e61/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dyaVxfFcMaw-q9Tk3NTQCbAsQySX3AAS4Cmb1Lx89-8';
+
+// ── Admin whitelist ───────────────────────────────────────────────────────────
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let allRows = [];
+let filteredRows = [];
+const selectedIds = new Set();
+let currentPlant = '';
+let currentView = 'pending';
+let currentSap = '';   // '' = ทั้งหมด, 'done' = SAP Done, 'pending' = SAP รอ
+let currentItem = '';
+
+// ── Utilities ─────────────────────────────────────────────────────────────────
+function excelDateToStr(val) {
+  if (!val) return '-';
+  if (typeof val === 'string' && /^\d+(\.\d+)?$/.test(val)) val = Number(val);
+  if (typeof val === 'string' && val.includes('-')) return val.split('T')[0];
+  if (typeof val === 'number') {
+    const d = new Date((val - 25569) * 86400 * 1000);
+    return String(d.getUTCDate()).padStart(2,'0') + '/' +
+           String(d.getUTCMonth()+1).padStart(2,'0') + '/' + d.getUTCFullYear();
+  }
+  return String(val).split('T')[0] || '-';
+}
+
+// Status_Text = workflow state (Pending/Sent/Cancelled/Error)
+// Status (bool) = SAP confirmation — completely separate
+function getStatus(row) {
+  const st = String(row['Status_Text'] ?? row['status_text'] ?? '').trim();
+  const l = st.toLowerCase();
+  if (!l || l === 'pending') return 'Pending';
+  if (l === 'sent' || l === 'done' || l === 'completed') return 'Sent';
+  if (l === 'cancelled' || l === 'canceled' || l === 'cancel') return 'Cancelled';
+  if (l === 'error' || l === 'failed') return 'Error';
+  return st || 'Pending';
+}
+
+function getSapStatus(row) {
+  const v = row['Status'] ?? row['status'];
+  if (v === true || String(v ?? '').toLowerCase() === 'true') return true;
+  return false;
+}
+
+function sapBadge(row) {
+  const done = getSapStatus(row);
+  const id = rowId(row);
+  if (done) return '<span style="color:#16a34a;font-size:12px;font-weight:600">&#10003; Done</span>';
+  if (!id)  return '<span style="color:#94a3b8;font-size:12px">ค้างพับ SAP</span>';
+  return `<button onclick="markSapDone('${id}')" style="background:none;border:1px solid #cbd5e1;border-radius:6px;padding:2px 8px;font-size:11px;color:#94a3b8;cursor:pointer;font-family:'IBM Plex Sans Thai',sans-serif" onmouseover="this.style.borderColor='#16a34a';this.style.color='#16a34a'" onmouseout="this.style.borderColor='#cbd5e1';this.style.color='#94a3b8'">ค้างพับ SAP ✎</button>`;
+}
+
+function rowId(row) { return row['OrderID'] || row['order_id'] || ''; }
+function rowPlant(row) { return row['Plant'] || row['plant'] || ''; }
+function rowTons(row) { return parseFloat(row['Tons'] || row['tons'] || 0) || 0; }
+
+function cutoffDisplay(row) {
+  const at = String(row['Cutoff_At_ISO'] ?? row['Cutoff_At'] ?? row['cutoff_at'] ?? '').trim();
+  if (at) return at.replace('T',' ').replace('+07:00','');
+  const date = String(row['Cutoff_Date'] ?? row['cutoff_date'] ?? row['Cutoff Date'] ?? '').trim();
+  return date ? excelDateToStr(date) + ' 10:00' : '-';
+}
+
+function deliveryDateVal(row) {
+  return row['Delivery_Date'] ?? row['Delivery Date'] ?? row['delivery_date'] ?? row['Receive Date'] ?? row['receive_date'] ?? row['request_date'] ?? '';
+}
+
+function statusBadge(row) {
+  const s = getStatus(row);
+  if (s === 'Pending')   return '<span class="badge pending">⏳ รอสั่งพับ</span>';
+  if (s === 'Error')     return '<span class="badge error">&#9888; Error</span>';
+  if (s === 'Cancelled') return '<span class="badge cancelled">ยกเลิก</span>';
+  return '<span class="badge done">&#10003; Sent</span>';
+}
+
+function plantBadge(plant) {
+  if (plant === 'SCSC') return '<span class="badge scsc">SCSC</span>';
+  if (plant === 'NTS')  return '<span class="badge nts">NTS</span>';
+  return plant || '-';
+}
+
+// ── Print Orders ──────────────────────────────────────────────────────────────
+  function parseProdName(desc) {
+  const m = String(desc||'').match(/^(SR24|SD40\(S\)|SD40\(NT\)|SD40|SD50|B400B-R)\s+(DB|RB)(\d+)\/(\d+)/i);
+  if (!m) return null;
+  return m[2].toUpperCase()+' '+m[1].toUpperCase()+' '+parseInt(m[3])+' mm. '+parseInt(m[4])+' m. TATA TISCON';
+}
+function getProdName(r) {
+  var sp=r['PROD_ID_SP']||r['prod_id_sp']||'';
+  var fp=r['PROD_ID_FP']||r['prod_id_fp']||'';
+  var desc=String(r['Item Description']||r['item_description']||'').trim();
+  return PROD_MAP[sp]||PROD_MAP[fp]||parseProdName(desc)||desc||'-';
+}
+  function printOrders() {
+  setView('pending');
+
+  if (currentPlant) { doPrintOrders(currentPlant); return; }
+
+  // Count Pending rows per plant for display
+  const pendingAll  = allRows.filter(r => getStatus(r) === 'Pending');
+  const scscCount   = pendingAll.filter(r => rowPlant(r) === 'SCSC').length;
+  const ntsCount    = pendingAll.filter(r => rowPlant(r) === 'NTS').length;
+
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9998;display:flex;align-items:center;justify-content:center';
+  const box = document.createElement('div');
+  box.style.cssText = 'background:#fff;border-radius:14px;padding:1.75rem 1.5rem;width:280px;box-shadow:0 20px 60px rgba(0,0,0,.25);text-align:center;font-family:"IBM Plex Sans Thai",sans-serif';
+  box.innerHTML = `
+    <div style="font-size:20px;margin-bottom:.5rem">🖨️</div>
+    <div style="font-size:14px;font-weight:600;color:#0f2a4a;margin-bottom:.35rem">พิมพ์ใบสรุป</div>
+    <div style="font-size:12px;color:#475569;margin-bottom:1.25rem">เลือกโรงงานที่ต้องการพิมพ์</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:.75rem">
+      <button id="_pSCSC" style="height:56px;background:#0369a1;color:#fff;border:none;border-radius:10px;font-family:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px">
+        <span style="font-size:15px;font-weight:700">SCSC</span>
+        <span style="font-size:11px;opacity:.8">${scscCount} รายการ</span>
+      </button>
+      <button id="_pNTS"  style="height:56px;background:#16a34a;color:#fff;border:none;border-radius:10px;font-family:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px">
+        <span style="font-size:15px;font-weight:700">NTS</span>
+        <span style="font-size:11px;opacity:.8">${ntsCount} รายการ</span>
+      </button>
+    </div>
+    <button id="_pCancel" style="width:100%;height:34px;background:#f1f5f9;color:#475569;border:none;border-radius:8px;font-size:12px;font-family:inherit;cursor:pointer">ยกเลิก</button>`;
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+  const close = () => document.body.removeChild(overlay);
+  box.querySelector('#_pSCSC').onclick   = () => { close(); doPrintOrders('SCSC'); };
+  box.querySelector('#_pNTS').onclick    = () => { close(); doPrintOrders('NTS');  };
+  box.querySelector('#_pCancel').onclick = close;
+  overlay.onclick = e => { if (e.target === overlay) close(); };
+}
+  function doPrintOrders(plant) {
+  var targetPlant = plant || currentPlant;
+  var plantCode = targetPlant === 'SCSC' ? '0435' : '0431';
+  var rows = allRows.filter(function(r){ return getStatus(r)==='Pending' && rowPlant(r)===targetPlant; });
+  if (rows.length === 0) { alert('ไม่มีรายการ Pending สำหรับ ' + targetPlant); return; }
+
+  var now = new Date();
+  var pad2 = function(n){ return String(n).padStart(2,'0'); };
+  var todayStr = pad2(now.getDate())+'/'+pad2(now.getMonth()+1)+'/'+now.getFullYear();
+  var timeStr  = pad2(now.getHours())+':'+pad2(now.getMinutes());
+
+  rows.sort(function(a,b){ return String(a['Date']||'').localeCompare(String(b['Date']||'')); });
+
+var totalTons = rows.reduce(function(s,r){ return s+rowTons(r); },0).toFixed(3);
+var totalPcs  = rows.reduce(function(s,r){ return s+(parseFloat(r['Pcs']||r['pcs']||0)||0); },0);
+
+  // ── สรุปตามเกรด ───────────────────────────────────────────────────────────
+  var sumMap = {};
+  rows.forEach(function(r){
+    var name = getProdName(r);
+    if (!sumMap[name]) sumMap[name] = {tons:0, pcs:0};
+    sumMap[name].tons += rowTons(r);
+    sumMap[name].pcs  += parseFloat(r['Pcs']||r['pcs']||0)||0;
+  });
+  var sumEntries = Object.entries(sumMap).sort(function(a,b){ return a[0].localeCompare(b[0]); });
+
+  var sumHtml = '';
+  sumEntries.forEach(function(e, i){
+    var bg = i%2===0 ? '#ffffff' : '#f0f9ff';
+    sumHtml += '<tr style="background:'+bg+'">'
+      +'<td style="padding:6px 8px;border:1px solid #cbd5e1;text-align:right;font-size:11px">'+(i+1)+'</td>'
+      +'<td style="padding:6px 8px;border:1px solid #cbd5e1;font-size:12px;font-weight:600">'+ e[0] +'</td>'
+      +'<td style="padding:6px 8px;border:1px solid #cbd5e1;text-align:right;font-size:12px;font-weight:700;color:#0f2a4a">'+ e[1].tons.toFixed(3) +'</td>'
+      +'<td style="padding:6px 8px;border:1px solid #cbd5e1;text-align:right;font-size:12px;font-weight:700;color:#0f2a4a">'+ Math.round(e[1].pcs).toLocaleString() +'</td>'
+      +'</tr>';
+  });
+
+  // ── รายละเอียดทุกรายการ ───────────────────────────────────────────────────
+  var detHtml = '';
+  rows.forEach(function(r, i){
+    var bg = i%2===0 ? '#ffffff' : '#f8fafc';
+    detHtml += '<tr style="background:'+bg+'">'
+      +'<td style="padding:4px 5px;border:1px solid #cbd5e1;text-align:right;font-size:10px">'+(i+1)+'</td>'
+      +'<td style="padding:4px 5px;border:1px solid #cbd5e1;font-size:10px">'+ getProdName(r) +'</td>'
+      +'<td style="padding:4px 5px;border:1px solid #cbd5e1;text-align:right;font-size:10px">'+(r['Tons']||r['tons']||'-')+'</td>'
+      +'<td style="padding:4px 5px;border:1px solid #cbd5e1;text-align:right;font-size:10px">'+(r['Pcs']||r['pcs']||'-')+'</td>'
+      +'<td style="padding:4px 5px;border:1px solid #cbd5e1;font-size:10px;font-family:Courier New,monospace">'+(r['Sales Order No.']||r['sales_order_no']||r['SalesOrderNo']||'-')+'</td>'
+      +'<td style="padding:4px 5px;border:1px solid #cbd5e1;font-size:10px">'+(r['Customer Name']||r['customer_name']||'-')+'</td>'
+      +'<td style="padding:4px 5px;border:1px solid #cbd5e1;font-size:10px">'+(r['Sales Person']||r['sales_person']||'-')+'</td>'
+      +'<td style="padding:4px 5px;border:1px solid #cbd5e1;font-size:10px;white-space:nowrap">'+excelDateToStr(deliveryDateVal(r))+'</td>'
+      +'<td style="padding:4px 5px;border:1px solid #cbd5e1;font-size:10px">'+(r['Incoterms']||r['incoterms']||r['term']||'-')+'</td>'
+      +'<td style="padding:4px 5px;border:1px solid #cbd5e1;font-size:10px">'+(r['Remark']||r['remark']||r['order_remark']||'-')+'</td>'
+      +'</tr>';
+  });
+
+  // ── สร้าง HTML ─────────────────────────────────────────────────────────────
+  var html = '<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"/>'
+    +'<title>ใบสรุปสั่งพับเหล็ก — '+targetPlant+' — '+todayStr+'</title>'
+    +'<style>'
+    +'@page{size:A4 landscape;margin:12mm 10mm}'
+    +'body{font-family:Arial,Tahoma,sans-serif;font-size:12px;color:#0f172a;margin:0;padding:0}'
+    +'.print-bar{position:fixed;top:0;left:0;right:0;background:#0f2a4a;padding:8px 16px;display:flex;align-items:center;gap:10px;z-index:999}'
+    +'.print-bar span{color:rgba(255,255,255,.7);font-size:12px;flex:1}'
+    +'.print-btn{height:32px;padding:0 18px;background:#16a34a;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer}'
+    +'.close-btn{height:32px;padding:0 12px;background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:6px;font-size:12px;cursor:pointer}'
+    +'@media print{.print-bar{display:none}.content{margin-top:0!important}}'
+    +'.content{margin-top:50px;padding:0 2px}'
+    +'.hdr-title{font-size:15px;font-weight:700;color:#0f2a4a;margin-bottom:2px}'
+    +'.hdr-sub{font-size:10px;color:#475569;margin-bottom:8px}'
+    +'.stats{display:flex;gap:12px;margin-bottom:10px}'
+    +'.stat{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:5px;padding:5px 14px;text-align:center}'
+    +'.stat-n{font-size:16px;font-weight:700;color:#0f2a4a}'
+    +'.stat-l{font-size:9px;color:#64748b}'
+    +'.section-label{font-size:11px;font-weight:700;color:#0f2a4a;border-left:3px solid #0f2a4a;padding-left:7px;margin:10px 0 5px}'
+    +'table{width:100%;border-collapse:collapse}'
+    +'th{background:#0f2a4a;color:#fff;padding:5px 6px;text-align:left;font-size:10px;font-weight:600;border:1px solid #0f2a4a}'
+    +'.sig-row{display:flex;gap:24px;margin-top:20px}'
+    +'.sig-box{flex:1;border-top:1px solid #94a3b8;padding-top:5px;font-size:10px;color:#475569}'
+    +'.sig-name{font-size:12px;font-weight:600;color:#0f2a4a;margin-bottom:18px}'
+    +'</style></head><body>'
+    +'<div class="print-bar">'
+      +'<span>ใบสรุปรายการสั่งพับเหล็ก — '+targetPlant+' (Plant '+plantCode+') — '+todayStr+' '+timeStr+'</span>'
+      +'<button class="close-btn" onclick="window.close()">✕ ปิด</button>'
+      +'<button class="print-btn" onclick="window.print()">🖨️ พิมพ์</button>'
+    +'</div>'
+    +'<div class="content">'
+      +'<div class="hdr-title">ใบสรุปรายการสั่งพับเหล็ก — โรงงาน '+targetPlant+' (Plant '+plantCode+')</div>'
+      +'<div class="hdr-sub">Tata Steel Thailand | SCM Demand Team &nbsp;|&nbsp; พิมพ์เมื่อ: '+todayStr+' '+timeStr+'</div>'
+      +'<div class="stats">'
+        +'<div class="stat"><div class="stat-n">'+rows.length+'</div><div class="stat-l">รายการ Pending</div></div>'
+        +'<div class="stat"><div class="stat-n">'+sumEntries.length+'</div><div class="stat-l">เกรดสินค้า</div></div>'
+        +'<div class="stat"><div class="stat-n">'+totalTons+'</div><div class="stat-l">ตัน (รวม)</div></div>'
+        +'<div class="stat"><div class="stat-n">'+totalPcs.toLocaleString()+'</div><div class="stat-l">เส้น (รวม)</div></div>'
+      +'</div>'
+
+      // ── ตารางสรุปเกรด
+      +'<div class="section-label">สรุปตามเกรดสินค้า</div>'
+      +'<table><thead><tr>'
+        +'<th style="width:30px">No.</th>'
+        +'<th>สินค้า (Item Description)</th>'
+        +'<th style="text-align:right;width:90px">รวมตัน</th>'
+        +'<th style="text-align:right;width:90px">รวมเส้น</th>'
+      +'</tr></thead><tbody>'+sumHtml+'</tbody></table>'
+
+      // ── ตารางรายละเอียด
+      +'<div class="section-label" style="margin-top:14px">รายละเอียดทุกรายการ</div>'
+      +'<table><thead><tr>'
+        +'<th style="width:22px">No.</th>'
+        +'<th>สินค้า (Item Description)</th>'
+        +'<th style="text-align:right">Tons</th>'
+        +'<th style="text-align:right">PCS</th>'
+        +'<th>Sales Order</th>'
+        +'<th>ลูกค้า</th>'
+        +'<th>Sales</th>'
+        +'<th>วันรับสินค้า</th>'
+        +'<th>Incoterms</th>'
+        +'<th>หมายเหตุ</th>'
+      +'</tr></thead><tbody>'+detHtml+'</tbody></table>'
+
+      +'<div class="sig-row">'
+        +'<div class="sig-box"><div class="sig-name">ผู้จัดทำ / Prepared by</div>ชื่อ: ___________________________<br/>วันที่: '+todayStr+'</div>'
+        +'<div class="sig-box"><div class="sig-name">ผู้อนุมัติ / Approved by</div>ชื่อ: ___________________________<br/>วันที่: _______________</div>'
+        +'<div class="sig-box"><div class="sig-name">โรงงาน / Factory received</div>ลงชื่อ: ___________________________<br/>วันที่: _______________</div>'
+      +'</div>'
+    +'</div></body></html>';
+
+  var w = window.open('','_blank','width=1100,height=750,scrollbars=yes');
+  if (!w) { alert('กรุณาอนุญาต popup ใน browser ก่อนพิมพ์'); return; }
+  w.document.write(html);
+  w.document.close();
+}
+
+// ── Fetch ─────────────────────────────────────────────────────────────────────
+async function markSapDone(orderId) {
+  if (!confirm(`ยืนยัน SAP Done สำหรับ Order: ${orderId}?`)) return;
+  document.getElementById('errBox').style.display = 'none';
+  document.getElementById('okBox').style.display  = 'none';
+  try {
+    const res = await SteelSecurity.secureFetch(SAP_DONE_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ order_ids: [orderId] })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    document.getElementById('okBox').textContent = `✅ SAP Done สำเร็จ: ${orderId}`;
+    document.getElementById('okBox').style.display = 'block';
+    await fetchData();
+  } catch(e) {
+    document.getElementById('errBox').textContent = 'SAP Done ไม่สำเร็จ: ' + e.message;
+    document.getElementById('errBox').style.display = 'block';
+  }
+}
+  async function fetchData() {
+  document.getElementById('loadingBox').style.display = 'block';
+  document.getElementById('tableCard').style.display = 'none';
+  document.getElementById('statsRow').style.display = 'none';
+  document.getElementById('actionBar').style.display = 'none';
+  document.getElementById('emptyBox').style.display = 'none';
+  document.getElementById('errBox').style.display = 'none';
+  document.getElementById('okBox').style.display = 'none';
+  selectedIds.clear();
+  updateSelCount();
+
+  try {
+    const res = await SteelSecurity.secureFetch(FLOW_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({})
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    allRows = Array.isArray(data) ? data : (data.value || []);
+    applyFilter();
+    const n = new Date();
+    const pad = v => String(v).padStart(2,'0');
+    document.getElementById('lastUpd').textContent =
+      'อัพเดต ' + pad(n.getHours()) + ':' + pad(n.getMinutes()) + ':' + pad(n.getSeconds());
+  } catch(e) {
+    document.getElementById('errBox').textContent = 'เกิดข้อผิดพลาดในการโหลดข้อมูล: ' + e.message;
+    document.getElementById('errBox').style.display = 'block';
+  } finally {
+    document.getElementById('loadingBox').style.display = 'none';
+  }
+}
+
+// ── Filter & Sort ─────────────────────────────────────────────────────────────
+function setPlant(plant) {
+  currentPlant = plant;
+  document.getElementById('pillAll').classList.toggle('active', plant === '');
+  document.getElementById('pillSCSC').classList.toggle('active', plant === 'SCSC');
+  document.getElementById('pillNTS').classList.toggle('active', plant === 'NTS');
+  selectedIds.clear();
+  applyFilter();
+}
+
+function setView(view) {
+  currentView = view;
+  document.getElementById('viewPending').classList.toggle('active', view === 'pending');
+  document.getElementById('viewSent').classList.toggle('active', view === 'sent');
+  document.getElementById('viewAll').classList.toggle('active', view === 'all');
+  selectedIds.clear();
+  applyFilter();
+}
+function setSap(val){
+  currentSap=val;
+  document.getElementById('sapAll').classList.toggle('active',val==='');
+  document.getElementById('sapDone').classList.toggle('active',val==='done');
+  document.getElementById('sapWait').classList.toggle('active',val==='pending');
+  selectedIds.clear();
+  applyFilter();
+}
+  function setItem(val) {
+  currentItem = val.trim().toLowerCase();
+  applyFilter();
+}
+function applyFilter() {
+  let rows = [...allRows];
+
+  if (currentView === 'pending') rows = rows.filter(r => getStatus(r) === 'Pending');
+  if (currentView === 'sent')    rows = rows.filter(r => getStatus(r) === 'Sent');
+  if (currentPlant) rows = rows.filter(r => rowPlant(r) === currentPlant);
+  if (currentSap === 'done')    rows = rows.filter(r => getSapStatus(r) === true);
+  if (currentSap === 'pending') rows = rows.filter(r => getSapStatus(r) === false);
+  if (currentItem) rows = rows.filter(r =>
+  String(r['Item Description'] || r['item_description'] || '').toLowerCase().includes(currentItem)
+);
+
+  // Sort: SCSC before NTS, then oldest first
+  rows.sort((a, b) => {
+    const pa = rowPlant(a) === 'SCSC' ? 0 : 1;
+    const pb = rowPlant(b) === 'SCSC' ? 0 : 1;
+    if (pa !== pb) return pa - pb;
+    const da = String(a['Date'] || a['date'] || '');
+    const db = String(b['Date'] || b['date'] || '');
+    return da.localeCompare(db);
+  });
+
+  filteredRows = rows;
+
+  // Stats: always computed from ALL rows (not filtered by plant)
+  const allPending  = allRows.filter(r => getStatus(r) === 'Pending');
+  const scscPending = allPending.filter(r => rowPlant(r) === 'SCSC');
+  const ntsPending  = allPending.filter(r => rowPlant(r) === 'NTS');
+  const totalTons   = allPending.reduce((s, r) => s + rowTons(r), 0);
+
+  document.getElementById('statPending').textContent = allPending.length;
+  document.getElementById('statSCSC').textContent    = scscPending.length;
+  document.getElementById('statNTS').textContent     = ntsPending.length;
+  document.getElementById('statTons').textContent    = totalTons.toFixed(3);
+  document.getElementById('statsRow').style.display  = 'grid';
+  document.getElementById('actionBar').style.display = 'flex';
+
+  renderTable(rows);
+  updateSelCount();
+  updateAdminPill();
+}
+
+function updateAdminPill(){
+  const pill=document.getElementById('adminPill');
+  if(!allRows.length){pill.style.display='none';return;}
+  const pending=allRows.filter(r=>getStatus(r)==='Pending');
+  const scsc=pending.filter(r=>rowPlant(r)==='SCSC').length;
+  const nts=pending.filter(r=>rowPlant(r)==='NTS').length;
+  document.getElementById('pillTotal').textContent=pending.length;
+  document.getElementById('pillSCSC').textContent=scsc+' SCSC';
+  document.getElementById('pillNTS').textContent=nts+' NTS';
+  pill.style.display=pending.length>0?'flex':'none';
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function renderTable(rows) {
+  document.getElementById('countLabel').textContent = 'แสดง ' + rows.length + ' รายการ';
+
+  if (rows.length === 0) {
+    document.getElementById('tableCard').style.display = 'none';
+    document.getElementById('emptyBox').style.display  = 'block';
+    return;
+  }
+  document.getElementById('emptyBox').style.display = 'none';
+  document.getElementById('tableCard').style.display = 'block';
+
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = rows.map(r => {
+    const id           = rowId(r);
+    const isPending    = getStatus(r) === 'Pending';
+    const isSapPending = getStatus(r) === 'Sent' && !getSapStatus(r);
+    const isSelectable = (isPending || isSapPending) && id;
+    const isSelected   = id && selectedIds.has(id);
+    const emailShort   = String(r['Submitter_email'] || r['submitter_email'] || '-').split('@')[0];
+    const cbAccent     = isSapPending ? '#2563b0' : 'var(--bm)';
+
+    return '<tr' + (isSelected ? ' class="selected"' : '') + '>' +
+      '<td class="cb-td">' + (isSelectable
+        ? '<input type="checkbox" data-id="' + id + '" style="accent-color:' + cbAccent + '"' + (isSelected ? ' checked' : '') + ' onchange="toggleRow(\'' + id + '\',this.checked)"/>'
+        : '') + '</td>' +
+      '<td class="mono" style="font-size:11px">' + (id || '-') + '</td>' +
+      '<td class="mono">' + excelDateToStr(r['Date'] || r['date']) + '</td>' +
+      '<td>' + plantBadge(rowPlant(r)) + '</td>' +
+      '<td>' + (r['Customer Group'] || r['customer_group'] || '-') + '</td>' +
+      '<td style="max-width:160px;font-size:11px">' + (r['Item Description'] || r['item_description'] || '-') + '</td>' +
+      '<td class="mono">' + (r['Tons'] || r['tons'] || '-') + '</td>' +
+      '<td class="mono">' + (r['Pcs'] || r['pcs'] || '-') + '</td>' +
+      '<td style="font-size:11px">' + (r['Customer Name'] || r['customer_name'] || '-') + '</td>' +
+      '<td style="font-size:11px">' + (r['Sales Person'] || r['sales_person'] || '-') + '</td>' +
+      '<td class="mono" style="font-size:11px">' + (r['Sales Order No.'] || r['sales_order_no'] || r['SalesOrderNo'] || '-') + '</td>' +
+      '<td class="mono" style="font-size:11px">' + excelDateToStr(deliveryDateVal(r)) + '</td>' +
+      '<td class="mono" style="font-size:11px">' + cutoffDisplay(r) + '</td>' +
+      '<td class="mono" style="font-size:11px">' + emailShort + '</td>' +
+      '<td>' + statusBadge(r) + '</td>' +
+      '<td style="text-align:center">' + sapBadge(r) + '</td>' +
+    '</tr>';
+  }).join('');
+}
+
+// ── Selection ─────────────────────────────────────────────────────────────────
+function toggleRow(id, checked) {
+  if (checked) selectedIds.add(id);
+  else selectedIds.delete(id);
+  const tr = document.querySelector('input[data-id="' + id + '"]')?.closest('tr');
+  if (tr) tr.classList.toggle('selected', checked);
+  updateSelCount();
+}
+
+function setSelectAll(checked) {
+  const selectableInView = filteredRows.filter(r =>
+    (getStatus(r) === 'Pending' || (getStatus(r) === 'Sent' && !getSapStatus(r))) && rowId(r)
+  );
+  if (checked) selectableInView.forEach(r => selectedIds.add(rowId(r)));
+  else         selectableInView.forEach(r => selectedIds.delete(rowId(r)));
+
+  document.querySelectorAll('tbody input[type=checkbox][data-id]').forEach(cb => {
+    cb.checked = selectedIds.has(cb.dataset.id);
+    cb.closest('tr').classList.toggle('selected', cb.checked);
+  });
+  document.getElementById('selectAll').checked = checked;
+  document.getElementById('hdrCb').checked     = checked;
+  updateSelCount();
+}
+
+function updateSelCount() {
+  const n    = selectedIds.size;
+  const rows = allRows.filter(r => selectedIds.has(rowId(r)));
+  const pendingRows = rows.filter(r => getStatus(r) === 'Pending');
+  const sapRows     = rows.filter(r => getStatus(r) === 'Sent' && !getSapStatus(r));
+  const tons = rows.reduce((s, r) => s + rowTons(r), 0);
+  const scsc = rows.filter(r => rowPlant(r) === 'SCSC').length;
+  const nts  = rows.filter(r => rowPlant(r) === 'NTS').length;
+
+  let info = 'เลือก <strong>' + n + '</strong> รายการ';
+  if (n > 0) {
+    const parts = [];
+    if (scsc) parts.push('SCSC ' + scsc);
+    if (nts)  parts.push('NTS ' + nts);
+    info += ' — ' + parts.join(', ') + ' — ' + tons.toFixed(3) + ' ตัน';
+    if (pendingRows.length) info += ' &nbsp;<span style="color:#d97706;font-size:11px">(Pending ' + pendingRows.length + ')</span>';
+    if (sapRows.length)     info += ' <span style="color:#2563b0;font-size:11px">(รอ SAP ' + sapRows.length + ')</span>';
+  }
+  document.getElementById('selInfo').innerHTML = info;
+  document.getElementById('markBtn').disabled    = pendingRows.length === 0;
+  document.getElementById('sapDoneBtn').disabled = sapRows.length === 0;
+
+  const selectableInView = filteredRows.filter(r =>
+    (getStatus(r) === 'Pending' || (getStatus(r) === 'Sent' && !getSapStatus(r))) && rowId(r)
+  );
+  const allSelected = selectableInView.length > 0 && selectableInView.every(r => selectedIds.has(rowId(r)));
+  document.getElementById('selectAll').checked = allSelected;
+  document.getElementById('hdrCb').checked     = allSelected;
+}
+
+// ── Mark as Sent ──────────────────────────────────────────────────────────────
+async function markAsSent() {
+  if (selectedIds.size === 0) return;
+
+  const ids  = [...selectedIds];
+  const rows = allRows.filter(r => ids.includes(rowId(r)));
+  const scsc = rows.filter(r => rowPlant(r) === 'SCSC').length;
+  const nts  = rows.filter(r => rowPlant(r) === 'NTS').length;
+  const tons = rows.reduce((s, r) => s + rowTons(r), 0).toFixed(3);
+
+  let msg = 'ยืนยัน Mark as Sent สำหรับ ' + ids.length + ' รายการ?\n\n';
+  if (scsc) msg += '• SCSC: ' + scsc + ' รายการ\n';
+  if (nts)  msg += '• NTS: ' + nts + ' รายการ\n';
+  msg += '• น้ำหนักรวม: ' + tons + ' ตัน';
+
+  if (!confirm(msg)) return;
+
+  const btn = document.getElementById('markBtn');
+  btn.classList.add('loading');
+  btn.disabled = true;
+  document.getElementById('errBox').style.display = 'none';
+  document.getElementById('okBox').style.display  = 'none';
+
+  try {
+    const res = await SteelSecurity.secureFetch(MARK_SENT_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({order_ids: ids})
+    });
+    const text = await res.text();
+    let data = {};
+    try { data = JSON.parse(text); } catch(_) {}
+
+    if (!res.ok || data.success === false)
+      throw new Error(data.message || text || 'HTTP ' + res.status);
+
+    document.getElementById('okBox').textContent =
+      'Mark as Sent สำเร็จ ' + ids.length + ' รายการ (SCSC: ' + scsc + ', NTS: ' + nts + ')';
+    document.getElementById('okBox').style.display = 'block';
+    selectedIds.clear();
+     await new Promise(r => setTimeout(r, 8000));
+     await fetchData();
+  } catch(e) {
+    document.getElementById('errBox').textContent = 'Mark as Sent ไม่สำเร็จ: ' + e.message;
+    document.getElementById('errBox').style.display = 'block';
+    btn.disabled = false;
+  } finally {
+    btn.classList.remove('loading');
+    updateSelCount();
+  }
+}
+
+// ── Batch SAP Done ────────────────────────────────────────────────────────────
+async function markSapDoneBatch() {
+  const sapRows = allRows.filter(r => selectedIds.has(rowId(r)) && getStatus(r) === 'Sent' && !getSapStatus(r));
+  if (sapRows.length === 0) return;
+
+  const ids  = sapRows.map(r => rowId(r));
+  const scsc = sapRows.filter(r => rowPlant(r) === 'SCSC').length;
+  const nts  = sapRows.filter(r => rowPlant(r) === 'NTS').length;
+  const tons = sapRows.reduce((s, r) => s + rowTons(r), 0).toFixed(3);
+
+  let msg = 'ยืนยัน SAP Done สำหรับ ' + ids.length + ' รายการ?\n\n';
+  if (scsc) msg += '• SCSC: ' + scsc + ' รายการ\n';
+  if (nts)  msg += '• NTS: ' + nts + ' รายการ\n';
+  msg += '• น้ำหนักรวม: ' + tons + ' ตัน';
+  if (!confirm(msg)) return;
+
+  const btn = document.getElementById('sapDoneBtn');
+  btn.disabled    = true;
+  btn.textContent = '⏳ กำลังบันทึก...';
+  document.getElementById('errBox').style.display = 'none';
+  document.getElementById('okBox').style.display  = 'none';
+
+  try {
+    const res = await SteelSecurity.secureFetch(SAP_DONE_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ order_ids: ids })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    document.getElementById('okBox').textContent =
+      '✅ SAP Done สำเร็จ ' + ids.length + ' รายการ (SCSC: ' + scsc + ', NTS: ' + nts + ')';
+    document.getElementById('okBox').style.display = 'block';
+    selectedIds.clear();
+    await fetchData();
+  } catch(e) {
+    document.getElementById('errBox').textContent = 'SAP Done ไม่สำเร็จ: ' + e.message;
+    document.getElementById('errBox').style.display = 'block';
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = '✓ SAP Done';
+    updateSelCount();
+  }
+}
+
+// ── SAP Summary Modal ─────────────────────────────────────────────────────────
+function showSapSummary() {
+  const pendingRows = allRows.filter(r => getStatus(r) === 'Pending');
+  const bendingRows = allRows.filter(r => getStatus(r) === 'Sent' && !getSapStatus(r));
+
+  if (pendingRows.length === 0 && bendingRows.length === 0) {
+    alert('ไม่มีรายการค้างดำเนินการ');
+    return;
+  }
+
+  // Auto-filter main table to Sent + SAP-pending so user can see bending rows
+  setView('sent');
+  setSap('pending');
+
+  const GRP_COLOR = { Project:'#7c3aed', Retail:'#2563b0', Direct:'#d97706', Export:'#16a34a' };
+
+  // Build plant > item > group > SO map from a row array
+  function buildPlantMap(rows) {
+    const m = {};
+    rows.forEach(r => {
+      const plant = rowPlant(r) || '(ไม่ระบุ)';
+      const item  = String(r['Item Description'] || r['item_description'] || '-').trim();
+      const grp   = String(r['Customer Group']   || r['customer_group']   || '(ไม่ระบุ)').trim() || '(ไม่ระบุ)';
+      const so    = String(r['Sales Order No.']  || r['sales_order_no']   || '-').trim() || '-';
+      const tons  = rowTons(r);
+      const pcs   = parseFloat(r['Pcs'] || r['pcs'] || 0) || 0;
+
+      if (!m[plant]) m[plant] = { tons:0, pcs:0, count:0, items:{} };
+      m[plant].tons += tons; m[plant].pcs += pcs; m[plant].count += 1;
+
+      const pi = m[plant].items;
+      if (!pi[item]) pi[item] = { tons:0, pcs:0, groups:{} };
+      pi[item].tons += tons; pi[item].pcs += pcs;
+
+      if (!pi[item].groups[grp]) pi[item].groups[grp] = { tons:0, pcs:0, soMap:{} };
+      pi[item].groups[grp].tons += tons; pi[item].groups[grp].pcs += pcs;
+
+      if (!pi[item].groups[grp].soMap[so]) pi[item].groups[grp].soMap[so] = { tons:0, pcs:0, count:0 };
+      pi[item].groups[grp].soMap[so].tons  += tons;
+      pi[item].groups[grp].soMap[so].pcs   += pcs;
+      pi[item].groups[grp].soMap[so].count += 1;
+    });
+    return m;
+  }
+
+  const badge = (tons, pcs, count, style) =>
+    '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:10px;white-space:nowrap;' + (style||'') + '">' +
+      tons.toFixed(3) + ' ต&nbsp;&nbsp;' + Math.round(pcs).toLocaleString() + ' เส้น&nbsp;&nbsp;' + count + ' รายการ' +
+    '</span>';
+
+  // Build one section's HTML from plantMap + color scheme
+  function buildSection(plantMap, itemBg, totalBg) {
+    let html = '';
+    let sectionTons = 0, sectionPcs = 0, sectionCount = 0;
+
+    const PLANT_STYLE = {
+      SCSC: { bg:'#0369a1', label:'SCSC (Plant 0435)' },
+      NTS:  { bg:'#16a34a', label:'NTS (Plant 0431)'  },
+    };
+
+    ['SCSC','NTS'].concat(Object.keys(plantMap).filter(p => p !== 'SCSC' && p !== 'NTS')).forEach(plant => {
+      const pv = plantMap[plant];
+      if (!pv) return;
+      sectionTons += pv.tons; sectionPcs += pv.pcs; sectionCount += pv.count;
+
+      const ps = PLANT_STYLE[plant] || { bg:'#475569', label: plant };
+      html +=
+        '<div style="background:' + ps.bg + ';padding:9px 14px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">' +
+          '<span style="background:rgba(255,255,255,.2);color:#fff;border-radius:5px;padding:2px 9px;font-size:11px;font-weight:700">' + plant + '</span>' +
+          '<span style="color:#fff;font-size:12px;font-weight:700">' + ps.label + '</span>' +
+          badge(pv.tons, pv.pcs, pv.count, 'color:rgba(255,255,255,.7);margin-left:4px') +
+        '</div>';
+
+      Object.entries(pv.items).sort((a,b) => a[0].localeCompare(b[0])).forEach(([item, iv]) => {
+        const itemCount = Object.values(iv.groups)
+          .reduce((s,gv) => s + Object.values(gv.soMap).reduce((s2,sv) => s2 + sv.count, 0), 0);
+
+        html +=
+          '<div style="background:' + itemBg + ';padding:7px 14px 7px 24px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">' +
+            '<span style="color:#fff;font-size:12px;font-weight:600;flex:1;min-width:0;word-break:break-word">' + item + '</span>' +
+            badge(iv.tons, iv.pcs, itemCount, 'color:rgba(255,255,255,.6)') +
+          '</div>';
+
+        Object.entries(iv.groups).sort((a,b) => a[0].localeCompare(b[0])).forEach(([grp, gv]) => {
+          const color    = GRP_COLOR[grp] || '#64748b';
+          const grpCount = Object.values(gv.soMap).reduce((s,sv) => s + sv.count, 0);
+
+          html +=
+            '<div style="background:#f1f5f9;padding:6px 14px 6px 36px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-bottom:.5px solid #e2e8f0">' +
+              '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + color + ';flex-shrink:0"></span>' +
+              '<span style="font-size:12px;font-weight:600;color:#1e293b;flex:1;min-width:0">' + grp + '</span>' +
+              badge(gv.tons, gv.pcs, grpCount, 'color:#475569') +
+            '</div>';
+
+          Object.entries(gv.soMap).sort((a,b) => a[0].localeCompare(b[0])).forEach(([so, sv]) => {
+            html +=
+              '<div style="background:#fff;padding:4px 14px 4px 52px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-bottom:.5px solid #f1f5f9">' +
+                '<span style="font-size:11px;color:#64748b;flex:1;min-width:0">SO: ' +
+                  (so === '-' ? '<span style="color:#94a3b8">(ไม่มี)</span>' : '<strong>' + so + '</strong>') +
+                '</span>' +
+                badge(sv.tons, sv.pcs, sv.count, 'color:#94a3b8') +
+              '</div>';
+          });
+        });
+      });
+    });
+
+    // Section footer
+    html +=
+      '<div style="background:' + totalBg + ';padding:8px 14px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">' +
+        '<span style="color:#fff;font-size:11px;font-weight:700;flex:1">รวม</span>' +
+        badge(sectionTons, sectionPcs, sectionCount, 'color:rgba(255,255,255,.85);font-weight:700') +
+      '</div>';
+
+    return html;
+  }
+
+  // ── Build content (ค้างพับ only) ──────────────────────────────────────────
+  if (bendingRows.length === 0) { alert('ไม่มีรายการค้างพับ SAP'); return; }
+
+  const bm = buildPlantMap(bendingRows);
+  const content = buildSection(bm, '#1e3a5f', '#1e40af');
+
+  let headerTons = 0, headerPcs = 0;
+  bendingRows.forEach(r => { headerTons += rowTons(r); headerPcs += parseFloat(r['Pcs']||r['pcs']||0)||0; });
+
+  // ── Modal ─────────────────────────────────────────────────────────────────
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9999;pointer-events:none';
+
+  const modal = document.createElement('div');
+  modal.style.cssText =
+    'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);' +
+    'background:#fff;border-radius:14px;width:min(580px,96vw);max-height:88vh;' +
+    'display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.35);' +
+    'font-family:\'IBM Plex Sans Thai\',sans-serif;overflow:hidden;z-index:10000;pointer-events:auto';
+
+  modal.innerHTML =
+    '<div id="_sapModalHdr" style="background:#0f2a4a;padding:1rem 1.25rem;border-radius:14px 14px 0 0;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;cursor:grab;user-select:none">' +
+      '<div>' +
+        '<div style="color:#fff;font-size:14px;font-weight:700">📋 ค้างพับ SAP</div>' +
+        '<div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">' +
+          '<strong style="color:#93c5fd">' + bendingRows.length + '</strong> รายการ · ' +
+          headerTons.toFixed(3) + ' ตัน · ' + Math.round(headerPcs).toLocaleString() + ' เส้น' +
+        '</div>' +
+      '</div>' +
+      '<button id="_sapModalClose" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:15px;line-height:28px;flex-shrink:0">✕</button>' +
+    '</div>' +
+    '<div style="overflow-y:auto;overflow-x:hidden">' + content + '</div>';
+
+  document.body.appendChild(overlay);
+  document.body.appendChild(modal);
+
+  const closeAll = () => { overlay.remove(); modal.remove(); };
+  modal.querySelector('#_sapModalClose').onclick = closeAll;
+  overlay.onclick = closeAll;
+
+  // ── Drag logic ────────────────────────────────────────────────────────────
+  const hdr = modal.querySelector('#_sapModalHdr');
+  let dragging = false, ox = 0, oy = 0;
+
+  hdr.addEventListener('mousedown', e => {
+    if (e.button !== 0) return;
+    dragging = true;
+    const r = modal.getBoundingClientRect();
+    modal.style.transform = 'none';
+    modal.style.left = r.left + 'px';
+    modal.style.top  = r.top  + 'px';
+    ox = e.clientX - r.left;
+    oy = e.clientY - r.top;
+    hdr.style.cursor = 'grabbing';
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    let nx = Math.max(0, Math.min(e.clientX - ox, window.innerWidth  - modal.offsetWidth));
+    let ny = Math.max(0, Math.min(e.clientY - oy, window.innerHeight - modal.offsetHeight));
+    modal.style.left = nx + 'px';
+    modal.style.top  = ny + 'px';
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (!dragging) return;
+    dragging = false;
+    hdr.style.cursor = 'grab';
+  });
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+fetchData();
+</script>
 </body>
 </html>
