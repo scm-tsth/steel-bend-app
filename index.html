@@ -157,7 +157,7 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
 <script src="security.js"></script>
 <script>
 const AUTH_URL='https://defaultc49eedf2bcd84a848b29b3e5f61a3d.03.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/89ec33c02cda46e6b5a53c86ad0cdae4/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=KAOAU4tru--J9rAwcQgUj6kywEszKoEDkEr4LP3tuYQ';
-let pendingEmail='';
+let pendingEmail='', pendingRequestId='';
 
 window.onload=function(){
   const saved=SteelSecurity.readSession();
@@ -186,8 +186,8 @@ async function doLogin(){
     const text=await res.text();
     let data={};
     try{data=JSON.parse(text);}catch(e){}
-    if(res.ok && data.success!==false){
-      pendingEmail=email+'@tatasteelthailand.com';
+    if(res.ok && data.ok===true && data.requestId){
+      pendingEmail=email+'@tatasteelthailand.com'; pendingRequestId=String(data.requestId||'');
       document.getElementById('emailInput').disabled=true;
       document.getElementById('otpWrap').classList.add('show');
       document.getElementById('loginText').textContent='ยืนยัน OTP →';
@@ -211,7 +211,7 @@ async function verifyOtp(){
   const btn=document.getElementById('loginBtn'),txt=document.getElementById('loginText'),spin=document.getElementById('loginSpin');
   btn.disabled=true;txt.style.display='none';spin.style.display='inline-block';err.classList.remove('show');
   try{
-    const res=await fetch(AUTH_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'verify_otp',email:pendingEmail,otp})});
+    const res=await fetch(AUTH_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'verify_otp',email:pendingEmail,otp,requestId:pendingRequestId})});
     const data=await res.json().catch(()=>({}));
     if(!res.ok||data.authorized!==true||!data.sessionToken) throw new Error(data.message||'OTP ไม่ถูกต้องหรือหมดอายุ');
     const session=SteelSecurity.saveSession(data); showMenu(session);
@@ -228,7 +228,7 @@ function showMenu(session){
 }
 
 function signOut(){
-  SteelSecurity.clearSession(); pendingEmail='';
+  SteelSecurity.clearSession(); pendingEmail=''; pendingRequestId='';
   document.getElementById('loginCard').classList.remove('hide');
   document.getElementById('menuView').classList.remove('show');
   document.getElementById('emailInput').value='';
