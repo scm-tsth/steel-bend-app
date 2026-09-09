@@ -213,7 +213,7 @@ async function verifyOtp(){
   try{
     const res=await fetch(AUTH_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'verify_otp',email:pendingEmail,otp,requestId:pendingRequestId})});
     const data=await res.json().catch(()=>({}));
-    if(!res.ok||data.authorized!==true||!data.sessionToken) throw new Error(data.message||'OTP ไม่ถูกต้องหรือหมดอายุ');
+    if(!res.ok||data.ok!==true||!data.sessionToken) throw new Error(data.message||'OTP ไม่ถูกต้องหรือหมดอายุ');
     const session=SteelSecurity.saveSession(data); showMenu(session);
   }catch(e){err.textContent='⛔ '+e.message;err.classList.add('show');}
   finally{btn.disabled=false;txt.style.display='inline';spin.style.display='none';}
