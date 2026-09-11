@@ -24,7 +24,7 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
 .email-wrap:focus-within{border-color:var(--ba);box-shadow:0 0 0 3px rgba(37,99,176,.1)}
 .email-wrap input{border:none;flex:1;height:38px;padding:0 10px;font-size:13px;font-family:'IBM Plex Sans Thai',sans-serif;outline:none;background:#fff;color:var(--tx)}
 .email-domain{background:var(--sl, #f1f5f9);padding:0 9px;height:38px;display:flex;align-items:center;font-size:12px;color:var(--t2);border-left:1px solid var(--br);white-space:nowrap;font-family:'IBM Plex Mono',monospace}
-.otp-wrap{display:none;margin-bottom:.75rem}.otp-wrap.show{display:block}.otp-wrap input{width:100%;height:44px;border:1px solid var(--br);border-radius:8px;text-align:center;font:600 20px 'IBM Plex Mono',monospace;letter-spacing:.45em;outline:none}.otp-wrap input:focus{border-color:var(--ba);box-shadow:0 0 0 3px rgba(37,99,176,.1)}
+.otp-wrap{display:none;margin-bottom:.75rem}.otp-wrap.show{display:block}.otp-ref{display:flex;align-items:center;justify-content:center;gap:7px;margin:0 0 .5rem;padding:.42rem .65rem;border:1px solid #bfdbfe;border-radius:8px;background:#eff6ff;color:#475569;font-size:12px}.otp-ref strong{font:600 13px 'IBM Plex Mono',monospace;letter-spacing:.08em;color:var(--bm)}.otp-wrap input{width:100%;height:44px;border:1px solid var(--br);border-radius:8px;text-align:center;font:600 20px 'IBM Plex Mono',monospace;letter-spacing:.45em;outline:none}.otp-wrap input:focus{border-color:var(--ba);box-shadow:0 0 0 3px rgba(37,99,176,.1)}
 .login-btn{width:100%;height:38px;background:var(--bm);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:500;font-family:'IBM Plex Sans Thai',sans-serif;cursor:pointer;transition:background .15s;display:flex;align-items:center;justify-content:center;gap:6px}
 .login-btn:hover{background:var(--bd)}
 .login-btn:disabled{background:var(--t3);cursor:not-allowed}
@@ -96,7 +96,7 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
       <input type="text" id="emailInput" placeholder="ชื่ออีเมล" onkeydown="if(event.key==='Enter')doLogin()"/>
       <span class="email-domain">@tatasteelthailand.com</span>
     </div>
-    <div class="otp-wrap" id="otpWrap"><input type="text" id="otpInput" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="••••••" onkeydown="if(event.key==='Enter')verifyOtp()"/></div>
+    <div class="otp-wrap" id="otpWrap"><div class="otp-ref"><span>รหัสอ้างอิง</span><strong id="otpRefCode">—</strong></div><input type="text" id="otpInput" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="••••••" onkeydown="if(event.key==='Enter')verifyOtp()"/></div>
     <button class="login-btn" id="loginBtn" onclick="doLogin()">
       <span id="loginText" aria-live="polite">ยืนยัน →</span>
       <span class="rebar-loader" id="loginSpin" style="display:none" aria-hidden="true"></span>
@@ -194,6 +194,8 @@ async function doLogin(){
     try{data=JSON.parse(text);}catch(e){}
     if(res.ok && data.ok===true && data.requestId){
       pendingEmail=email+'@tatasteelthailand.com'; pendingRequestId=String(data.requestId||'');
+      const refSource=pendingRequestId.replace(/[^a-z0-9]/gi,'').toUpperCase();
+      document.getElementById('otpRefCode').textContent='SB-'+refSource.slice(0,6);
       document.getElementById('emailInput').disabled=true;
       document.getElementById('otpWrap').classList.add('show');
       document.getElementById('loginText').textContent='ยืนยัน OTP →';
@@ -241,6 +243,7 @@ function signOut(){
   document.getElementById('emailInput').value='';
   document.getElementById('emailInput').disabled=false;
   document.getElementById('otpInput').value='';
+  document.getElementById('otpRefCode').textContent='—';
   document.getElementById('otpWrap').classList.remove('show');
   document.getElementById('loginText').textContent='ยืนยัน →';
   document.getElementById('loginBtn').onclick=doLogin;
