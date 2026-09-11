@@ -75,6 +75,7 @@ tbody tr.selected{background:#eff6ff}
 tbody td{padding:.5rem .65rem;vertical-align:middle;line-height:1.4}
 tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t2)}
 tbody td.cb-td{text-align:center;padding:.5rem .4rem}
+.note-cell{display:block;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--t2);font-size:11px}
 tbody td.cb-td input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--bm)}
 
 .badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500;white-space:nowrap}
@@ -253,9 +254,8 @@ tbody td.cb-td input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent
           <th>PCS</th>
           <th>ลูกค้า</th>
           <th>Sales</th>
-          <th>Sales Order</th>
           <th>วันรับสินค้า</th>
-          <th>รอบ Cutoff</th>
+          <th>หมายเหตุ</th>
           <th>ผู้สั่งพับ</th>
           <th>Workflow</th>
           <th>SAP</th>
@@ -332,6 +332,7 @@ function sapBadge(row) {
 function rowId(row) { return row['OrderID'] || row['order_id'] || ''; }
 function rowPlant(row) { return row['Plant'] || row['plant'] || ''; }
 function rowTons(row) { return parseFloat(row['Tons'] || row['tons'] || 0) || 0; }
+function rowRemark(row) { return String(row['Order Remark'] ?? row['Order_Remark'] ?? row['order_remark'] ?? row['Remark'] ?? row['remark'] ?? '').trim(); }
 
 function cutoffDisplay(row) {
   const at = String(row['Cutoff_At_ISO'] ?? row['Cutoff_At'] ?? row['cutoff_at'] ?? '').trim();
@@ -711,9 +712,8 @@ function renderTable(rows) {
       '<td class="mono">' + (r['Pcs'] || r['pcs'] || '-') + '</td>' +
       '<td style="font-size:11px">' + (r['Customer Name'] || r['customer_name'] || '-') + '</td>' +
       '<td style="font-size:11px">' + (r['Sales Person'] || r['sales_person'] || '-') + '</td>' +
-      '<td class="mono" style="font-size:11px">' + (r['Sales Order No.'] || r['sales_order_no'] || r['SalesOrderNo'] || '-') + '</td>' +
       '<td class="mono" style="font-size:11px">' + excelDateToStr(deliveryDateVal(r)) + '</td>' +
-      '<td class="mono" style="font-size:11px">' + cutoffDisplay(r) + '</td>' +
+      '<td><span class="note-cell" title="' + rowRemark(r).replace(/"/g,'&quot;') + '">' + (rowRemark(r) || '-') + '</span></td>' +
       '<td class="mono" style="font-size:11px">' + emailShort + '</td>' +
       '<td>' + statusBadge(r) + '</td>' +
       '<td style="text-align:center">' + sapBadge(r) + '</td>' +
