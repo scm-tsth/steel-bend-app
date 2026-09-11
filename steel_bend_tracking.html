@@ -131,6 +131,7 @@ tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t
         <span class="email-domain">@tatasteelthailand.com</span>
       </div>
       <button class="load-btn" id="searchBtn" onclick="loadByEmail()">🔍 ค้นหา</button>
+      <button class="all-btn" onclick="loadMine()">รายการของฉัน</button>
       <button class="all-btn" onclick="loadAll()">ทั้งหมด</button>
     </div>
   </div>
@@ -332,6 +333,11 @@ function parseDateTime(value){
   return isNaN(iso.getTime())?null:iso;
 }
 
+function rowTimestamp(row){
+  const parsed=parseDateTime(row['Date']??row['date']??'');
+  return parsed?parsed.getTime():0;
+}
+
 function canCancel(row){
   return isPending(row) && rowOrderId(row) && rowEmail(row)===currentUserEmail();
 }
@@ -465,6 +471,13 @@ function loadByEmail(){
   currentEmail=document.getElementById('emailInput').value.trim().toLowerCase();
   fetchData();
 }
+function loadMine(){
+  const me=currentUserEmail();
+  const local=me.includes('@')?me.split('@')[0]:me;
+  currentEmail=local;
+  document.getElementById('emailInput').value=local;
+  fetchData();
+}
 function loadAll(){
   currentEmail='';
   document.getElementById('emailInput').value='';
@@ -526,7 +539,9 @@ function renderTable(rows){
       return aDone-bDone;
     }
 
-    return 0;
+    const dateDiff=rowTimestamp(b)-rowTimestamp(a);
+    if(dateDiff!==0) return dateDiff;
+    return String(rowOrderId(b)).localeCompare(String(rowOrderId(a)));
   });
   const waiting=rows.filter(r=>getDisplayStatus(r)==='waiting');
 const bending=rows.filter(r=>getDisplayStatus(r)==='bending');
@@ -581,7 +596,7 @@ document.getElementById('statsRow').style.display='grid';
     </tr>`;
   }).join('');
 }
-  loadAll();
+  loadMine();
 </script>
 </body>
 </html>
