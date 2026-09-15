@@ -28,6 +28,7 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
 .filter-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .filter-label{font-size:12px;font-weight:500;color:var(--t2);white-space:nowrap}
 .pill{height:30px;padding:0 14px;border:1.5px solid var(--br);background:#fff;color:var(--t2);border-radius:20px;font-size:12px;font-weight:500;font-family:'IBM Plex Sans Thai',sans-serif;cursor:pointer;white-space:nowrap;transition:all .15s}
+.pill.active::before{content:"✓ ";font-weight:700}
 .pill:hover{border-color:var(--bm);color:var(--bm)}
 .pill.active{border-color:var(--bm);background:var(--bm);color:#fff}
 .pill.scsc.active{border-color:#0369a1;background:#0369a1;color:#fff}
@@ -132,7 +133,7 @@ tbody td.cb-td input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent
     <span style="font-size:15px">⏳</span>
     <div>
       <div><span class="pill-total" id="pillTotal">0</span><span class="pill-lbl"> ค้างพับ</span></div>
-      <div class="pill-split"><span id="pillSCSC" style="color:#93c5fd">0 SCSC</span><span style="color:rgba(255,255,255,.3)"> / </span><span id="pillNTS" style="color:#86efac">0 NTS</span></div>
+      <div class="pill-split"><span id="pendingCountSCSC" style="color:#93c5fd">0 SCSC</span><span style="color:rgba(255,255,255,.3)"> / </span><span id="pendingCountNTS" style="color:#86efac">0 NTS</span></div>
     </div>
   </div>
   <button class="home-btn" onclick="fetchData()">🔄 Refresh</button>
@@ -150,9 +151,9 @@ tbody td.cb-td input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent
     <div class="fg">
       <div class="fg-label">โรงงาน</div>
       <div style="display:flex;gap:5px">
-        <button class="pill active" id="pillAll"  onclick="setPlant('')">ทั้งหมด</button>
-        <button class="pill scsc"   id="pillSCSC" onclick="setPlant('SCSC')">SCSC</button>
-        <button class="pill nts"    id="pillNTS"  onclick="setPlant('NTS')">NTS</button>
+        <button class="pill active" aria-pressed="true" id="pillAll"  onclick="setPlant('')">ทั้งหมด</button>
+        <button class="pill scsc"   aria-pressed="false" id="pillSCSC" onclick="setPlant('SCSC')">SCSC</button>
+        <button class="pill nts"    aria-pressed="false" id="pillNTS"  onclick="setPlant('NTS')">NTS</button>
       </div>
     </div>
 
@@ -617,6 +618,9 @@ async function markSapDone(orderId) {
 // ── Filter & Sort ─────────────────────────────────────────────────────────────
 function setPlant(plant) {
   currentPlant = plant;
+  ['pillAll','pillSCSC','pillNTS'].forEach(function(id, index) {
+    document.getElementById(id).setAttribute('aria-pressed', String(plant === ['', 'SCSC', 'NTS'][index]));
+  });
   document.getElementById('pillAll').classList.toggle('active', plant === '');
   document.getElementById('pillSCSC').classList.toggle('active', plant === 'SCSC');
   document.getElementById('pillNTS').classList.toggle('active', plant === 'NTS');
@@ -693,8 +697,8 @@ function updateAdminPill(){
   const scsc=pending.filter(r=>rowPlant(r)==='SCSC').length;
   const nts=pending.filter(r=>rowPlant(r)==='NTS').length;
   document.getElementById('pillTotal').textContent=pending.length;
-  document.getElementById('pillSCSC').textContent=scsc+' SCSC';
-  document.getElementById('pillNTS').textContent=nts+' NTS';
+  document.getElementById('pendingCountSCSC').textContent=scsc+' SCSC';
+  document.getElementById('pendingCountNTS').textContent=nts+' NTS';
   pill.style.display=pending.length>0?'flex':'none';
 }
 
