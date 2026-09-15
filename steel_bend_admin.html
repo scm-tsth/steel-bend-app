@@ -371,6 +371,27 @@ function getProdName(r) {
   var desc=String(r['Item Description']||r['item_description']||'').trim();
   return PROD_MAP[sp]||PROD_MAP[fp]||parseProdName(desc)||desc||'-';
 }
+function productSortInfo(value) {
+  var name = typeof value === 'string' ? value : getProdName(value);
+  var text = String(name || '').trim().toUpperCase();
+  var typeRank = /^RB\b/.test(text) ? 0 : (/^DB\b/.test(text) ? 1 : 2);
+  var sizeMatch = text.match(/\b(\d+(?:\.\d+)?)\s*MM\b/);
+  var lengthMatch = text.match(/\b(\d+(?:\.\d+)?)\s*M\b/);
+  return {
+    name: text,
+    typeRank: typeRank,
+    size: sizeMatch ? parseFloat(sizeMatch[1]) : Number.MAX_VALUE,
+    length: lengthMatch ? parseFloat(lengthMatch[1]) : Number.MAX_VALUE
+  };
+}
+function compareProducts(a, b) {
+  var pa = productSortInfo(a);
+  var pb = productSortInfo(b);
+  if (pa.typeRank !== pb.typeRank) return pa.typeRank - pb.typeRank;
+  if (pa.size !== pb.size) return pa.size - pb.size;
+  if (pa.length !== pb.length) return pa.length - pb.length;
+  return pa.name.localeCompare(pb.name, undefined, {numeric:true});
+}
   function printOrders() {
   setView('pending');
 
@@ -419,7 +440,7 @@ function getProdName(r) {
   var todayStr = pad2(now.getDate())+'/'+pad2(now.getMonth()+1)+'/'+now.getFullYear();
   var timeStr  = pad2(now.getHours())+':'+pad2(now.getMinutes());
 
-  rows.sort(function(a,b){ return String(a['Date']||'').localeCompare(String(b['Date']||'')); });
+  rows.sort(compareProducts);
 
 var totalTons = rows.reduce(function(s,r){ return s+rowTons(r); },0).toFixed(3);
 var totalPcs  = rows.reduce(function(s,r){ return s+(parseFloat(r['Pcs']||r['pcs']||0)||0); },0);
@@ -432,7 +453,7 @@ var totalPcs  = rows.reduce(function(s,r){ return s+(parseFloat(r['Pcs']||r['pcs
     sumMap[name].tons += rowTons(r);
     sumMap[name].pcs  += parseFloat(r['Pcs']||r['pcs']||0)||0;
   });
-  var sumEntries = Object.entries(sumMap).sort(function(a,b){ return a[0].localeCompare(b[0]); });
+  var sumEntries = Object.entries(sumMap).sort(function(a,b){ return compareProducts(a[0], b[0]); });
 
   var sumHtml = '';
   sumEntries.forEach(function(e, i){
@@ -945,7 +966,7 @@ function showSapSummary() {
           badge(pv.tons, pv.pcs, pv.count, 'color:rgba(255,255,255,.7);margin-left:4px') +
         '</div>';
 
-      Object.entries(pv.items).sort((a,b) => a[0].localeCompare(b[0])).forEach(([item, iv]) => {
+      Object.entries(pv.items).sort((a,b) => compareProducts(a[0], b[0])).forEach(([item, iv]) => {
         const itemCount = Object.values(iv.groups)
           .reduce((s,gv) => s + Object.values(gv.soMap).reduce((s2,sv) => s2 + sv.count, 0), 0);
 
