@@ -42,15 +42,15 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
 .menu-view{display:none}
 .menu-view.show{display:block}
 .login-card.hide{display:none}
-.greeting{text-align:center;font-size:13px;color:var(--t2);margin-bottom:1.1rem}
-.greeting strong{color:var(--bm)}
+.greeting{text-align:center;font-size:13px;color:#fff;margin:0 auto 1.1rem;padding:.58rem 1rem;width:max-content;max-width:100%;border:1px solid rgba(255,255,255,.55);border-radius:999px;background:rgba(7,35,70,.72);box-shadow:0 6px 18px rgba(3,20,40,.18);text-shadow:0 1px 2px rgba(0,0,0,.35);overflow-wrap:anywhere}
+.greeting strong{color:#fff;font-weight:600}
 .cards{display:flex;flex-direction:column;gap:12px}
 .menu-card{background:#fff;border:1.5px solid var(--br);border-radius:var(--ra);padding:1.3rem 1.4rem;cursor:pointer;transition:all .2s;text-decoration:none;display:flex;align-items:center;gap:1rem;box-shadow:0 1px 4px rgba(0,0,0,.06)}
 .menu-card:hover{border-color:var(--ba);box-shadow:0 4px 20px rgba(37,99,176,.12);transform:translateY(-2px)}
 .menu-card.track:hover{border-color:var(--gr)}
 .menu-card.dash:hover{border-color:#7c3aed;box-shadow:0 4px 20px rgba(124,58,237,.12)}
 .menu-card.admin:hover{border-color:#d97706}
-.card-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px}
+.card-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}.card-icon svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.order .card-icon{color:#2563b0}.track .card-icon{color:#15803d}.dash .card-icon{color:#7c3aed}.admin .card-icon{color:#b45309}
 .order .card-icon{background:var(--bl)}
 .track .card-icon{background:var(--gl)}
 .dash  .card-icon{background:#ede9fe}
@@ -63,7 +63,7 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
 .signout:hover{color:var(--rd)}
 .footer{text-align:center;margin-top:1.5rem;font-size:11px;color:var(--t3)}
 </style>
-<link rel="stylesheet" href="steel-mill-night.css?v=20260909"/>\n</head>
+<link rel="stylesheet" href="steel-mill-night.css?v=20260909"/></head>
 <body>
 <div class="wrap">
   <div class="hdr">
@@ -110,7 +110,7 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
     <div class="cards">
 
       <a class="menu-card order" href="steel_bend_order.html">
-        <div class="card-icon">🔩</div>
+        <div class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6h9a5 5 0 0 1 5 5v7"/><path d="M4 11h6a3 3 0 0 1 3 3v4"/><path d="M7 4v4M11 4v4M16 9h4M11 14h4M16 16h4"/></svg></div>
         <div class="card-text">
           <h2>สั่งพับเหล็ก</h2>
           <p>กรอกรายการสินค้าที่ต้องการสั่งพับ<br/>ส่งคำสั่งซื้อเข้าระบบได้ทันที</p>
@@ -119,7 +119,7 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
       </a>
 
       <a class="menu-card track" href="steel_bend_tracking.html">
-        <div class="card-icon">📋</div>
+        <div class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 5H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3"/><path d="M9 3h6v4H9zM8 13l2 2 5-5M8 18h7"/></svg></div>
         <div class="card-text">
           <h2>ติดตามสถานะ</h2>
           <p>ตรวจสอบรายการที่สั่งไว้<br/>ดูสถานะว่าดำเนินการแล้วหรือยัง</p>
@@ -128,14 +128,7 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
       </a>
 
       <a class="menu-card dash" href="steel_bend_dashboard.html">
-        <div class="card-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <rect x="3"    y="3"    width="7.5" height="7.5" rx="1.5" fill="#7c3aed"/>
-            <rect x="13.5" y="3"    width="7.5" height="7.5" rx="1.5" fill="#7c3aed" opacity=".4"/>
-            <rect x="3"    y="13.5" width="7.5" height="7.5" rx="1.5" fill="#7c3aed" opacity=".4"/>
-            <rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5" fill="#7c3aed"/>
-          </svg>
-        </div>
+        <div class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/><path d="M3 10h2M9 4h2M15 13h2"/></svg></div>
         <div class="card-text">
           <h2>Dashboard</h2>
           <p>ภาพรวมการสั่งพับ Top สินค้า<br/>และสรุปยอดตาม Customer Group</p>
@@ -144,7 +137,7 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
       </a>
 
       <a class="menu-card admin" href="steel_bend_admin.html" id="adminCard" style="display:none">
-        <div class="card-icon">⚙️</div>
+        <div class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 12h2M10 12h10M4 17h7M15 17h5"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="13" cy="17" r="2"/></svg></div>
         <div class="card-text">
           <h2>Admin Panel</h2>
           <p>จัดการรายการ Pending<br/>Mark as Sent เพื่อส่งโรงงาน</p>
