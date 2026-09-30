@@ -178,6 +178,18 @@ tbody td.cb-td input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent
         <button                id="sapWait" onclick="setSap('pending')">— รอ</button>
       </div>
     </div>
+
+    <div class="fg-sep"></div>
+    <div class="fg">
+      <div class="fg-label">วันที่ Admin สั่งพับ</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <input type="date" id="fSentDate" onchange="setSentDate(this.value)"
+          style="height:30px;width:145px;padding:0 8px;border:1.5px solid var(--br);border-radius:8px;background:#fff;color:var(--tx);font-size:12px;font-family:'IBM Plex Sans Thai',sans-serif;outline:none"/>
+        <button type="button" class="icon-btn" onclick="setSentDateToday()">วันนี้</button>
+        <button type="button" class="icon-btn" id="clearSentDateBtn" onclick="clearSentDate()" style="display:none">ล้าง</button>
+      </div>
+    </div>
+
        <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--br);display:flex;align-items:center;gap:10px">
       <span style="font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;white-space:nowrap">🔍 ค้นหาสินค้า</span>
       <input type="text" id="fItem"
@@ -291,6 +303,7 @@ let currentPlant = '';
 let currentView = 'pending';
 let currentSap = '';   // '' = ทั้งหมด, 'done' = SAP Done, 'pending' = SAP รอ
 let currentItem = '';
+let currentSentDate = '';
 
 // ── Utilities ─────────────────────────────────────────────────────────────────
 function excelDateToStr(val) {
@@ -303,6 +316,21 @@ function excelDateToStr(val) {
            String(d.getUTCMonth()+1).padStart(2,'0') + '/' + d.getUTCFullYear();
   }
   return String(val).split('T')[0] || '-';
+}
+
+function normalizedDateKey(val) {
+  if (val === null || val === undefined || val === '') return '';
+  if (typeof val === 'string' && /^\d+(\.\d+)?$/.test(val.trim())) val = Number(val);
+  if (typeof val === 'number') {
+    const d = new Date((val - 25569) * 86400 * 1000);
+    return d.getUTCFullYear() + '-' + String(d.getUTCMonth()+1).padStart(2,'0') + '-' + String(d.getUTCDate()).padStart(2,'0');
+  }
+  const s = String(val).trim();
+  let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (m) return m[1] + '-' + m[2].padStart(2,'0') + '-' + m[3].padStart(2,'0');
+  m = s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);
+  if (m) return m[3] + '-' + m[2].padStart(2,'0') + '-' + m[1].padStart(2,'0');
+  return '';
 }
 
 // Status_Text = workflow state (Pending/Sent/Cancelled/Error)
@@ -653,6 +681,22 @@ function setSap(val){
   currentItem = val.trim().toLowerCase();
   applyFilter();
 }
+function setSentDate(val) {
+  currentSentDate = val || '';
+  document.getElementById('clearSentDateBtn').style.display = currentSentDate ? 'inline-flex' : 'none';
+  selectedIds.clear();
+  applyFilter();
+}
+function setSentDateToday() {
+  const d = new Date();
+  const val = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  document.getElementById('fSentDate').value = val;
+  setSentDate(val);
+}
+function clearSentDate() {
+  document.getElementById('fSentDate').value = '';
+  setSentDate('');
+}
 function applyFilter() {
   let rows = [...allRows];
 
@@ -664,6 +708,7 @@ function applyFilter() {
   if (currentItem) rows = rows.filter(r =>
   String(r['Item Description'] || r['item_description'] || '').toLowerCase().includes(currentItem)
 );
+  if (currentSentDate) rows = rows.filter(r => normalizedDateKey(sentToPlantDateVal(r)) === currentSentDate);
 
   // Sort: SCSC before NTS, then oldest first
   rows.sort((a, b) => {
