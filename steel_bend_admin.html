@@ -259,6 +259,7 @@ tbody td.cb-td input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent
           <th>หมายเหตุ</th>
           <th>ผู้สั่งพับ</th>
           <th>Workflow</th>
+          <th>วันที่ Admin สั่งพับ</th>
           <th>SAP</th>
         </tr>
       </thead>
@@ -344,6 +345,10 @@ function cutoffDisplay(row) {
 
 function deliveryDateVal(row) {
   return row['Delivery_Date'] ?? row['Delivery Date'] ?? row['delivery_date'] ?? row['Receive Date'] ?? row['receive_date'] ?? row['request_date'] ?? '';
+}
+
+function sentToPlantDateVal(row) {
+  return row['Sent_To_Plant_At'] ?? row['Sent To Plant At'] ?? row['sent_to_plant_at'] ?? row['Marked_Sent_At'] ?? row['marked_sent_at'] ?? '';
 }
 
 function statusBadge(row) {
@@ -741,6 +746,7 @@ function renderTable(rows) {
       '<td><span class="note-cell" title="' + rowRemark(r).replace(/"/g,'&quot;') + '">' + (rowRemark(r) || '-') + '</span></td>' +
       '<td class="mono" style="font-size:11px">' + emailShort + '</td>' +
       '<td>' + statusBadge(r) + '</td>' +
+      '<td class="mono" style="font-size:11px;white-space:nowrap">' + excelDateToStr(sentToPlantDateVal(r)) + '</td>' +
       '<td style="text-align:center">' + sapBadge(r) + '</td>' +
     '</tr>';
   }).join('');
