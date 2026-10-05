@@ -160,6 +160,10 @@ tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t
   <option value="cancelled">ยกเลิกแล้ว</option>
   <option value="error">⚠️ Error</option>
 </select>
+    <select class="filter-select" id="fSort" onchange="applyFilter()">
+      <option value="oldest">เรียงตามคิว: เก่าสุดก่อน</option>
+      <option value="newest">ล่าสุดก่อน</option>
+    </select>
   </div>
 </div>
 
@@ -214,7 +218,7 @@ tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t
     <table>
       <thead>
         <tr>
-          <th>วันที่สั่ง</th>
+          <th>วันที่/เวลาสั่ง</th>
           <th>แผนก</th>
           <th>Plant</th>
           <th>สินค้า</th>
@@ -225,7 +229,7 @@ tbody td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t
           <th>Incoterms</th>
           <th class="receive-col">วันที่รับสินค้า</th>
           <th class="cutoff-col">รอบตัดยอด</th>
-          <th>Email ผู้สั่ง</th>
+          <th>ผู้สั่ง</th>
           <th class="note-col">หมายเหตุ</th>
           <th>สถานะ</th>
           <th>จัดการ</th>
@@ -334,8 +338,34 @@ function parseDateTime(value){
 }
 
 function rowTimestamp(row){
-  const parsed=parseDateTime(row['Date']??row['date']??'');
-  return parsed?parsed.getTime():0;
+  const candidates=[
+    row['Submitted_At'],row['submitted_at'],row['Submitted At'],
+    row['Date'],row['date']
+  ];
+  for(const value of candidates){
+    const parsed=parseDateTime(value);
+    if(parsed) return parsed.getTime();
+  }
+  const orderMatch=String(rowOrderId(row)).match(/-(\d{13})-/);
+  return orderMatch?Number(orderMatch[1]):0;
+}
+
+function orderDateTimeDisplay(row){
+  const submitted=row['Submitted_At']??row['submitted_at']??row['Submitted At']??'';
+  const parsed=parseDateTime(submitted);
+  if(parsed){
+    const pad=v=>String(v).padStart(2,'0');
+    return `${pad(parsed.getDate())}/${pad(parsed.getMonth()+1)}/${parsed.getFullYear()} ${pad(parsed.getHours())}:${pad(parsed.getMinutes())}`;
+  }
+  const orderMatch=String(rowOrderId(row)).match(/-(\d{13})-/);
+  if(orderMatch){
+    const d=new Date(Number(orderMatch[1]));
+    if(!isNaN(d.getTime())){
+      const pad=v=>String(v).padStart(2,'0');
+      return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+  }
+  return excelDateToStr(row['Date']??row['date']??'');
 }
 
 function canCancel(row){
@@ -489,6 +519,7 @@ function applyFilter(){
   const fPlant=document.getElementById('fPlant').value;
   const fItem=document.getElementById('fItem').value.toLowerCase().trim();
   const fStatus=document.getElementById('fStatus').value;
+  const fSort=document.getElementById('fSort').value;
 
   let rows=[...allRows];
 
@@ -512,7 +543,7 @@ if(fItem){
 
 if(fStatus) rows=rows.filter(r=>getDisplayStatus(r)===fStatus);
 
-  renderTable(rows);
+  renderTable(rows,fSort);
   updateMyPendingPill();
 }
 
@@ -529,19 +560,13 @@ function updateMyPendingPill(){
   }
 }
 
-function renderTable(rows){
+function renderTable(rows,sortMode='oldest'){
 
   rows.sort((a,b)=>{
-    const aDone=statusSortOrder(a);
-    const bDone=statusSortOrder(b);
-
-    if(aDone!==bDone){
-      return aDone-bDone;
-    }
-
-    const dateDiff=rowTimestamp(b)-rowTimestamp(a);
-    if(dateDiff!==0) return dateDiff;
-    return String(rowOrderId(b)).localeCompare(String(rowOrderId(a)));
+    const direction=sortMode==='newest'?-1:1;
+    const dateDiff=rowTimestamp(a)-rowTimestamp(b);
+    if(dateDiff!==0) return direction*dateDiff;
+    return direction*String(rowOrderId(a)).localeCompare(String(rowOrderId(b)));
   });
   const waiting=rows.filter(r=>getDisplayStatus(r)==='waiting');
 const bending=rows.filter(r=>getDisplayStatus(r)==='bending');
@@ -578,7 +603,7 @@ document.getElementById('statsRow').style.display='grid';
     const email=(r['Submitter_email']||r['submitter_email']||'-');
     const emailShort=email.includes('@')?email.split('@')[0]:email;
     return `<tr>
-      <td class="mono">${excelDateToStr(r['Date']||r['date'])}</td>
+      <td class="mono" style="white-space:nowrap">${orderDateTimeDisplay(r)}</td>
       <td>${r['Customer Group']||r['customer_group']||'-'}</td>
       <td><strong>${r['Plant']||r['plant']||'-'}</strong></td>
       <td style="max-width:160px;font-size:11px">${r['Item Description']||r['item_description']||'-'}</td>
@@ -596,7 +621,7 @@ document.getElementById('statsRow').style.display='grid';
     </tr>`;
   }).join('');
 }
-  loadMine();
+  loadAll();
 </script>
 </body>
 </html>
