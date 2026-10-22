@@ -420,12 +420,18 @@ function statusBadge(row){
   if(s==='cancelled') return '<span class="badge cancelled">ยกเลิก</span>';
   return '<span class="badge error">⚠️ Error</span>';
 }
-function statusSortOrder(row){
+function isOwnRow(row){
+  return rowEmail(row)===fullEmail(currentUserEmail());
+}
+function trackingSortOrder(row){
   const s=getDisplayStatus(row);
-  if(s==='waiting') return 0;
-  if(s==='bending') return 1;
-  if(s==='error')   return 2;
-  if(s==='cancelled') return 3;
+  const active=s==='waiting'||s==='bending';
+
+  // Sales เห็นงานของตนเองที่ยังไม่เสร็จก่อน ตามด้วยงานค้างของคนอื่น
+  if(isOwnRow(row)&&active) return 0;
+  if(active) return 1;
+  if(s==='error') return 2;
+  if(s==='done') return 3;
   return 4;
 }
 
@@ -560,6 +566,9 @@ function updateMyPendingPill(){
 function renderTable(rows,sortMode='oldest'){
 
   rows.sort((a,b)=>{
+    const priorityDiff=trackingSortOrder(a)-trackingSortOrder(b);
+    if(priorityDiff!==0) return priorityDiff;
+
     const direction=sortMode==='newest'?-1:1;
     const dateDiff=rowTimestamp(a)-rowTimestamp(b);
     if(dateDiff!==0) return direction*dateDiff;
