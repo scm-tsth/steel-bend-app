@@ -322,10 +322,6 @@ function rowOrderId(row){
   return row['OrderID']||row['order_id']||'';
 }
 
-function cancelDeadlineValue(row){
-  return row['Cancel_Deadline_At']||row['cancel_deadline_at']||'';
-}
-
 function parseDateTime(value){
   if(!value) return null;
   if(typeof value==='number') return new Date((value-25569)*86400*1000);
@@ -369,7 +365,8 @@ function orderDateTimeDisplay(row){
 }
 
 function canCancel(row){
-  return isPending(row) && rowOrderId(row) && rowEmail(row)===currentUserEmail();
+  // ไม่มีเวลาหมดสิทธิ์: ยกเลิกได้ตราบใดที่ Admin ยังไม่ส่งโรงงาน (สถานะยัง Pending)
+  return getStatusText(row)==='Pending' && rowOrderId(row) && rowEmail(row)===currentUserEmail();
 }
 
 function receiveDateValue(row){
