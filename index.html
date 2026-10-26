@@ -63,6 +63,14 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
 .signout{text-align:center;margin-top:1rem;font-size:12px;color:var(--t3);cursor:pointer;text-decoration:underline}
 .signout:hover{color:var(--rd)}
 .footer{text-align:center;margin-top:1.5rem;font-size:11px;color:var(--t3)}
+.announcement-banner{display:none;align-items:flex-start;gap:10px;margin:0 0 1rem;padding:.85rem .9rem;border:1px solid rgba(251,191,36,.75);border-radius:12px;background:rgba(255,251,235,.97);box-shadow:0 8px 24px rgba(15,42,74,.16);color:#78350f;text-align:left}
+.announcement-banner.show{display:flex}
+.announcement-icon{width:30px;height:30px;border-radius:8px;background:#fef3c7;display:flex;align-items:center;justify-content:center;flex:0 0 auto;color:#b45309}
+.announcement-content{min-width:0;flex:1}
+.announcement-title{font-size:12px;font-weight:600;color:#92400e;margin-bottom:2px}
+.announcement-message{font-size:12px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+.announcement-close{border:0;background:transparent;color:#a16207;font-size:18px;line-height:1;cursor:pointer;padding:2px}
+
 </style>
 <link rel="stylesheet" href="steel-mill-night.css?v=20260909"/></head>
 <body>
@@ -108,6 +116,14 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
   <!-- MENU -->
   <div class="menu-view" id="menuView">
     <div class="greeting">สวัสดีครับ <strong id="greetName"></strong></div>
+    <div class="announcement-banner" id="announcementBanner" role="status" aria-live="polite">
+      <div class="announcement-icon" aria-hidden="true">!</div>
+      <div class="announcement-content">
+        <div class="announcement-title">ประกาศจากผู้ดูแลระบบ</div>
+        <div class="announcement-message" id="announcementMessage"></div>
+      </div>
+      <button type="button" class="announcement-close" aria-label="ปิดประกาศ" onclick="dismissAnnouncement()">×</button>
+    </div>
     <div class="cards">
 
       <a class="menu-card order" href="steel_bend_order.html">
@@ -156,7 +172,8 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
 <script src="security.js"></script>
 <script>
 const AUTH_URL='https://defaultc49eedf2bcd84a848b29b3e5f61a3d.03.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/89ec33c02cda46e6b5a53c86ad0cdae4/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=KAOAU4tru--J9rAwcQgUj6kywEszKoEDkEr4LP3tuYQ';
-let pendingEmail='', pendingRequestId='';
+
+const ANNOUNCEMENT_URL='https://defaultc49eedf2bcd84a848b29b3e5f61a3d.03.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/07/workflows/d3abd968f94e48fab975d5b1fbe33c7a/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=THI9-WKccb-yIrV3gFZnFxJzn6hkHH77ZT_xjGeHd3c';let pendingEmail='', pendingRequestId='';
 
 window.onload=function(){
   const saved=SteelSecurity.readSession();
@@ -228,6 +245,42 @@ function showMenu(session){
   document.getElementById('greetName').textContent=session.email;
   const isAdmin=['admin','scm'].includes(session.role);
   document.getElementById('adminCard').style.display=isAdmin?'flex':'none';
+  loadAnnouncement();
+}
+
+function decodeAnnouncement(data){
+  if(data && typeof data.message==='string') return data.message;
+  const b64=data && typeof data.messageBase64==='string' ? data.messageBase64 : '';
+  if(!b64) return '';
+  try{
+    const bytes=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
+    return new TextDecoder('utf-8').decode(bytes);
+  }catch(e){ return ''; }
+}
+
+async function loadAnnouncement(){
+  const box=document.getElementById('announcementBanner');
+  const message=document.getElementById('announcementMessage');
+  box.classList.remove('show');
+  message.textContent='';
+  try{
+    const res=await SteelSecurity.secureFetch(ANNOUNCEMENT_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'get'})
+    });
+    if(!res.ok) return;
+    const data=await res.json().catch(()=>({}));
+    const text=decodeAnnouncement(data).trim();
+    if(text){
+      message.textContent=text;
+      box.classList.add('show');
+    }
+  }catch(e){}
+}
+
+function dismissAnnouncement(){
+  document.getElementById('announcementBanner').classList.remove('show');
 }
 
 function signOut(){
@@ -242,6 +295,7 @@ function signOut(){
   document.getElementById('loginText').textContent='ยืนยัน →';
   document.getElementById('loginBtn').onclick=doLogin;
   document.getElementById('errMsg').classList.remove('show');
+  document.getElementById('announcementBanner').classList.remove('show');
 }
 </script>
 </body>
