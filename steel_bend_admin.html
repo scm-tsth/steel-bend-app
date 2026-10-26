@@ -24,11 +24,23 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
 .home-btn:hover{background:rgba(255,255,255,.18)}
 
 .card{background:#fff;border:1px solid var(--br);border-radius:var(--ra);padding:1rem 1.2rem;margin-bottom:.9rem;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-.announcement-admin{border-left:4px solid #d97706;background:linear-gradient(135deg,#fff 0%,#fffbeb 100%)}
-.announcement-admin-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:.75rem}
-.announcement-admin-icon{width:34px;height:34px;border-radius:9px;background:#fef3c7;color:#b45309;display:flex;align-items:center;justify-content:center;font-weight:700;flex:0 0 auto}
+.announcement-admin{border:1px solid rgba(37,99,176,.18);border-left:4px solid #2563b0;background:linear-gradient(135deg,#fff 0%,#f8fbff 58%,#eff6ff 100%)}
+.announcement-admin-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:.8rem}
+.announcement-admin-icon{width:36px;height:36px;border-radius:10px;border:1px solid #bfdbfe;background:linear-gradient(145deg,#eff6ff,#dbeafe);color:#1d4ed8;display:flex;align-items:center;justify-content:center;font:700 18px 'IBM Plex Mono',monospace;flex:0 0 auto;box-shadow:0 4px 12px rgba(37,99,176,.12)}
 .announcement-admin-title{font-size:14px;font-weight:600;color:var(--tx)}
 .announcement-admin-desc{font-size:11px;color:var(--t2);margin-top:2px}
+.current-notice{position:relative;margin:0 0 .9rem;padding:1rem 1.1rem;border-radius:12px;background:linear-gradient(135deg,#0f2a4a 0%,#1a3d6b 72%,#20518a 100%);box-shadow:0 10px 24px rgba(15,42,74,.16);color:#fff;overflow:hidden}
+.current-notice::after{content:"";position:absolute;right:-40px;top:-54px;width:155px;height:155px;border-radius:50%;background:radial-gradient(circle,rgba(96,165,250,.2),transparent 68%);pointer-events:none}
+.current-notice.empty{background:linear-gradient(135deg,#475569,#64748b);box-shadow:none}
+.current-notice-top{position:relative;z-index:1;display:flex;align-items:center;gap:8px;margin-bottom:.55rem}
+.current-notice-label{font:600 10px 'IBM Plex Mono',monospace;letter-spacing:.1em;color:#bfdbfe}
+.current-notice-badge{display:inline-flex;align-items:center;gap:5px;margin-left:auto;padding:3px 8px;border:1px solid rgba(134,239,172,.45);border-radius:999px;background:rgba(22,163,74,.18);color:#bbf7d0;font-size:10px;font-weight:600}
+.current-notice-badge::before{content:"";width:6px;height:6px;border-radius:50%;background:#4ade80;box-shadow:0 0 0 4px rgba(74,222,128,.12)}
+.current-notice.empty .current-notice-badge{border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#e2e8f0}
+.current-notice.empty .current-notice-badge::before{background:#cbd5e1;box-shadow:none}
+.current-notice-message{position:relative;z-index:1;min-height:24px;font-size:13px;font-weight:500;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}
+.current-notice-help{position:relative;z-index:1;margin-top:.55rem;font-size:10px;color:rgba(255,255,255,.58)}
+.announcement-editor-label{display:block;font-size:11px;font-weight:600;color:var(--t2);margin:0 0 .35rem}
 .announcement-editor{width:100%;min-height:84px;resize:vertical;border:1.5px solid var(--br);border-radius:8px;padding:.65rem .75rem;background:#fff;color:var(--tx);font:13px/1.6 'IBM Plex Sans Thai',sans-serif;outline:none}
 .announcement-editor:focus{border-color:var(--ba);box-shadow:0 0 0 3px rgba(37,99,176,.1)}
 .announcement-admin-actions{display:flex;align-items:center;gap:8px;margin-top:.65rem;flex-wrap:wrap}
@@ -38,6 +50,7 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
 .announcement-save:disabled,.announcement-clear:disabled{opacity:.55;cursor:wait}
 .announcement-count{font-size:11px;color:var(--t3);margin-left:auto}
 .announcement-status{font-size:11px;color:var(--t2)}
+
 
 
 .filter-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -168,10 +181,19 @@ tbody td.cb-td input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent
       <div class="announcement-admin-desc">ข้อความนี้จะแสดงให้ผู้ใช้งานทุกคนเห็นทันทีหลัง Login หากเว้นว่างจะไม่มีประกาศ</div>
     </div>
   </div>
+  <div class="current-notice empty" id="currentNotice">
+    <div class="current-notice-top">
+      <span class="current-notice-label">CURRENT NOTICE</span>
+      <span class="current-notice-badge" id="currentNoticeBadge">กำลังตรวจสอบ</span>
+    </div>
+    <div class="current-notice-message" id="currentAnnouncementText">กำลังโหลดประกาศปัจจุบัน...</div>
+    <div class="current-notice-help">นี่คือข้อความที่ผู้ใช้งานจะเห็นหลัง Login</div>
+  </div>
+  <label class="announcement-editor-label" for="announcementInput">แก้ไขหรือสร้างข้อความประกาศ</label>
   <textarea id="announcementInput" class="announcement-editor" maxlength="1000" placeholder="พิมพ์ข้อความประกาศ เช่น ระบบอยู่ระหว่างปรับปรุงชั่วคราว..." oninput="updateAnnouncementCount()"></textarea>
   <div class="announcement-admin-actions">
-    <button type="button" class="announcement-save" id="announcementSaveBtn" onclick="saveAnnouncement()">บันทึกประกาศ</button>
-    <button type="button" class="announcement-clear" id="announcementClearBtn" onclick="clearAnnouncement()">ลบประกาศ</button>
+    <button type="button" class="announcement-save" id="announcementSaveBtn" onclick="saveAnnouncement()">บันทึกและเผยแพร่</button>
+    <button type="button" class="announcement-clear" id="announcementClearBtn" onclick="clearAnnouncement()">ลบประกาศที่กำลังใช้งาน</button>
     <span class="announcement-status" id="announcementStatus">กำลังโหลดประกาศ...</span>
     <span class="announcement-count" id="announcementCount">0/1000</span>
   </div>
@@ -645,6 +667,16 @@ function updateAnnouncementCount() {
   document.getElementById('announcementCount').textContent = el.value.length + '/1000';
 }
 
+function renderCurrentAnnouncement(text) {
+  const notice = document.getElementById('currentNotice');
+  const message = document.getElementById('currentAnnouncementText');
+  const badge = document.getElementById('currentNoticeBadge');
+  const active = Boolean(String(text || '').trim());
+  notice.classList.toggle('empty', !active);
+  message.textContent = active ? text.trim() : 'ขณะนี้ไม่มีประกาศที่กำลังแสดงแก่ผู้ใช้งาน';
+  badge.textContent = active ? 'กำลังใช้งาน' : 'ไม่มีประกาศ';
+}
+
 function setAnnouncementBusy(busy, status) {
   document.getElementById('announcementSaveBtn').disabled = busy;
   document.getElementById('announcementClearBtn').disabled = busy;
@@ -664,8 +696,9 @@ async function loadAnnouncement() {
     const text = decodeAnnouncement(data);
     document.getElementById('announcementInput').value = text;
     updateAnnouncementCount();
+    renderCurrentAnnouncement(text);
     document.getElementById('announcementStatus').textContent =
-      text.trim() ? 'มีประกาศที่กำลังใช้งาน' : 'ขณะนี้ไม่มีประกาศ';
+      text.trim() ? 'แสดงประกาศปัจจุบันแล้ว' : 'ขณะนี้ไม่มีประกาศ';
   } catch(e) {
     document.getElementById('announcementStatus').textContent = 'โหลดประกาศไม่สำเร็จ: ' + e.message;
   } finally {
@@ -708,6 +741,7 @@ async function clearAnnouncement() {
     if (!res.ok) throw new Error('HTTP ' + res.status);
     document.getElementById('announcementInput').value = '';
     updateAnnouncementCount();
+    renderCurrentAnnouncement('');
     document.getElementById('announcementStatus').textContent = 'ลบประกาศแล้ว';
   } catch(e) {
     document.getElementById('announcementStatus').textContent = 'ลบไม่สำเร็จ: ' + e.message;
