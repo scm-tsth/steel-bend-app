@@ -284,8 +284,17 @@ function setAnnouncementGate(state){
   const title=document.getElementById('announcementGateTitle');
   const detail=document.getElementById('announcementGateText');
   const checking=state!=='ready';
+  const cards=menu.querySelector('.cards');
+  const signout=menu.querySelector('.signout');
   menu.classList.toggle('announcement-checking',checking);
   menu.setAttribute('aria-busy',checking?'true':'false');
+  if(checking){
+    cards.setAttribute('inert','');
+    signout.setAttribute('inert','');
+  }else{
+    cards.removeAttribute('inert');
+    signout.removeAttribute('inert');
+  }
   gate.className='announcement-gate'+(state==='ready'?' ready':state==='error'?' error':'');
   if(state==='error'){
     title.textContent='ยังตรวจสอบประกาศไม่สำเร็จ';
