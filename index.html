@@ -74,6 +74,21 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
 .announcement-message{font-size:12px;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere;color:#78350f}
 .announcement-close{position:relative;z-index:2;border:1px solid rgba(180,83,9,.18);background:rgba(255,255,255,.65);color:#a16207;width:26px;height:26px;border-radius:8px;font-size:17px;line-height:22px;cursor:pointer;padding:0}
 .announcement-close:hover{background:#fff;color:#7c2d12}
+.announcement-gate{display:flex;align-items:center;gap:12px;margin:0 0 1.15rem;padding:.9rem 1rem;border:1px solid rgba(147,197,253,.72);border-radius:14px;background:rgba(239,246,255,.97);box-shadow:0 10px 28px rgba(7,35,70,.18);color:var(--bd);text-align:left}
+.announcement-gate.ready{display:none}
+.announcement-gate.error{border-color:#fca5a5;background:rgba(254,242,242,.98);color:#991b1b}
+.announcement-gate-loader{width:24px;height:24px;flex:0 0 auto;border:3px solid #bfdbfe;border-top-color:var(--ba);border-radius:50%;animation:notice-spin .8s linear infinite}
+.announcement-gate.error .announcement-gate-loader{display:none}
+.announcement-gate-copy{min-width:0;flex:1}
+.announcement-gate-title{display:block;font-size:13px;font-weight:600}
+.announcement-gate-text{display:block;margin-top:2px;font-size:11px;line-height:1.5;color:var(--t2)}
+.announcement-gate.error .announcement-gate-text{color:#b91c1c}
+.announcement-retry{display:none;border:1px solid #dc2626;background:#fff;color:#b91c1c;border-radius:8px;padding:.45rem .7rem;font:500 11px 'IBM Plex Sans Thai',sans-serif;cursor:pointer;white-space:nowrap}
+.announcement-gate.error .announcement-retry{display:block}
+.menu-view.announcement-checking .cards,.menu-view.announcement-checking .signout{pointer-events:none;opacity:.38;filter:saturate(.45);user-select:none}
+.menu-view.announcement-checking .menu-card{transform:none;box-shadow:none}
+@keyframes notice-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.announcement-gate-loader{animation:none;border-top-color:#bfdbfe}}
 
 </style>
 <link rel="stylesheet" href="steel-mill-night.css?v=20260909"/></head>
@@ -120,6 +135,14 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
   <!-- MENU -->
   <div class="menu-view" id="menuView">
     <div class="greeting">สวัสดีครับ <strong id="greetName"></strong></div>
+    <div class="announcement-gate" id="announcementGate" role="status" aria-live="polite">
+      <span class="announcement-gate-loader" aria-hidden="true"></span>
+      <span class="announcement-gate-copy">
+        <strong class="announcement-gate-title" id="announcementGateTitle">กำลังตรวจสอบประกาศ</strong>
+        <span class="announcement-gate-text" id="announcementGateText">กรุณารอสักครู่ก่อนเข้าใช้งานระบบ</span>
+      </span>
+      <button type="button" class="announcement-retry" id="announcementRetry" onclick="loadAnnouncement()">ลองอีกครั้ง</button>
+    </div>
     <div class="announcement-banner" id="announcementBanner" role="status" aria-live="polite">
       <div class="announcement-icon" aria-hidden="true">!</div>
       <div class="announcement-content">
@@ -246,11 +269,31 @@ async function verifyOtp(){
 
 function showMenu(session){
   document.getElementById('loginCard').classList.add('hide');
-  document.getElementById('menuView').classList.add('show');
+  const menu=document.getElementById('menuView');
+  menu.classList.add('show');
   document.getElementById('greetName').textContent=session.email;
   const isAdmin=['admin','scm'].includes(session.role);
   document.getElementById('adminCard').style.display=isAdmin?'flex':'none';
+  setAnnouncementGate('loading');
   loadAnnouncement();
+}
+
+function setAnnouncementGate(state){
+  const menu=document.getElementById('menuView');
+  const gate=document.getElementById('announcementGate');
+  const title=document.getElementById('announcementGateTitle');
+  const detail=document.getElementById('announcementGateText');
+  const checking=state!=='ready';
+  menu.classList.toggle('announcement-checking',checking);
+  menu.setAttribute('aria-busy',checking?'true':'false');
+  gate.className='announcement-gate'+(state==='ready'?' ready':state==='error'?' error':'');
+  if(state==='error'){
+    title.textContent='ยังตรวจสอบประกาศไม่สำเร็จ';
+    detail.textContent='เพื่อป้องกันการพลาดข้อความสำคัญ กรุณาลองโหลดอีกครั้ง';
+  }else{
+    title.textContent='กำลังตรวจสอบประกาศ';
+    detail.textContent='กรุณารอสักครู่ก่อนเข้าใช้งานระบบ';
+  }
 }
 
 function decodeAnnouncement(data){
@@ -268,24 +311,37 @@ async function loadAnnouncement(){
   const message=document.getElementById('announcementMessage');
   box.classList.remove('show');
   message.textContent='';
+  setAnnouncementGate('loading');
+  const controller=new AbortController();
+  const tid=setTimeout(()=>controller.abort(),20000);
   try{
     const res=await SteelSecurity.secureFetch(ANNOUNCEMENT_URL,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({action:'get'})
+      body:JSON.stringify({action:'get'}),
+      signal:controller.signal
     });
-    if(!res.ok) return;
+    if(!res.ok) throw new Error('announcement request failed');
     const data=await res.json().catch(()=>({}));
     const text=decodeAnnouncement(data).trim();
     if(text){
       message.textContent=text;
       box.classList.add('show');
     }
-  }catch(e){}
+    setAnnouncementGate('ready');
+  }catch(e){
+    setAnnouncementGate('error');
+  }finally{
+    clearTimeout(tid);
+  }
 }
 
 function dismissAnnouncement(){
   document.getElementById('announcementBanner').classList.remove('show');
+  const menu=document.getElementById('menuView');
+  menu.classList.remove('announcement-checking');
+  menu.removeAttribute('aria-busy');
+  document.getElementById('announcementGate').className='announcement-gate';
 }
 
 function signOut(){
