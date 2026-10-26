@@ -331,7 +331,9 @@ async function loadAnnouncement(){
       signal:controller.signal
     });
     if(!res.ok) throw new Error('announcement request failed');
-    const data=await res.json().catch(()=>({}));
+    const data=await res.json().catch(()=>null);
+    const hasPayload=data && (typeof data.message==='string' || typeof data.messageBase64==='string');
+    if(!hasPayload) throw new Error('invalid announcement response');
     const text=decodeAnnouncement(data).trim();
     if(text){
       message.textContent=text;
