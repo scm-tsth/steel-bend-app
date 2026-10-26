@@ -24,6 +24,21 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:#eef2f7;color:var(--
 .home-btn:hover{background:rgba(255,255,255,.18)}
 
 .card{background:#fff;border:1px solid var(--br);border-radius:var(--ra);padding:1rem 1.2rem;margin-bottom:.9rem;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.announcement-admin{border-left:4px solid #d97706;background:linear-gradient(135deg,#fff 0%,#fffbeb 100%)}
+.announcement-admin-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:.75rem}
+.announcement-admin-icon{width:34px;height:34px;border-radius:9px;background:#fef3c7;color:#b45309;display:flex;align-items:center;justify-content:center;font-weight:700;flex:0 0 auto}
+.announcement-admin-title{font-size:14px;font-weight:600;color:var(--tx)}
+.announcement-admin-desc{font-size:11px;color:var(--t2);margin-top:2px}
+.announcement-editor{width:100%;min-height:84px;resize:vertical;border:1.5px solid var(--br);border-radius:8px;padding:.65rem .75rem;background:#fff;color:var(--tx);font:13px/1.6 'IBM Plex Sans Thai',sans-serif;outline:none}
+.announcement-editor:focus{border-color:var(--ba);box-shadow:0 0 0 3px rgba(37,99,176,.1)}
+.announcement-admin-actions{display:flex;align-items:center;gap:8px;margin-top:.65rem;flex-wrap:wrap}
+.announcement-save,.announcement-clear{height:34px;padding:0 14px;border-radius:8px;font:600 12px 'IBM Plex Sans Thai',sans-serif;cursor:pointer}
+.announcement-save{border:0;background:var(--bm);color:#fff}.announcement-save:hover{background:var(--bd)}
+.announcement-clear{border:1px solid #fca5a5;background:#fff;color:var(--rd)}.announcement-clear:hover{background:var(--rl)}
+.announcement-save:disabled,.announcement-clear:disabled{opacity:.55;cursor:wait}
+.announcement-count{font-size:11px;color:var(--t3);margin-left:auto}
+.announcement-status{font-size:11px;color:var(--t2)}
+
 
 .filter-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .filter-label{font-size:12px;font-weight:500;color:var(--t2);white-space:nowrap}
@@ -143,6 +158,24 @@ tbody td.cb-td input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent
 <div id="warnBox" class="warn-box" style="display:none"></div>
 <div id="errBox" class="err-box" style="display:none"></div>
 <div id="okBox" class="ok-box" style="display:none"></div>
+
+<!-- SYSTEM ANNOUNCEMENT -->
+<div class="card announcement-admin">
+  <div class="announcement-admin-head">
+    <div class="announcement-admin-icon" aria-hidden="true">!</div>
+    <div>
+      <div class="announcement-admin-title">ประกาศหลังเข้าสู่ระบบ</div>
+      <div class="announcement-admin-desc">ข้อความนี้จะแสดงให้ผู้ใช้งานทุกคนเห็นทันทีหลัง Login หากเว้นว่างจะไม่มีประกาศ</div>
+    </div>
+  </div>
+  <textarea id="announcementInput" class="announcement-editor" maxlength="1000" placeholder="พิมพ์ข้อความประกาศ เช่น ระบบอยู่ระหว่างปรับปรุงชั่วคราว..." oninput="updateAnnouncementCount()"></textarea>
+  <div class="announcement-admin-actions">
+    <button type="button" class="announcement-save" id="announcementSaveBtn" onclick="saveAnnouncement()">บันทึกประกาศ</button>
+    <button type="button" class="announcement-clear" id="announcementClearBtn" onclick="clearAnnouncement()">ลบประกาศ</button>
+    <span class="announcement-status" id="announcementStatus">กำลังโหลดประกาศ...</span>
+    <span class="announcement-count" id="announcementCount">0/1000</span>
+  </div>
+</div>
 
 <!-- FILTER -->
 <div class="card" style="padding:1.1rem 1.5rem">
@@ -292,6 +325,7 @@ const steelSession=SteelSecurity.requireSession({roles:['admin','scm']});
 const FLOW_URL = 'https://defaultc49eedf2bcd84a848b29b3e5f61a3d.03.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/dd06128deabc40d8ba6a54df6e6327bd/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=J_ZPZCb4OzwlGSQ3GXc27pDL8NKs_VmWYqzVdg-pe0w';
 const MARK_SENT_URL = 'https://defaultc49eedf2bcd84a848b29b3e5f61a3d.03.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/1e4a17125d7840b888494c29add2d889/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=aAVPqqnU7rOm3gDmVUVI441GlvPjZ4xD4p0-rrG5wbA';
 const SAP_DONE_URL = 'https://defaultc49eedf2bcd84a848b29b3e5f61a3d.03.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/217b6c25991e459c92da5a57416d0e61/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dyaVxfFcMaw-q9Tk3NTQCbAsQySX3AAS4Cmb1Lx89-8';
+const ANNOUNCEMENT_URL = 'https://defaultc49eedf2bcd84a848b29b3e5f61a3d.03.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/07/workflows/d3abd968f94e48fab975d5b1fbe33c7a/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=THI9-WKccb-yIrV3gFZnFxJzn6hkHH77ZT_xjGeHd3c';
 
 // ── Admin whitelist ───────────────────────────────────────────────────────────
 
@@ -593,6 +627,93 @@ var totalPcs  = rows.reduce(function(s,r){ return s+(parseFloat(r['Pcs']||r['pcs
   if (!w) { alert('กรุณาอนุญาต popup ใน browser ก่อนพิมพ์'); return; }
   w.document.write(html);
   w.document.close();
+}
+
+// ── System announcement ───────────────────────────────────────────────────────
+function decodeAnnouncement(data) {
+  if (data && typeof data.message === 'string') return data.message;
+  const b64 = data && typeof data.messageBase64 === 'string' ? data.messageBase64 : '';
+  if (!b64) return '';
+  try {
+    const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+    return new TextDecoder('utf-8').decode(bytes);
+  } catch(e) { return ''; }
+}
+
+function updateAnnouncementCount() {
+  const el = document.getElementById('announcementInput');
+  document.getElementById('announcementCount').textContent = el.value.length + '/1000';
+}
+
+function setAnnouncementBusy(busy, status) {
+  document.getElementById('announcementSaveBtn').disabled = busy;
+  document.getElementById('announcementClearBtn').disabled = busy;
+  if (status !== undefined) document.getElementById('announcementStatus').textContent = status;
+}
+
+async function loadAnnouncement() {
+  setAnnouncementBusy(true, 'กำลังโหลดประกาศ...');
+  try {
+    const res = await SteelSecurity.secureFetch(ANNOUNCEMENT_URL, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({action:'get'})
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const text = decodeAnnouncement(data);
+    document.getElementById('announcementInput').value = text;
+    updateAnnouncementCount();
+    document.getElementById('announcementStatus').textContent =
+      text.trim() ? 'มีประกาศที่กำลังใช้งาน' : 'ขณะนี้ไม่มีประกาศ';
+  } catch(e) {
+    document.getElementById('announcementStatus').textContent = 'โหลดประกาศไม่สำเร็จ: ' + e.message;
+  } finally {
+    setAnnouncementBusy(false);
+  }
+}
+
+async function saveAnnouncement() {
+  const message = document.getElementById('announcementInput').value.trim();
+  if (!message) {
+    document.getElementById('announcementStatus').textContent = 'กรุณาพิมพ์ข้อความก่อนบันทึก';
+    document.getElementById('announcementInput').focus();
+    return;
+  }
+  setAnnouncementBusy(true, 'กำลังบันทึกประกาศ...');
+  try {
+    const res = await SteelSecurity.secureFetch(ANNOUNCEMENT_URL, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({action:'save', message})
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    document.getElementById('announcementStatus').textContent = 'บันทึกประกาศแล้ว';
+    setTimeout(loadAnnouncement, 400);
+  } catch(e) {
+    document.getElementById('announcementStatus').textContent = 'บันทึกไม่สำเร็จ: ' + e.message;
+    setAnnouncementBusy(false);
+  }
+}
+
+async function clearAnnouncement() {
+  if (!confirm('ยืนยันลบประกาศปัจจุบัน? ผู้ใช้จะไม่เห็นข้อความนี้หลัง Login ครั้งถัดไป')) return;
+  setAnnouncementBusy(true, 'กำลังลบประกาศ...');
+  try {
+    const res = await SteelSecurity.secureFetch(ANNOUNCEMENT_URL, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({action:'clear'})
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    document.getElementById('announcementInput').value = '';
+    updateAnnouncementCount();
+    document.getElementById('announcementStatus').textContent = 'ลบประกาศแล้ว';
+  } catch(e) {
+    document.getElementById('announcementStatus').textContent = 'ลบไม่สำเร็จ: ' + e.message;
+  } finally {
+    setAnnouncementBusy(false);
+  }
 }
 
 // ── Fetch ─────────────────────────────────────────────────────────────────────
@@ -1138,6 +1259,7 @@ function showSapSummary() {
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
+loadAnnouncement();
 fetchData();
 </script>
 </body>
